@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, Image, Alert, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { styles, typography } from "./styles";
+import { styles, typography } from "../global/styles";
 import Logo from "../assets/logo.png";
 import { colors } from "../../styles/colors";
 import { Input, InputPassword } from "../components/Input";

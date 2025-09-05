@@ -4,6 +4,7 @@ import { colors } from "./colors";
 export const fontWeights = {
     regular: "400" as TextStyle["fontWeight"],
     medium: "500" as TextStyle["fontWeight"],
+    semibold: "600" as TextStyle["fontWeight"],
     bold: "700" as TextStyle["fontWeight"],
     light: "300" as TextStyle["fontWeight"],
 };
@@ -11,6 +12,7 @@ export const fontWeights = {
 export const baseTypography = {
     montserratRegular: { fontFamily: 'Montserrat_400Regular', letterSpacing: 0.1 },
     montserratMedium: { fontFamily: 'Montserrat_500Medium', letterSpacing: 0.1 },
+    montserratSemibold: { fontFamily: 'Montserrat_600SemiBold', letterSpacing: 0.1 },
     montserratBold: { fontFamily: 'Montserrat_700Bold', letterSpacing: 0.1 },
     montserratLight: { fontFamily: 'Montserrat_300Light', letterSpacing: 0 },
 };
@@ -49,6 +51,13 @@ export const typography: Record<string, TextStyle> = {
         fontSize: 14,
         lineHeight: 18,
         color: colors.green85F,
+    },
+
+    // ===== SemiBold =====
+    M01SB1214: {
+        ...baseTypography.montserratSemibold,
+        fontSize: 12,
+        lineHeight: 14,
     },
 
     // ===== Medium =====

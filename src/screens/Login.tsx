@@ -7,7 +7,7 @@ import {
     ScrollView,
 } from "react-native";
 
-import { styles, typography } from "./styles";
+import { styles, typography } from "../global/styles";
 import Logo from '../assets/logo.png'
 import { colors } from "../../styles/colors";
 import { Input, InputPassword } from "../components/Input";

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, Image, Alert } from "react-native";
 
-import { styles, typography } from "./styles";
+import { styles, typography } from "../global/styles";
 import Logo from "../assets/logo.png";
 import { InputPassword } from "../components/Input";
 import { PrimaryButton } from "../components/Button";

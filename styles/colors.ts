@@ -2,6 +2,7 @@ export const colors = {
     gray47: "#474747",
     gray23: "#232323",
     gray14: "#141414",
+    gray19: "#191919",
     gray73: "#737373",
     gray75: "#757575",
     grayE8: "#E8E8E8",
@@ -12,4 +13,6 @@ export const colors = {
     whiteFBFE: "#FBFBFE",
     blackShadow: "#0000007D",
     greenShadow: "#00A382",
+    orange360: "#CC3600",
+    orange0EB: "#FFF0EB",
 };

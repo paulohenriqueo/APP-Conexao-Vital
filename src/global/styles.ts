@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { colors } from "../../styles/colors";
 import { typography } from "../../styles/typography";
 import { scale } from 'react-native-size-matters';
@@ -37,6 +37,14 @@ export const styles = StyleSheet.create({
         borderRadius: 24,
         gap: 16,
     },
+    boxBottom: {
+        width: "100%",
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "flex-end",
+        paddingBottom: scale(48),
+        marginTop: 16,
+    },
     dividerContainer: {
         flexDirection: "row",
         textAlignVertical: "center",
@@ -55,14 +63,6 @@ export const styles = StyleSheet.create({
         flex: 1,
         height: 1,
         backgroundColor: colors.grayE8,
-    },
-    boxBottom: {
-        width: "100%",
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "flex-end",
-        paddingBottom: scale(48), 
-        marginTop: 16
     },
     /* Login */
     logoLogin: {
@@ -92,6 +92,16 @@ export const styles = StyleSheet.create({
         justifyContent: "flex-start",
         gap: 8,
         marginBottom: 12,
-    }
+    },
+    contentArea: {
+        flex: 1,
+        padding: 16,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    contentText: {
+        ...typography.M01R1418,
+        color: colors.gray14,
+    },
 });
 export { typography };
