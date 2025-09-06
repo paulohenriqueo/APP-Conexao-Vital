@@ -6,12 +6,11 @@ import {
     Alert,
     ScrollView,
 } from "react-native";
-
-import { styles, typography } from "../global/styles";
-import Logo from '../assets/logo.png'
-import { colors } from "../../styles/colors";
-import { Input, InputPassword } from "../components/Input";
-import { PrimaryButton, GoogleButton } from "../components/Button";
+import { styles, typography } from "../../../styles/styles";
+import Logo from '../../assets/logo.png'
+import { colors } from "../../../styles/colors";
+import { Input, InputPassword } from "../../components/Input";
+import { PrimaryButton, GoogleButton } from "../../components/Button";
 import { useNavigation } from "@react-navigation/native";
 
 export default function Login() {
@@ -89,7 +88,7 @@ export default function Login() {
                 <View style={styles.boxBottom}>
                     <Text style={typography.M01R1624}>
                         Novo aqui?{" "}
-                        <Text style={{ color: colors.green85F }} onPress={() => navigation.navigate("Cadastro")}>
+                        <Text style={{ color: colors.green85F }} onPress={() => navigation.navigate("Register")}>
                             Crie a sua conta!
                         </Text>
                     </Text>

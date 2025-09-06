@@ -19,6 +19,9 @@ declare module "phosphor-react-native" {
   export const House: React.FC<IconProps>;
   export const User: React.FC<IconProps>;
   export const Clock: React.FC<IconProps>;
+  export const FunnelSimple: React.FC<IconProps>;
+  export const MagnifyingGlass: React.FC<IconProps>;
+  
 
   export const PhosphorIcon: React.FC<IconProps>;
 }

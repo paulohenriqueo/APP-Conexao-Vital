@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, Image, ScrollView } from "react-native";
-import { styles, typography } from "../global/styles";
-import Logo from "../assets/logo.png";
+import { styles, typography } from "../../../styles/styles";
+import Logo from "../../assets/logo.png";
 
-export default function Politica() {
+export default function PrivacyPolicy() {
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.header}>

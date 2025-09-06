@@ -1,11 +1,11 @@
 import React from "react";
 import { View, Text, Image, ScrollView } from "react-native";
-import { styles, typography } from "../global/styles";
-import { colors } from "../../styles/colors";
-import Logo from "../assets/logo.png";
+import { styles, typography } from "../../../styles/styles";
+import { colors } from "../../../styles/colors";
+import Logo from "../../assets/logo.png";
 
 
-export default function Termos() {
+export default function Terms() {
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.header}>

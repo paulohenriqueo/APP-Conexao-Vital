@@ -2,13 +2,13 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 
-import Login from "./src/screens/Login";
-import Cadastro from "./src/screens/Cadastro";
-import RecuperacaoSenha from "./src/screens/RecuperacaoSenha";
-import NovaSenha from "./src/screens/NovaSenha";
-import Termos from "./src/screens/Termos";
-import Politica from "./src/screens/Politica";
-import Home from "./src/screens/Home";
+import Login from "./src/screens/auth/Login";
+import Register from "./src/screens/auth/Register";
+import PasswordRecover from "./src/screens/auth/PasswordRecover";
+import NewPassword from "./src/screens/auth/NewPassword";
+import Terms from "./src/screens/legal/Terms";
+import PrivacyPoliticy from "./src/screens/legal/PrivacyPolicy";
+import Home from "./src/screens/home/Home";
 
 const Stack = createStackNavigator();
 
@@ -17,11 +17,11 @@ export default function Routes() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Cadastro" component={Cadastro} />
-        <Stack.Screen name="RecuperacaoSenha" component={RecuperacaoSenha} />
-        <Stack.Screen name="NovaSenha" component={NovaSenha} />
-        <Stack.Screen name="Termos" component={Termos} />
-        <Stack.Screen name="Politica" component={Politica} />
+        <Stack.Screen name="Register" component={Register} />
+        <Stack.Screen name="PasswordRecover" component={PasswordRecover} />
+        <Stack.Screen name="NewPassword" component={NewPassword} />
+        <Stack.Screen name="Terms" component={Terms} />
+        <Stack.Screen name="PrivacyPoliticy" component={PrivacyPoliticy} />
         <Stack.Screen name="Home" component={Home} />
       </Stack.Navigator>
     </NavigationContainer>

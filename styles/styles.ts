@@ -1,6 +1,6 @@
-import { StyleSheet } from "react-native";
-import { colors } from "../../styles/colors";
-import { typography } from "../../styles/typography";
+import { StyleSheet, TextInput } from "react-native";
+import { colors } from "./colors";
+import { typography } from "./typography";
 import { scale } from 'react-native-size-matters';
 
 export const styles = StyleSheet.create({
@@ -96,6 +96,7 @@ export const styles = StyleSheet.create({
     contentArea: {
         flex: 1,
         padding: 16,
+        width: "100%",
         justifyContent: "center",
         alignItems: "center",
     },

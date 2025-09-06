@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import { View, Text, Image, Alert } from "react-native";
 
-import { styles, typography } from "../global/styles";
-import Logo from "../assets/logo.png";
-import { InputPassword } from "../components/Input";
-import { PrimaryButton } from "../components/Button";
+import { styles, typography } from "../../../styles/styles";
+import Logo from "../../assets/logo.png";
+import { InputPassword } from "../../components/Input";
+import { PrimaryButton } from "../../components/Button";
 import { useNavigation } from "@react-navigation/native";
 
 
-export default function NovaSenha() {
+export default function NewPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigation = useNavigation<any>();
 
-  const handleNovaSenha = () => {
+  const handleNewPassword = () => {
     if (!password || !confirmPassword) {
       Alert.alert("Preencha todos os campos.");
     } else if (password !== confirmPassword) {
@@ -44,7 +44,7 @@ export default function NovaSenha() {
           onChangeText={setConfirmPassword}
           showForgotPassword={false}
         />
-        <PrimaryButton title="Concluir" onPress={handleNovaSenha} />
+        <PrimaryButton title="Concluir" onPress={handleNewPassword} />
       </View>
     </View>
   );

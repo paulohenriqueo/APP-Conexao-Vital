@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Alert, BackHandler, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { TopBar } from "../components/TopBar";
-import { BottomNavBar } from "../components/BottomNavbar";
-import { styles } from "../global/styles";
-import { CompleteProfileModal } from "../components/Modal";
+import { TopBar } from "../../components/TopBar";
+import { BottomNavBar } from "../../components/BottomNavbar";
+import { styles } from "../../../styles/styles";
+import { CompleteProfileModal } from "../../components/Modal";
+import { SearchBar } from "../../components/SearchBar";
 
 export default function Home() {
   const navigation = useNavigation<any>();
   const [selectedTab, setSelectedTab] = useState("home");
   const [showModal, setShowModal] = useState(true);
   const [profileCompleted, setProfileCompleted] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const backAction = () => {
@@ -58,9 +60,33 @@ export default function Home() {
   const renderContent = () => {
     switch (selectedTab) {
       case "home":
-        return <Text style={styles.contentText}>Início</Text>;
+        return (
+          <View style={{ flex: 1, width: "100%", padding: 0}}>
+            <SearchBar
+              value={search}
+              onChangeText={setSearch}
+              onPressFilter={() => console.log("Filter pressed in Home")}
+              placeholder="Pesquisar..."
+            />
+            <Text style={{...styles.contentText, textAlign: "center", padding: 32}}>Início</Text>
+            {/* Rest of Home content */}
+          </View>
+        );
+
       case "history":
-        return <Text style={styles.contentText}>Histórico</Text>;
+        return (
+          <View style={{ flex: 1, width: "100%", padding: 0 }}>
+            <SearchBar
+              value={search}
+              onChangeText={setSearch}
+              onPressFilter={() => console.log("Filter pressed in History")}
+              placeholder="Pesquisar..."
+            />
+            <Text style={{...styles.contentText, textAlign: "center", padding: 32}}>Histórico</Text>
+            {/* Rest of History content */}
+          </View>
+        );
+
       case "profile":
         return <Text style={styles.contentText}>Perfil</Text>;
       default:
@@ -74,7 +100,8 @@ export default function Home() {
       <View style={styles.contentArea}>{renderContent()}</View>
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />
 
-      <CompleteProfileModal
+      {/* Ativar quando a tela de completar o cadastro estiver pronta */}
+      {/* <CompleteProfileModal
         visible={showModal}
         text="Complete seu cadastro para aproveitar ao máximo o aplicativo!"
         onPressPrimary={() => {
@@ -88,7 +115,7 @@ export default function Home() {
             "Para fazer qualquer solicitação é necessário completar o cadastro, mas você pode continuar pesquisando sem filtros definidos."
           );
         }}
-      />
+      /> */}
     </View>
   );
 }

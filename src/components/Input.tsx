@@ -19,6 +19,7 @@ export function Input({ placeholder, value, onChangeText }: InputProps) {
       placeholderTextColor={colors.gray75}
       value={value}
       onChangeText={onChangeText}
+      cursorColor={colors.orange360}
     />
   );
 }
@@ -44,7 +45,7 @@ export function InputPassword({
   const navigation = useNavigation<any>();
 
   const handleForgotPassword = () => {
-    navigation.navigate("RecuperacaoSenha", { email: emailValue || "" });
+    navigation.navigate("PasswordRecover", { email: emailValue || "" });
   };
 
   return (
@@ -57,6 +58,7 @@ export function InputPassword({
           secureTextEntry={!showPassword}
           value={value}
           onChangeText={onChangeText}
+          cursorColor={colors.orange360}
         />
         <TouchableOpacity
           onPress={() => setShowPassword(!showPassword)}

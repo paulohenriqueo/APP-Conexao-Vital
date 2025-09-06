@@ -15,9 +15,20 @@ export const baseTypography = {
     montserratSemibold: { fontFamily: 'Montserrat_600SemiBold', letterSpacing: 0.1 },
     montserratBold: { fontFamily: 'Montserrat_700Bold', letterSpacing: 0.1 },
     montserratLight: { fontFamily: 'Montserrat_300Light', letterSpacing: 0 },
+    hindRegular: { fontFamily: 'Hind_400Regular', letterSpacing: 0.1 },
 };
 
 export const typography: Record<string, TextStyle> = {
+    // Hind
+    // ===== Regular =====
+    H01R1624: {
+        ...baseTypography.hindRegular,
+        fontSize: 16,
+        lineHeight: 24,
+        color: colors.gray47,
+    },
+
+    // Montserrat
     // ===== Regular =====
     M01R1012: {
         ...baseTypography.montserratRegular,
