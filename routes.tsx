@@ -21,7 +21,7 @@ export default function Routes() {
         <Stack.Screen name="PasswordRecover" component={PasswordRecover} />
         <Stack.Screen name="NewPassword" component={NewPassword} />
         <Stack.Screen name="Terms" component={Terms} />
-        <Stack.Screen name="PrivacyPoliticy" component={PrivacyPoliticy} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPoliticy} />
         <Stack.Screen name="Home" component={Home} />
       </Stack.Navigator>
     </NavigationContainer>
