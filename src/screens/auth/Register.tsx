@@ -9,6 +9,7 @@ import { PrimaryButton, GoogleButton } from "../../components/Button";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { FIREBASE_AUTH } from "../../../FirebaseConfig";
 
+
 export default function Register() {
   const navigation = useNavigation<any>();
   const [nome, setNome] = useState("");

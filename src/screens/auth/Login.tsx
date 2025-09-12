@@ -15,7 +15,7 @@ import { Input, InputPassword } from "../../components/Input";
 import { PrimaryButton, GoogleButton } from "../../components/Button";
 import { useNavigation } from "@react-navigation/native";
 import { FIREBASE_AUTH } from "../../../FirebaseConfig";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { ActivityIndicator } from "react-native";
 
 export default function Login() {
