@@ -15,8 +15,8 @@ const Stack = createStackNavigator();
 export default function Routes() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={Login} />
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={Login}/>
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="PasswordRecover" component={PasswordRecover} />
         <Stack.Screen name="NewPassword" component={NewPassword} />
