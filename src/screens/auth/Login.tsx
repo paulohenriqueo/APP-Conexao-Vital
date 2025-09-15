@@ -25,6 +25,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const auth = FIREBASE_AUTH;
 
+
     // SignIn com Firebase Authentication
     const singIn = async () => {
         if (email === "" || password === "") {
@@ -32,6 +33,9 @@ export default function Login() {
             return;
         }
         setLoading(true);
+    //first commit in development branch
+
+
         try {
             await signInWithEmailAndPassword(auth, email, password);
             Alert.alert("Login bem-sucedido!");
