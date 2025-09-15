@@ -25,8 +25,10 @@ type GoogleButtonProps = {
 export function GoogleButton({ title = "Continue com Google", onPress }: GoogleButtonProps) {
     return (
         <TouchableOpacity style={styles.googleButton} onPress={onPress} activeOpacity={0.5}>
-            <Image source={Google} style={styles.buttonIcon} />
-            <Text style={styles.googleButtonText}>{title}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Image source={Google} style={styles.buttonIcon} />
+                <Text style={styles.googleButtonText}>{title}</Text>
+            </View>
         </TouchableOpacity>
     );
 }

@@ -27,6 +27,10 @@ export default function Login() {
 
     // SignIn com Firebase Authentication
     const singIn = async () => {
+        if (email === "" || password === "") {
+            alert("Por favor, preencha todos os campos.");
+            return;
+        }
         setLoading(true);
         try {
             await signInWithEmailAndPassword(auth, email, password);
@@ -34,37 +38,47 @@ export default function Login() {
             navigation.navigate("Home");
         } catch (error: any) {
             console.error("Erro no login:", error);
-            Alert.alert("Ocorreu um erro durante o login. Tente novamente.");
-            setLoading(false);
+            // Tratamento de erros específicos do Firebase
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+                Alert.alert("Credenciais inválidas", "Senha incorreta.");
+            } else if (error.code === 'auth/invalid-email') {
+                Alert.alert("Usuário Não Cadastrado", "Este email não está cadastrado em nosso sistema.");
+            }
+            else if (error.code === 'auth/user-disabled') {
+                Alert.alert("Usuário Bloqueado", "Sua conta foi bloqueada.");
+            } else if (error.code === 'auth/too-many-requests') {
+                Alert.alert("Muitas tentativas", "Acesso temporariamente bloqueado. Tente novamente mais tarde.");
+            } else {
+                Alert.alert("Erro", "Ocorreu um erro durante o login. Tente novamente.");
+            }
+    
         } finally {
             setLoading(false);
         }
     }
 
+    // const handleLogin = () => {
+    //     try {
+    //         if (!email || !password) {
+    //             return Alert.alert("Por favor, preencha todos os campos.");
+    //         }
 
-
-    const handleLogin = () => {
-        try {
-            if (!email || !password) {
-                return Alert.alert("Por favor, preencha todos os campos.");
-            }
-
-            setTimeout(() => {
-                // if (email === "teste@gmail.com" && password === "123456") { 
-                // Adicionar lógica real
-                if (email && password) {
-                    Alert.alert("Login bem-sucedido!");
-                    navigation.navigate("Home");
-                }
-                else {
-                    Alert.alert("E-mail ou senha incorretos. Tente novamente.");
-                }
-            }, 1500);
-        } catch (error) {
-            console.error("Erro no login:", error);
-            Alert.alert("Ocorreu um erro durante o login. Tente novamente.");
-        }
-    };
+    //         setTimeout(() => {
+    //             // if (email === "teste@gmail.com" && password === "123456") { 
+    //             // Adicionar lógica real
+    //             if (email && password) {
+    //                 Alert.alert("Login bem-sucedido!");
+    //                 navigation.navigate("Home");
+    //             }
+    //             else {
+    //                 Alert.alert("E-mail ou senha incorretos. Tente novamente.");
+    //             }
+    //         }, 1500);
+    //     } catch (error) {
+    //         console.error("Erro no login:", error);
+    //         Alert.alert("Ocorreu um erro durante o login. Tente novamente.");
+    //     }
+    // };
 
     const handleGoogleLogin = () => {
         try {

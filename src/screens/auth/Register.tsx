@@ -7,7 +7,9 @@ import { colors } from "../../../styles/colors";
 import { Input, InputPassword } from "../../components/Input";
 import { PrimaryButton, GoogleButton } from "../../components/Button";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { FIREBASE_AUTH } from "../../../FirebaseConfig";
+import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../FirebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
+
 
 
 export default function Register() {
@@ -17,15 +19,33 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  
   const auth = FIREBASE_AUTH;
 
   // SignUp com Firebase Authentication
       const signUp = async () => {
           setLoading(true);
+
+          if (password !== confirmPassword) {
+            alert("As senhas não coincidem. Por favor, tente novamente.");
+            setLoading(false);
+            return;
+          }
+
           try {
-              await createUserWithEmailAndPassword(auth, email, password);
+              const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+              const user = userCredential.user;
+
+              await setDoc(doc(FIRESTORE_DB, "Users", user.uid), {
+                name: nome,
+                email: email,
+                createdAt: new Date(),
+                
+              });
+
               Alert.alert("Conta criada com sucesso!");
               navigation.navigate("Home");
+
           } catch (error: any) {
               console.error("Erro no cadastro:", error);
               Alert.alert("Ocorreu um erro durante o cadastro. Tente novamente.");
