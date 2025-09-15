@@ -5,6 +5,8 @@ import {
     Image,
     Alert,
     ScrollView,
+    ActivityIndicatorBase,
+    KeyboardAvoidingView,
 } from "react-native";
 import { styles, typography } from "../../../styles/styles";
 import Logo from '../../assets/logo.png'
@@ -12,34 +14,75 @@ import { colors } from "../../../styles/colors";
 import { Input, InputPassword } from "../../components/Input";
 import { PrimaryButton, GoogleButton } from "../../components/Button";
 import { useNavigation } from "@react-navigation/native";
+import { FIREBASE_AUTH } from "../../../FirebaseConfig";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { ActivityIndicator } from "react-native";
 
 export default function Login() {
     const navigation = useNavigation<any>();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const auth = FIREBASE_AUTH;
 
-    const handleLogin = () => {
-        try {
-            if (!email || !password) {
-                return Alert.alert("Por favor, preencha todos os campos.");
-            }
 
-            setTimeout(() => {
-                // if (email === "teste@gmail.com" && password === "123456") { 
-                // Adicionar lógica real
-                if (email && password) {
-                    Alert.alert("Login bem-sucedido!");
-                    navigation.navigate("Home");
-                }
-                else {
-                    Alert.alert("E-mail ou senha incorretos. Tente novamente.");
-                }
-            }, 1500);
-        } catch (error) {
-            console.error("Erro no login:", error);
-            Alert.alert("Ocorreu um erro durante o login. Tente novamente.");
+    // SignIn com Firebase Authentication
+    const singIn = async () => {
+        if (email === "" || password === "") {
+            alert("Por favor, preencha todos os campos.");
+            return;
         }
-    };
+        setLoading(true);
+    //first commit in development branch
+
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            Alert.alert("Login bem-sucedido!");
+            navigation.navigate("Home");
+        } catch (error: any) {
+            console.error("Erro no login:", error);
+            // Tratamento de erros específicos do Firebase
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+                Alert.alert("Credenciais inválidas", "Senha incorreta.");
+            } else if (error.code === 'auth/invalid-email') {
+                Alert.alert("Usuário Não Cadastrado", "Este email não está cadastrado em nosso sistema.");
+            }
+            else if (error.code === 'auth/user-disabled') {
+                Alert.alert("Usuário Bloqueado", "Sua conta foi bloqueada.");
+            } else if (error.code === 'auth/too-many-requests') {
+                Alert.alert("Muitas tentativas", "Acesso temporariamente bloqueado. Tente novamente mais tarde.");
+            } else {
+                Alert.alert("Erro", "Ocorreu um erro durante o login. Tente novamente.");
+            }
+    
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // const handleLogin = () => {
+    //     try {
+    //         if (!email || !password) {
+    //             return Alert.alert("Por favor, preencha todos os campos.");
+    //         }
+
+    //         setTimeout(() => {
+    //             // if (email === "teste@gmail.com" && password === "123456") { 
+    //             // Adicionar lógica real
+    //             if (email && password) {
+    //                 Alert.alert("Login bem-sucedido!");
+    //                 navigation.navigate("Home");
+    //             }
+    //             else {
+    //                 Alert.alert("E-mail ou senha incorretos. Tente novamente.");
+    //             }
+    //         }, 1500);
+    //     } catch (error) {
+    //         console.error("Erro no login:", error);
+    //         Alert.alert("Ocorreu um erro durante o login. Tente novamente.");
+    //     }
+    // };
 
     const handleGoogleLogin = () => {
         try {
@@ -54,6 +97,7 @@ export default function Login() {
 
     return (
         <View style={styles.container}>
+            <KeyboardAvoidingView behavior="padding" style={{ flex: 1, width: "100%", alignItems: 'center', justifyContent: 'center' }}>  
             <ScrollView
                 style={{ flex: 1, width: "100%" }}
                 contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
@@ -69,20 +113,29 @@ export default function Login() {
                     <Input
                         placeholder="E-mail"
                         value={email}
-                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        onChangeText={(text) => setEmail(text)}
                     />
                     <InputPassword
                         placeholder="Senha"
                         value={password}
-                        onChangeText={setPassword}
+                        autoCapitalize="none"
+                        onChangeText={(text) => setPassword(text)}
                     />
-                    <PrimaryButton title="Entrar" onPress={handleLogin} />
+                    {loading ? (
+                        <ActivityIndicator size="large" color={colors.green382} />
+                    ) : (
+                        <>  
+                        <PrimaryButton title="Entrar" onPress={singIn} />
                     <View style={styles.dividerContainer}>
                         <View style={styles.line} />
                         <Text style={styles.dividerText}>ou</Text>
                         <View style={styles.line} />
                     </View>
                     <GoogleButton onPress={handleGoogleLogin} />
+                        </>
+                    )}
+                    
                 </View>
 
                 <View style={styles.boxBottom}>
@@ -94,6 +147,7 @@ export default function Login() {
                     </Text>
                 </View>
             </ScrollView>
+            </KeyboardAvoidingView> 
         </View >
     )
 }

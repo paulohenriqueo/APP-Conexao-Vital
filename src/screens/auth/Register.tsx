@@ -6,6 +6,11 @@ import Logo from "../../assets/logo.png";
 import { colors } from "../../../styles/colors";
 import { Input, InputPassword } from "../../components/Input";
 import { PrimaryButton, GoogleButton } from "../../components/Button";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../FirebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
+
+
 
 export default function Register() {
   const navigation = useNavigation<any>();
@@ -13,6 +18,42 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  
+  const auth = FIREBASE_AUTH;
+
+  // SignUp com Firebase Authentication
+      const signUp = async () => {
+          setLoading(true);
+
+          if (password !== confirmPassword) {
+            alert("As senhas não coincidem. Por favor, tente novamente.");
+            setLoading(false);
+            return;
+          }
+
+          try {
+              const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+              const user = userCredential.user;
+
+              await setDoc(doc(FIRESTORE_DB, "Users", user.uid), {
+                name: nome,
+                email: email,
+                createdAt: new Date(),
+                
+              });
+
+              Alert.alert("Conta criada com sucesso!");
+              navigation.navigate("Home");
+
+          } catch (error: any) {
+              console.error("Erro no cadastro:", error);
+              Alert.alert("Ocorreu um erro durante o cadastro. Tente novamente.");
+              setLoading(false);
+          } finally {
+              setLoading(false);
+          }
+      }
 
   const handleRegister = () => {
     console.log("Cadastro pressionado");
@@ -41,8 +82,8 @@ export default function Register() {
 
         <View style={styles.containerBox}>
           <Input placeholder="Nome completo" value={nome} onChangeText={setNome} />
-          <Input placeholder="E-mail" value={email} onChangeText={setEmail} />
-          <InputPassword placeholder="Senha" value={password} onChangeText={setPassword} showForgotPassword={false} />
+          <Input placeholder="E-mail" value={email} autoCapitalize="none" onChangeText={(text) => setEmail(text)} />
+          <InputPassword placeholder="Senha" value={password} autoCapitalize="none" onChangeText={(text) => setPassword(text)} showForgotPassword={false} />
           <InputPassword placeholder="Repita a senha" value={confirmPassword} onChangeText={setConfirmPassword} showForgotPassword={false} />
           <Text style={{ ...typography.M01R1014, color: colors.gray75 }}>
             Ao cadastrar, você aceita os{" "}
@@ -50,7 +91,7 @@ export default function Register() {
             <Text style={{ color: colors.green382 }} onPress={() => navigation.navigate("PrivacyPolicy")}>Política de Privacidade</Text>.
           </Text>
 
-          <PrimaryButton title="Criar conta" onPress={handleRegister} />
+          <PrimaryButton title="Criar conta" onPress={signUp} />
 
           <View style={styles.dividerContainer}>
             <View style={styles.line} />

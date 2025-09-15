@@ -9,9 +9,10 @@ type InputProps = {
   placeholder?: string;
   value?: string;
   onChangeText?: (text: string) => void;
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
 };
 
-export function Input({ placeholder, value, onChangeText }: InputProps) {
+export function Input({ placeholder, value, onChangeText, autoCapitalize }: InputProps) {
   return (
     <TextInput
       style={styles.input}
@@ -20,6 +21,7 @@ export function Input({ placeholder, value, onChangeText }: InputProps) {
       value={value}
       onChangeText={onChangeText}
       cursorColor={colors.orange360}
+      autoCapitalize={autoCapitalize}  
     />
   );
 }
@@ -31,6 +33,7 @@ type InputPasswordProps = {
   showForgotPassword?: boolean;
   forgotPasswordText?: string;
   emailValue?: string; // adicionamos para passar o email
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
 };
 
 export function InputPassword({
@@ -40,6 +43,7 @@ export function InputPassword({
   showForgotPassword = true,
   forgotPasswordText = "Esqueci minha senha",
   emailValue,
+  autoCapitalize = "none",
 }: InputPasswordProps) {
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation<any>();
