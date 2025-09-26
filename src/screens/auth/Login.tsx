@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Text,
     View,
@@ -15,8 +15,14 @@ import { Input, InputPassword } from "../../components/Input";
 import { PrimaryButton, GoogleButton } from "../../components/Button";
 import { useNavigation } from "@react-navigation/native";
 import { FIREBASE_AUTH } from "../../../FirebaseConfig";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { GoogleAuthProvider, signInWithCredential, signInWithEmailAndPassword } from "firebase/auth";
+import * as WebBrowser from 'expo-web-browser';
 import { ActivityIndicator } from "react-native";
+import { makeRedirectUri } from 'expo-auth-session';
+import * as Google from 'expo-auth-session/providers/google';
+import { useAuthRequest } from 'expo-auth-session/providers/google';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
     const navigation = useNavigation<any>();
@@ -24,6 +30,11 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const auth = FIREBASE_AUTH;
+    const [request, response, promptAsync] = useAuthRequest({
+        webClientId: '582696474367-m4r89vgv17k52h64ulgc27babi75ou8e.apps.googleusercontent.com',
+        iosClientId: '582696474367-b9skl4jd704sqvpni9auinid4ksc35ti.apps.googleusercontent.com',
+        androidClientId: '582696474367-ri81htmh94qvp3345ebtu158ef2bgqho.apps.googleusercontent.com',
+    });
 
 
     // SignIn com Firebase Authentication
@@ -33,8 +44,6 @@ export default function Login() {
             return;
         }
         setLoading(true);
-    //first commit in development branch
-
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
@@ -61,39 +70,29 @@ export default function Login() {
         }
     }
 
-    // const handleLogin = () => {
-    //     try {
-    //         if (!email || !password) {
-    //             return Alert.alert("Por favor, preencha todos os campos.");
-    //         }
-
-    //         setTimeout(() => {
-    //             // if (email === "teste@gmail.com" && password === "123456") { 
-    //             // Adicionar lógica real
-    //             if (email && password) {
-    //                 Alert.alert("Login bem-sucedido!");
-    //                 navigation.navigate("Home");
-    //             }
-    //             else {
-    //                 Alert.alert("E-mail ou senha incorretos. Tente novamente.");
-    //             }
-    //         }, 1500);
-    //     } catch (error) {
-    //         console.error("Erro no login:", error);
-    //         Alert.alert("Ocorreu um erro durante o login. Tente novamente.");
-    //     }
-    // };
+    useEffect(() => {
+        const signInWithGoogle = async () => {
+            if (response?.type === 'success') {
+                const { authentication } = response;
+                if (authentication?.accessToken) {
+                    const credential = GoogleAuthProvider.credential(null, authentication.accessToken);
+                    try {
+                        await signInWithCredential(auth, credential);
+                        Alert.alert("Login Google bem-sucedido!");
+                        navigation.navigate("Home");
+                    } catch (error) {
+                        Alert.alert("Erro ao autenticar com Firebase.");
+                    }
+                }
+            }
+        };
+        signInWithGoogle();
+    }, [response]);
 
     const handleGoogleLogin = () => {
-        try {
-            console.log("Login com Google");
-            Alert.alert("Login com Google concluído com sucesso!");
-            navigation.navigate("Home"); // simulação
-        } catch (error) {
-            console.error("Erro no login:", error);
-            Alert.alert("Ocorreu um erro durante o login. Tente novamente.");
-        }
-    }   /* Adicionar lógica */
+        promptAsync();
+    };
+
 
     return (
         <View style={styles.container}>
@@ -132,7 +131,7 @@ export default function Login() {
                         <Text style={styles.dividerText}>ou</Text>
                         <View style={styles.line} />
                     </View>
-                    <GoogleButton onPress={handleGoogleLogin} />
+                        <GoogleButton onPress={handleGoogleLogin} />
                         </>
                     )}
                     

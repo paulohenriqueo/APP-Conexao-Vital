@@ -13,9 +13,15 @@
       "backgroundColor": "#00A382"
     },
     "ios": {
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "com.googleusercontent.apps.582696474367-b9skl4jd704sqvpni9auinid4ksc35ti"
+        }
+      },
       "supportsTablet": true
     },
     "android": {
+      "package": "host.exp.ex",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#00A382"
