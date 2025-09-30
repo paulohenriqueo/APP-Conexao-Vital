@@ -6,6 +6,7 @@ import { BottomNavBar } from "../../components/BottomNavbar";
 import { styles } from "../../../styles/styles";
 import { CompleteProfileModal } from "../../components/Modal";
 import { SearchBar } from "../../components/SearchBar";
+import Profile from "./profile/Profile";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -88,7 +89,7 @@ export default function Home() {
         );
 
       case "profile":
-        return <Text style={styles.contentText}>Perfil</Text>;
+        return <Profile />;
       default:
         return <Text style={styles.contentText}>Início</Text>;
     }
