@@ -1,12 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { colors } from "../../../../styles/colors";
 import { fontWeights } from "../../../../styles/typography";
 import { styles } from "../../../../styles/styles";
+import { getAuth } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState<"info" | "qualifications">("info");
+  const [userEmail, setUserEmail] = useState("");
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      setUserEmail(currentUser.email || "");
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const auth = getAuth();
+      const db = getFirestore();
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const userDocRef = doc(db, "Users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setUserName(userDoc.data().name || "");
+        }
+      }
+    };
+    fetchUserName();
+  }, []);
 
   return (
     <ScrollView
@@ -52,7 +80,18 @@ export default function Profile() {
             textAlign: "center",
           }}
         >
-          João Almeida Júnior
+          {userName}
+        </Text>
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: fontWeights.bold,
+            marginBottom: 4,
+            color: colors.gray23,
+            textAlign: "center",
+          }}
+        >
+          {userEmail}
         </Text>
         <View style={{ flexDirection: "row", marginTop: 4 }}>
           {[...Array(5)].map((_, i) => (
