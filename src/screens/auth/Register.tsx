@@ -27,7 +27,7 @@ export default function Register() {
           setLoading(true);
 
           if (password !== confirmPassword) {
-            alert("As senhas não coincidem. Por favor, tente novamente.");
+            Alert.alert("Senhas distintas","As senhas não coincidem. Por favor, tente novamente.");
             setLoading(false);
             return;
           }
@@ -43,13 +43,20 @@ export default function Register() {
                 
               });
 
-              Alert.alert("Conta criada com sucesso!");
+              Alert.alert("Conta criada com sucesso!", "Bem-vindo(a)!");
               navigation.navigate("Home");
 
           } catch (error: any) {
-              console.error("Erro no cadastro:", error);
-              Alert.alert("Ocorreu um erro durante o cadastro. Tente novamente.");
-              setLoading(false);
+            if(error.code === 'auth/invalid-email') {
+              Alert.alert("Email inválido", "Por favor, insira um email válido.");
+            }
+            if(password.length < 6) {
+              Alert.alert("Senha fraca", "A senha deve conter no mínimo 6 caracteres.");
+            }
+            if(error.code === 'auth/email-already-in-use'){
+              Alert.alert("Email já cadastrado", "Este email já está em uso. Tente outro.");
+            }
+
           } finally {
               setLoading(false);
           }
@@ -57,7 +64,7 @@ export default function Register() {
 
   const handleRegister = () => {
     console.log("Cadastro pressionado");
-    Alert.alert("Cadastro concluído com sucesso!");
+    Alert.alert("Cadastro concluído com sucesso!", "Bem-vindo(a)!");
     navigation.navigate("Login"); // simulação
   };
 
@@ -66,6 +73,11 @@ export default function Register() {
     Alert.alert("Cadastro com Google concluído com sucesso!");
     navigation.navigate("Login"); // simulação
   }
+
+   // Validação de email simples
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  // Validação de senha (mínimo 6 caracteres)
+  const isPasswordValid = password.length >= 6;
 
   return (
     <View style={styles.container}>
@@ -83,7 +95,13 @@ export default function Register() {
         <View style={styles.containerBox}>
           <Input placeholder="Nome completo" value={nome} onChangeText={setNome} />
           <Input placeholder="E-mail" value={email} autoCapitalize="none" onChangeText={(text) => setEmail(text)} />
+          <Text style={{ color: isEmailValid ? 'green' : 'red', fontSize: 10, alignSelf: 'flex-start', marginLeft: 8, marginBottom: 8 }}>
+            Exemplo: usuario@email.com*
+          </Text>
           <InputPassword placeholder="Senha" value={password} autoCapitalize="none" onChangeText={(text) => setPassword(text)} showForgotPassword={false} />
+          <Text style={{ color: isPasswordValid ? 'green' : 'red', fontSize: 10, alignSelf: 'flex-start', marginLeft: 8, marginBottom: 8 }}>
+            A senha deve ter no mínimo 6 caracteres.*
+          </Text>
           <InputPassword placeholder="Repita a senha" value={confirmPassword} onChangeText={setConfirmPassword} showForgotPassword={false} />
           <Text style={{ ...typography.M01R1014, color: colors.gray75 }}>
             Ao cadastrar, você aceita os{" "}
