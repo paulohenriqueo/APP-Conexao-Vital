@@ -102,8 +102,7 @@ export default function Register() {
         </View>
 
         <View style={{ ...styles.boxBottom, marginTop: 16 }}>
-          {'    '}
-          <Text style={typography.M01R1624}>
+          <Text style={{ ...typography.M01R1624, fontSize: 14 }}>
             Já possui cadastro?{" "}
             <Text
               style={{ color: colors.green85F }}
