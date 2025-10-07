@@ -104,4 +104,4 @@ export const styles = StyleSheet.create({
         ...typography.M01M1824,
     },
 });
-export { typography };
+export { typography, colors };
