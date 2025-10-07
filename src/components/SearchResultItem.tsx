@@ -1,37 +1,45 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { styles } from "./styles/SearchResultItem";
+import { styles as resultStyles } from "./styles/SearchResultItem";
 import { colors } from "../../styles/colors";
+import { styles } from "../../styles/styles";
 import { Avatar } from "./Avatar";
 
 type SearchResultItemProps = {
   name: string;
   rating: number;
   tags: string[];
+  principalRole: string;
   onPress: () => void;
 };
 
-export function SearchResultItem({ name, rating, tags, onPress }: SearchResultItemProps) {
+export function SearchResultItem({ name, principalRole, rating, tags, onPress }: SearchResultItemProps) {
   return (
-    <View style={styles.container}>
+    <View style={resultStyles.container}>
       <Avatar name={name} />
 
       <View style={{ flex: 1, marginLeft: 12 }}>
-        <Text style={styles.name}>{name}</Text>
-
-        <View style={styles.ratingContainer}>
+        <Text style={resultStyles.name}>{name}
+          <Text style={{ ...styles.principalRole }}>  Especialização {principalRole}</Text>
+        </Text>
+        {/*
+          <Text style={resultStyles.name}>{name}
+          </Text>
+          <Text style={{ ...styles.principalRole }}>Especialização {principalRole}</Text>
+        */}
+        <View style={{ ...styles.ratingContainer }}>
           {Array.from({ length: 5 }).map((_, i) => (
             <Ionicons
               key={i}
               name={i < rating ? "star" : "star-outline"}
-              size={18}
-              color= {colors.ambar400}
+              size={14}
+              color={colors.ambar400}
             />
           ))}
         </View>
 
-        <View style={styles.tagsContainer}>
+        <View style={{ ...styles.tagsContainer }}>
           {tags.map((tag, idx) => (
             <View key={idx} style={styles.tag}>
               <Text style={styles.tagText}>#{tag}</Text>

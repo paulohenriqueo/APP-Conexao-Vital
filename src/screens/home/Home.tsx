@@ -61,21 +61,21 @@ export default function Home() {
   // Dados para teste de lista
   // Melhores avaliados - perfis que aparecem no inicio
   const homeData = [
-    { id: "1", name: "Maria Bellone", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"] },
-    { id: "2", name: "João Moura", rating: 5, tags: ["Enfermagem", "Acompanhante"] },
-    { id: "3", name: "Julia Almeida", rating: 4, tags: ["Enfermagem", "Acompanhante"] },
+    { id: "1", name: "Maria Bellone", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], principalRole: "Cuidado Domiciliar" },
+    { id: "2", name: "João Moura", rating: 5, tags: ["Enfermagem", "Acompanhante"], principalRole: "Enfermeiro" },
+    { id: "3", name: "Julia Almeida", rating: 4, tags: ["Enfermagem", "Acompanhante"], principalRole: "Acompanhante" },
   ];
 
   const historyData = [
-    { id: "1", name: "Maria Silva", rating: 5, date: "04 abr." },
-    { id: "2", name: "João Souza", rating: 4, date: "15 mar." },
-    { id: "3", name: "João Almeida", rating: 4, date: "15 mar." },
+    { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", principalRole: "Cuidado Domiciliar" },
+    { id: "2", name: "João Souza", rating: 4, date: "15 mar.", principalRole: "Enfermeiro" },
+    { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", principalRole: "Cuidado Domiciliar" },
   ];
 
   const searchData = [
-    { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"] },
-    { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"] },
-    { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"] },
+    { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], principalRole: "Cuidado Domiciliar" },
+    { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], principalRole: "Enfermeiro" },
+    { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], principalRole: "Acompanhante" },
   ];
 
   // Função para renderizar conteúdo dependendo da aba selecionada
@@ -90,7 +90,7 @@ export default function Home() {
               onPressFilter={() => console.log("Filter pressed in Home")}
               placeholder="Pesquisar..."
             />
-            <Text style={{ ...styles.contentText, textAlign: "left", paddingVertical: 16 }}>
+            <Text style={{ ...styles.subtitleText, textAlign: "left", paddingVertical: 16 }}>
               Melhores avaliados
             </Text>
             <CustomList
@@ -111,7 +111,7 @@ export default function Home() {
               onPressFilter={() => console.log("Filter pressed in Home")}
               placeholder="Pesquisar..."
             />
-            <Text style={{ ...styles.contentText, textAlign: "left", paddingVertical: 16 }}>
+            <Text style={{ ...styles.subtitleText, textAlign: "left", paddingVertical: 16 }}>
               Resultados encontrados
             </Text>
             <CustomList
@@ -131,7 +131,7 @@ export default function Home() {
               onPressFilter={() => console.log("Filter pressed in History")}
               placeholder="Pesquisar..."
             />
-            <Text style={{ ...styles.contentText, textAlign: "left", paddingVertical: 16 }}>
+            <Text style={{ ...styles.subtitleText, textAlign: "left", paddingVertical: 16 }}>
               Histórico de solicitações
             </Text>
             <CustomList

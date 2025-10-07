@@ -77,7 +77,7 @@ export const styles = StyleSheet.create({
         marginBottom: 8,
     },
     paragraph: {
-        ...typography.M01R1418,
+        ...typography.H01R1624,
         textAlign: "justify",
         marginBottom: 16
     },
@@ -101,7 +101,36 @@ export const styles = StyleSheet.create({
         alignItems: "center",
     },
     contentText: {
+        ...typography.H01R1624,
+    },
+    subtitleText: {
         ...typography.M01M1824,
     },
+    ratingContainer: {
+        flexDirection: "row",
+        marginVertical: 4,
+    },
+    tagsContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+    },
+    tag: {
+        backgroundColor: "#d1f5e0",
+        borderRadius: 8,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        marginRight: 6,
+        marginTop: 4,
+    },
+    tagText: {
+        color: "#00796b",
+        fontSize: 12,
+    },
+    principalRole: {
+        fontSize: 12,
+        lineHeight: 14,
+        fontWeight: "500",
+        color: colors.gray75,
+    }
 });
 export { typography };

@@ -95,11 +95,11 @@ export default function Register() {
         <View style={styles.containerBox}>
           <Input placeholder="Nome completo" value={nome} onChangeText={setNome} />
           <Input placeholder="E-mail" value={email} autoCapitalize="none" onChangeText={(text) => setEmail(text)} />
-          <Text style={{ color: isEmailValid ? 'green' : 'red', fontSize: 10, alignSelf: 'flex-start', marginLeft: 8, marginBottom: 8 }}>
+          <Text style={{ color: isEmailValid ? 'green' : 'red', fontSize: 10, alignSelf: 'flex-start', marginLeft: 8, marginTop: -8 }}>
             Exemplo: usuario@email.com*
           </Text>
           <InputPassword placeholder="Senha" value={password} autoCapitalize="none" onChangeText={(text) => setPassword(text)} showForgotPassword={false} />
-          <Text style={{ color: isPasswordValid ? 'green' : 'red', fontSize: 10, alignSelf: 'flex-start', marginLeft: 8, marginBottom: 8 }}>
+          <Text style={{ color: isPasswordValid ? 'green' : 'red', fontSize: 10, alignSelf: 'flex-start', marginLeft: 8, marginTop: -8 }}>
             A senha deve ter no mínimo 6 caracteres.*
           </Text>
           <InputPassword placeholder="Repita a senha" value={confirmPassword} onChangeText={setConfirmPassword} showForgotPassword={false} />

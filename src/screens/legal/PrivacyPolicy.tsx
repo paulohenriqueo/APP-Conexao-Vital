@@ -1,13 +1,19 @@
 import React from "react";
-import { View, Text, Image, ScrollView } from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { styles, typography } from "../../../styles/styles";
 import Logo from "../../assets/logo.png";
+import { CaretLeft  } from "phosphor-react-native";
+import { useNavigation } from "@react-navigation/native";
+import { colors } from "../../../styles/colors";
 
 export default function PrivacyPolicy() {
+    const navigation = useNavigation();
     return (
         <View style={{ flex: 1 }}>
             <View style={styles.header}>
-                <Image source={Logo} style={{ height: 48, width: 48 }} />
+                <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 8 }}>
+                    <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" />
+                </TouchableOpacity>
                 <Text style={{ ...typography.M0L2432 }}>Política de Privacidade</Text>
             </View>
 
