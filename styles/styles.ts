@@ -101,8 +101,7 @@ export const styles = StyleSheet.create({
         alignItems: "center",
     },
     contentText: {
-        ...typography.M01R1418,
-        color: colors.gray14,
+        ...typography.M01M1824,
     },
 });
 export { typography };

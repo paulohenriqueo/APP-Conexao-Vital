@@ -15,4 +15,5 @@ export const colors = {
     greenShadow: "#00A382",
     orange360: "#CC3600",
     orange0EB: "#FFF0EB",
+    ambar400: "#FFB900",
 };
