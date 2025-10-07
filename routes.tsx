@@ -9,6 +9,7 @@ import NewPassword from "./src/screens/auth/NewPassword";
 import Terms from "./src/screens/legal/Terms";
 import PrivacyPoliticy from "./src/screens/legal/PrivacyPolicy";
 import Home from "./src/screens/home/Home";
+import PatientForms from "./src/screens/onboarding/PatientForms";
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,7 @@ export default function Routes() {
         <Stack.Screen name="Terms" component={Terms} />
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPoliticy} />
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="PatientForms" component={PatientForms} />
       </Stack.Navigator>
     </NavigationContainer>
   );
