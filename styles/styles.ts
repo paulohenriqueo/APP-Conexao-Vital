@@ -133,4 +133,4 @@ export const styles = StyleSheet.create({
         color: colors.gray75,
     }
 });
-export { typography };
+export { typography, colors };

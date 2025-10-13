@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Alert, BackHandler, StyleSheet } from "react-native";
+import { View, Text, Alert, BackHandler, StyleSheet, Modal, Button, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { TopBar } from "../../components/TopBar";
 import { BottomNavBar } from "../../components/BottomNavbar";
@@ -155,22 +155,69 @@ export default function Home() {
       <View style={styles.contentArea}>{renderContent()}</View>
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />
 
-      {/* Ativar quando a tela de completar o cadastro estiver pronta */}
-      {/* <CompleteProfileModal
-        visible={showModal}
-        text="Complete seu cadastro para aproveitar ao máximo o aplicativo!"
-        onPressPrimary={() => {
-          setShowModal(false);
-          navigation.navigate("ProfileComplete"); // tela de edição do perfil
-        }}
-        onPressSecondary={() => {
-          setShowModal(false);
-          Alert.alert(
-            "Atenção",
-            "Para fazer qualquer solicitação é necessário completar o cadastro, mas você pode continuar pesquisando sem filtros definidos."
-          );
-        }}
-      /> */}
+      {/* Modal para completar cadastro */}
+      {!profileCompleted && (
+        <Modal
+          visible={showModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowModal(false)}
+        >
+          <View style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <View style={{
+              backgroundColor: 'white',
+              borderRadius: 16,
+              padding: 28,
+              alignItems: 'center',
+              width: '80%'
+            }}>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12, textAlign: 'center' }}>
+                Complete seu cadastro
+              </Text>
+              <Text style={{ fontSize: 15, marginBottom: 24, textAlign: 'center' }}>
+                Para continuar, informe se você é um paciente ou cuidador.
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 16 }}>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#00996D',
+                    paddingVertical: 12,
+                    paddingHorizontal: 24,
+                    borderRadius: 8,
+                    marginRight: 8
+                  }}
+                  onPress={() => {
+                    setShowModal(false);
+                    navigation.navigate("PatientForms");
+                  }}
+                >
+                  <Text style={{ color: 'white', fontWeight: 'bold' }}>Paciente</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#2196F3',
+                    paddingVertical: 12,
+                    paddingHorizontal: 24,
+                    borderRadius: 8
+                  }}
+                  onPress={() => {
+                    setShowModal(false);
+                    // Troque para a tela de cuidador se existir
+                    Alert.alert("Em breve", "Formulário de cuidador em desenvolvimento.");
+                  }}
+                >
+                  <Text style={{ color: 'white', fontWeight: 'bold' }}>Cuidador</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }

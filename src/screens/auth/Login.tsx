@@ -47,7 +47,6 @@ export default function Login() {
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            Alert.alert("Login bem-sucedido!");
             navigation.navigate("Home");
         } catch (error: any) {
             console.error("Erro no login:", error);
