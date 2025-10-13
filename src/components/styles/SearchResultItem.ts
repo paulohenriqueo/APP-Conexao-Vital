@@ -14,24 +14,4 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  ratingContainer: {
-    flexDirection: "row",
-    marginVertical: 4,
-  },
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  tag: {
-    backgroundColor: "#d1f5e0",
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 6,
-    marginTop: 4,
-  },
-  tagText: {
-    color: "#00796b",
-    fontSize: 12,
-  },
 });

@@ -1,23 +1,53 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
-import { colors } from "../../../../styles/colors";
-import { fontWeights } from "../../../../styles/typography";
-import { styles } from "../../../../styles/styles";
-import { getAuth } from "firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { colors } from "../../../../styles/colors";
+import { fontWeights, typography } from "../../../../styles/typography";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import ProfileItem from "../../../components/ProfileItem";
+import { SignOut } from "phosphor-react-native";
+import ProfileInfo from "../../../components/ProfileInfo";
+import Qualifications from "../../../components/Qualifications";
+import { Avatar } from "../../../components/Avatar";
+import { styles } from "../../../../styles/styles";
+import { Ionicons } from "@expo/vector-icons";
+
+interface User {
+  bio?: string;
+  role?: "caregiver" | "client";
+  qualifications?: string[];
+  rating?: number;
+}
+
+interface SectionItem {
+  section: string;
+  title: string;
+  onPress: () => void;
+  icon?: React.ReactNode;
+}
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState<"info" | "qualifications">("info");
-  const [userEmail, setUserEmail] = useState("");
   const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
+  const navigation = useNavigation<NavigationProp<any>>();
+
+  // Dados provisórios do usuário
+  const user: User = {
+    bio: "Cuidador experiente com foco em idosos.",
+    role: "caregiver", // agora é do tipo correto
+    qualifications: ["Primeiros Socorros", "Cuidador de Idosos"],
+    rating: 4.5,
+  };
+
+  // Buscar email e nome do usuário
   useEffect(() => {
     const auth = getAuth();
     const currentUser = auth.currentUser;
-    if (currentUser) {
-      setUserEmail(currentUser.email || "");
-    }
+    if (currentUser) setUserEmail(currentUser.email || "");
   }, []);
 
   useEffect(() => {
@@ -28,19 +58,46 @@ export default function Profile() {
       if (currentUser) {
         const userDocRef = doc(db, "Users", currentUser.uid);
         const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setUserName(userDoc.data().name || "");
-        }
+        if (userDoc.exists()) setUserName(userDoc.data().name || "");
       }
     };
     fetchUserName();
   }, []);
 
+  // Logout
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      Alert.alert("Logout", "Você saiu da sua conta com sucesso!", [{ text: "OK" }]);
+      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+    } catch (error) {
+      console.error("Erro ao deslogar:", error);
+      alert("Ocorreu um erro ao deslogar. Tente novamente.");
+    }
+  };
+  // Cria um array único com todas as seções e itens
+  const items: SectionItem[] = [
+    { section: "Históricos", title: "Avaliações realizadas", onPress: () => console.log("Completed Reviews") },
+    { section: "Históricos", title: "Compra de créditos", onPress: () => console.log("Purchase Credits") },
+    { section: "Ajuda e Suporte", title: "Termos de Uso", onPress: () => navigation.navigate("Terms") },
+    { section: "Ajuda e Suporte", title: "Política de Privacidade", onPress: () => navigation.navigate("PrivacyPolicy") },
+    // Exibe sempre por enquanto
+    // Alternativa quando userRole estiver implementado
+    // userRole === "caregiver" &&
+    { section: "Ajuda e Suporte", title: "Solicitar especializações", onPress: () => navigation.navigate("Specializations") },
+    { section: "Ajuda e Suporte", title: "Sair", onPress: handleLogout, icon: <SignOut size={22} color={colors.gray75} weight="bold" />, },
+
+  ].filter(Boolean); // remove itens falsos
+
+  // Cria um array único com todas as seções
+  const sections = Array.from(new Set(items.map(item => item.section)));
+
   return (
     <ScrollView
       contentContainerStyle={{
         justifyContent: "flex-start",
-        padding: 16,
+        padding: 4,
         backgroundColor: colors.whiteFBFE,
         flexGrow: 1,
       }}
@@ -53,49 +110,40 @@ export default function Profile() {
           width: "100%",
           backgroundColor: colors.gray7FD,
           borderRadius: 16,
-          paddingVertical: 24,
+          paddingVertical: 16,
           marginBottom: 16,
+          gap: 4,
         }}
       >
-        <View
-          style={{
-            width: 84,
-            height: 84,
-            borderRadius: 42,
-            marginBottom: 12,
-            backgroundColor: colors.grayE8,
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
-          }}
-        >
-          <MaterialIcons name="person" size={54} color={colors.gray75} />
-        </View>
+        <Avatar size={84} name={userName} />
         <Text
           style={{
-            fontSize: 20,
-            fontWeight: fontWeights.bold,
-            marginBottom: 4,
-            color: colors.gray23,
+            ...typography.H01B2024,
+            marginTop: 8,
             textAlign: "center",
+            fontWeight: "700",
           }}
         >
           {userName}
         </Text>
         <Text
           style={{
-            fontSize: 20,
-            fontWeight: fontWeights.bold,
-            marginBottom: 4,
-            color: colors.gray23,
+            ...typography.H01SB1618,
+            color: colors.gray75,
             textAlign: "center",
+            fontWeight: "600",
           }}
         >
           {userEmail}
         </Text>
-        <View style={{ flexDirection: "row", marginTop: 4 }}>
-          {[...Array(5)].map((_, i) => (
-            <MaterialIcons key={i} name="star" size={20} color="#FFD700" />
+        <View style={{...styles.ratingContainer}}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Ionicons
+              key={i}
+              name={i < (user.rating || 0) ? "star" : "star-outline"}
+              size={20}
+              color={colors.ambar400}
+            />
           ))}
         </View>
       </View>
@@ -168,6 +216,7 @@ export default function Profile() {
           width: "100%",
           borderBottomWidth: 1,
           borderBottomColor: colors.grayE8,
+          marginBottom: 16,
         }}
       >
         <TouchableOpacity
@@ -182,13 +231,14 @@ export default function Profile() {
         >
           <Text
             style={{
+              ...typography.M01B1418,
               color: activeTab === "info" ? colors.green382 : colors.gray75,
-              fontWeight: fontWeights.bold,
             }}
           >
             Informações gerais
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={{
             flex: 1,
@@ -201,9 +251,8 @@ export default function Profile() {
         >
           <Text
             style={{
-              color:
-                activeTab === "qualifications" ? colors.green382 : colors.gray75,
-              fontWeight: fontWeights.bold,
+              ...typography.M01B1418,
+              color: activeTab === "qualifications" ? colors.green382 : colors.gray75,
             }}
           >
             Qualificações
@@ -211,97 +260,37 @@ export default function Profile() {
         </TouchableOpacity>
       </View>
 
-      {/* Conteúdo das abas */}
-      <View style={{ width: "100%", marginBottom: 16, paddingHorizontal: 4 }}>
-        {activeTab === "info" ? (
-          <Text
-            style={{...styles.contentText, padding: 0, marginTop: 12}}
-          >
-            Lorem ipsum dolor sit amet consectetur. Eget condimentum amet enim
-            lacinia at. Nunc felis orci vestibulum adipiscing sit in erat porta
-            feugiat. Fermentum quis eget et massa amet aliquet blandit. Magnis
-            aliquam penatibus augue fringilla urna nisl quisque viverra.
-          </Text>
-        ) : (
-          <Text
-            style={{...styles.contentText, padding: 0, marginTop: 12}}
-          >
-            Qualificações do usuário exibidas aqui.
-          </Text>
-        )}
-      </View>
+      {/* Conteúdo da aba */}
+      {activeTab === "info" && <ProfileInfo user={user} />}
+      {activeTab === "qualifications" && <Qualifications user={user} />}
 
-      {/* Históricos */}
-      <Text
-        style={{
-          fontSize: 17,
-          fontWeight: fontWeights.bold,
-          marginBottom: 8,
-          alignSelf: "flex-start",
-          marginTop: 8,
-          color: colors.gray23,
-        }}
-      >
-        Históricos
-      </Text>
-      <View
-        style={{
-          width: "100%",
-          backgroundColor: colors.gray7FD,
-          borderRadius: 12,
-          padding: 0,
-          marginBottom: 24,
-        }}
-      >
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingVertical: 18,
-            paddingHorizontal: 16,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.grayE8,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 15,
-              color: colors.gray23,
-            }}
-          >
-            Avaliações realizadas
-          </Text>
-          <MaterialIcons
-            name="keyboard-arrow-right"
-            size={24}
-            color={colors.gray75}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingVertical: 18,
-            paddingHorizontal: 16,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 15,
-              color: colors.gray23,
-            }}
-          >
-            Compra de créditos
-          </Text>
-          <MaterialIcons
-            name="keyboard-arrow-right"
-            size={24}
-            color={colors.gray75}
-          />
-        </TouchableOpacity>
-      </View>
+      {/* Seções */}
+      {sections.map(section => {
+        const sectionItems = items.filter(item => item.section === section);
+        return (
+          <View key={section} style={{ marginBottom: 24 }}>
+            <Text
+              style={{
+                ...typography.M01B1624,
+                marginBottom: 8,
+              }}
+            >
+              {section}
+            </Text>
+            <View style={{ borderRadius: 12, overflow: "hidden" }}>
+              {sectionItems.map((item, index) => (
+                <ProfileItem
+                  key={index}
+                  title={item.title}
+                  onPress={item.onPress}
+                  showDivider={index !== sectionItems.length - 1}
+                  icon={item.icon}
+                />
+              ))}
+            </View>
+          </View>
+        );
+      })}
     </ScrollView>
   );
 }

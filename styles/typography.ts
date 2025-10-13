@@ -16,16 +16,48 @@ export const baseTypography = {
     montserratBold: { fontFamily: 'Montserrat_700Bold', letterSpacing: 0.1 },
     montserratLight: { fontFamily: 'Montserrat_300Light', letterSpacing: 0 },
     hindRegular: { fontFamily: 'Hind_400Regular', letterSpacing: 0.1 },
+    hindSemiBold: { fontFamily: 'Hind_600SemiBold', letterSpacing: 0.1 },
+    hindBold: { fontFamily: 'Hind_700Bold', letterSpacing: 0.1 },
 };
 
 export const typography: Record<string, TextStyle> = {
     // Hind
     // ===== Regular =====
+    H01R1214: {
+        ...baseTypography.hindRegular,
+        fontSize: 12,
+        lineHeight: 14,
+    },
+    H01R1418: {
+        ...baseTypography.hindRegular,
+        fontSize: 14,
+        lineHeight: 18,
+        color: colors.gray23,
+    },
     H01R1624: {
         ...baseTypography.hindRegular,
         fontSize: 16,
         lineHeight: 24,
         color: colors.gray47,
+    },
+    // ===== Bold =====
+    H01B2024: {
+        ...baseTypography.hindBold,
+        fontSize: 20,
+        lineHeight: 24,
+        color: colors.gray23,
+    },
+    // ===== Semibold =====
+    H01SB1214: {
+        ...baseTypography.hindSemiBold,
+        fontSize: 12,
+        lineHeight: 14,
+    },
+    H01SB1618: {
+        ...baseTypography.hindSemiBold,
+        fontSize: 16,
+        lineHeight: 18,
+        color: colors.gray23,
     },
 
     // Montserrat
@@ -68,6 +100,12 @@ export const typography: Record<string, TextStyle> = {
         fontSize: 14,
         lineHeight: 18,
         color: colors.green85F,
+    },
+    M01B1624: {
+        ...baseTypography.montserratBold,
+        fontSize: 16,
+        lineHeight: 24,
+        color: colors.gray23,
     },
 
     // ===== SemiBold =====

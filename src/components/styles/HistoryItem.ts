@@ -14,11 +14,8 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  ratingContainer: {
-    flexDirection: "row",
-    marginVertical: 4,
-  },
   date: {
+    fontSize: 12,
     color: "#555",
   },
 });

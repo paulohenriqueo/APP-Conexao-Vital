@@ -1,37 +1,43 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { styles } from "./styles/HistoryItem";
+import { styles as historyStyles } from "./styles/HistoryItem";
 import { colors } from "../../styles/colors";
+import { styles } from "../../styles/styles";
 import { Avatar } from "./Avatar";
 
 type HistoryItemProps = {
     name: string;
     rating: number;
     date: string;
+    principalRole: string;
     onPress: () => void;
 };
 
-export function HistoryItem({ name, rating, date, onPress }: HistoryItemProps) {
+export function HistoryItem({ name, principalRole, rating, date, onPress }: HistoryItemProps) {
     return (
-        <View style={styles.container}>
-            <Avatar name={name}/>
-
+        <View style={historyStyles.container}>
+            <Avatar name={name} />
             <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.name}>{name}</Text>
-
-                <View style={styles.ratingContainer}>
+                <Text style={historyStyles.name}>{name}
+                    <Text style={{ ...styles.principalRole }}>  Especialização {principalRole}</Text>
+                </Text>
+                {/*
+                    <Text style={historyStyles.name}>{name}
+                    </Text>
+                    <Text style={{ ...styles.principalRole }}>Especialização {principalRole}</Text>
+                */}
+                <View style={{ ...styles.ratingContainer }}>
                     {Array.from({ length: 5 }).map((_, i) => (
                         <Ionicons
                             key={i}
                             name={i < rating ? "star" : "star-outline"}
-                            size={18}
-                            color= {colors.ambar400}
+                            size={14}
+                            color={colors.ambar400}
                         />
                     ))}
                 </View>
-
-                <Text style={styles.date}>{date}</Text>
+                <Text style={historyStyles.date}>{date}</Text>
             </View>
 
             <TouchableOpacity onPress={onPress}>
