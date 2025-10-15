@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { colors, styles, typography } from "../../../styles/styles";
 import { Input } from "../../components/Input";
 
 export default function PatientForms({ navigation }: any) {
   const [birthDate, setBirthDate] = useState("");
+  const [birthDateObj, setBirthDateObj] = useState<Date | undefined>(undefined);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [cep, setCep] = useState("");
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
@@ -17,6 +20,18 @@ export default function PatientForms({ navigation }: any) {
 
   const handleSelectPhoto = () => {
     // lógica para selecionar foto
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setBirthDateObj(selectedDate);
+      // Formata para dd/mm/yyyy
+      const day = String(selectedDate.getDate()).padStart(2, "0");
+      const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const year = selectedDate.getFullYear();
+      setBirthDate(`${day}/${month}/${year}`);
+    }
   };
 
   return (
@@ -102,11 +117,27 @@ export default function PatientForms({ navigation }: any) {
             },
           ]}
         >
-          <Input
-            placeholder="Data de nascimento"
-            value={birthDate}
-            onChangeText={setBirthDate}
-          />
+          {/* Campo Data de Nascimento com calendário */}
+          <TouchableOpacity onPress={() => setShowDatePicker(true)} activeOpacity={0.8}>
+            <Input
+              placeholder="Data de nascimento"
+              value={birthDate}
+              editable={false}
+              pointerEvents="none"
+              style={{ backgroundColor: colors.gray7FD, marginBottom: 12, borderRadius: 8 }}
+            />
+            {/* Ícone do calendário, se desejar */}
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={birthDateObj || new Date(2000, 0, 1)}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={handleDateChange}
+              maximumDate={new Date()}
+            />
+          )}
+
           <Input placeholder="CEP" value={cep} onChangeText={setCep} />
           <Input placeholder="Rua" value={street} onChangeText={setStreet}/>
           <Input placeholder="Cidade" value={city} onChangeText={setCity}/>
