@@ -1,27 +1,17 @@
 import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, Text } from "react-native";
+import { View, TextInput, TouchableOpacity, Text, TextInputProps } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { styles, typography } from "./styles/Input";
 import { colors } from "../../styles/colors";
 
-type InputProps = {
-  placeholder?: string;
-  value?: string;
-  onChangeText?: (text: string) => void;
-  autoCapitalize?: "none" | "sentences" | "words" | "characters";
-};
-
-export function Input({ placeholder, value, onChangeText, autoCapitalize }: InputProps) {
+export function Input(props: TextInputProps) {
   return (
     <TextInput
-      style={styles.input}
-      placeholder={placeholder}
+      style={[styles.input]}
       placeholderTextColor={colors.gray75}
-      value={value}
-      onChangeText={onChangeText}
       cursorColor={colors.orange360}
-      autoCapitalize={autoCapitalize}  
+      {...props}
     />
   );
 }

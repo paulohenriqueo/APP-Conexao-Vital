@@ -1,10 +1,17 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
-import { colors, styles, typography } from "../../../styles/styles";
-import { Input } from "../../components/Input";
+import { View, Text, ScrollView, TouchableOpacity, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { colors, styles, typography } from "../../../../styles/styles";
+import { Input } from "../../../components/Input";
+import { Picker } from "@react-native-picker/picker";
 
 export default function PatientForms({ navigation }: any) {
+  const [cpf, setCpf] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [birthDateObj, setBirthDateObj] = useState<Date | undefined>(undefined);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [gender, setGender] = useState("");
   const [cep, setCep] = useState("");
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
@@ -12,12 +19,54 @@ export default function PatientForms({ navigation }: any) {
   const [agreed, setAgreed] = useState(false);
 
   const handleContinue = () => {
-   navigation.navigate("Home");
+   navigation.navigate("PatientCondition");
   };
 
   const handleSelectPhoto = () => {
     // lógica para selecionar foto
   };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setBirthDateObj(selectedDate);
+      // Formata para dd/mm/yyyy
+      const day = String(selectedDate.getDate()).padStart(2, "0");
+      const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const year = selectedDate.getFullYear();
+      setBirthDate(`${day}/${month}/${year}`);
+    }
+  };
+
+  // Função para aplicar a máscara
+  function maskPhone(value: string) {
+    // Remove tudo que não for número
+    let cleaned = value.replace(/\D/g, "");
+    // Limita a 11 dígitos
+    cleaned = cleaned.slice(0, 11);
+    // Aplica a máscara
+    if (cleaned.length <= 2) return `(${cleaned}`;
+    if (cleaned.length <= 7)
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
+  }
+  function maskCpf(value: string) {
+    // Remove tudo que não for número
+    let cleaned = value.replace(/\D/g, "");
+    // Limita a 11 dígitos
+    cleaned = cleaned.slice(0, 11);
+    // Aplica a máscara
+    if (cleaned.length <= 3) {
+        return cleaned;
+    } else if (cleaned.length <= 6) {
+        return `${cleaned.slice(0, 3)}.${cleaned.slice(3)}`;
+    } else if (cleaned.length <= 9) {
+        return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6)}`;
+    } else {
+        return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
+    }
+
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.green382 }}>
@@ -82,6 +131,7 @@ export default function PatientForms({ navigation }: any) {
             </Text>
           </TouchableOpacity>
         </View>
+
         {/* Card do formulário */}
         <View
           style={[
@@ -102,11 +152,68 @@ export default function PatientForms({ navigation }: any) {
             },
           ]}
         >
-          <Input
-            placeholder="Data de nascimento"
-            value={birthDate}
-            onChangeText={setBirthDate}
+
+          {/* Campo CPF */}
+          <Input 
+          placeholder="CPF" 
+          value={cpf} 
+          onChangeText={text => setCpf(maskCpf(text))}
+          keyboardType="numeric"
+          maxLength={14}
           />
+
+          {/* Campo Data de Nascimento com calendário */}
+          <TouchableOpacity onPress={() => setShowDatePicker(true)} activeOpacity={0.8}>
+            <Input
+              placeholder="Data de nascimento"
+              value={birthDate}
+              editable={false}
+              pointerEvents="none"
+            />
+            {/* Ícone do calendário, se desejar */}
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={birthDateObj || new Date(2000, 0, 1)}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={handleDateChange}
+              maximumDate={new Date()}
+            />
+          )}
+          <Input
+            placeholder="Telefone"
+            value={phone}
+            onChangeText={text => setPhone(maskPhone(text))}
+            keyboardType="numeric"
+            maxLength={15}
+          />
+          <View
+            style={{
+              backgroundColor: colors.gray7FD,
+              borderRadius: 8,
+              marginBottom: 12,
+              borderWidth: 0,
+              overflow: "hidden",
+            }}
+          >
+            <Picker
+              selectedValue={gender}
+              onValueChange={setGender}
+              style={{
+                height: 58,
+                color: gender ? colors.gray23 : colors.gray75,
+                paddingLeft: 8,
+              }}
+              dropdownIconColor={colors.gray75}
+            >
+              <Picker.Item label="Selecione o gênero" value="" color={colors.gray75} />
+              <Picker.Item label="Feminino" value="Feminino" />
+              <Picker.Item label="Masculino" value="Masculino" />
+              <Picker.Item label="Outro" value="Outro" />
+              <Picker.Item label="Prefiro não informar" value="Prefiro não informar" />
+            </Picker>
+          </View>
           <Input placeholder="CEP" value={cep} onChangeText={setCep} />
           <Input placeholder="Rua" value={street} onChangeText={setStreet}/>
           <Input placeholder="Cidade" value={city} onChangeText={setCity}/>
@@ -170,7 +277,7 @@ export default function PatientForms({ navigation }: any) {
             onPress={handleContinue}
             disabled={!agreed}
           >
-            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>Finalizar</Text>
+            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>Continuar</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
