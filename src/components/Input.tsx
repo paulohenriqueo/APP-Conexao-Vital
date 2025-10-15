@@ -8,7 +8,7 @@ import { colors } from "../../styles/colors";
 export function Input(props: TextInputProps) {
   return (
     <TextInput
-      style={[styles.input, props.style]}
+      style={[styles.input]}
       placeholderTextColor={colors.gray75}
       cursorColor={colors.orange360}
       {...props}
