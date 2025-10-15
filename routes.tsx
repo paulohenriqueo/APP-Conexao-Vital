@@ -9,7 +9,7 @@ import NewPassword from "./src/screens/auth/NewPassword";
 import Terms from "./src/screens/legal/Terms";
 import PrivacyPolicy from "./src/screens/legal/PrivacyPolicy";
 import Home from "./src/screens/home/Home";
-import PatientForms from "./src/screens/onboarding/PatientForms";
+import PatientForms from "./src/screens/onboarding/patient/PatientForms";
 import Specializations from "./src/screens/home/Specializations";
 
 const Stack = createStackNavigator();

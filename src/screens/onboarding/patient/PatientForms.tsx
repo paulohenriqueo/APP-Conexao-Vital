@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { colors, styles, typography } from "../../../styles/styles";
-import { Input } from "../../components/Input";
+import { colors, styles, typography } from "../../../../styles/styles";
+import { Input } from "../../../components/Input";
 
 export default function PatientForms({ navigation }: any) {
   const [birthDate, setBirthDate] = useState("");
