@@ -16,7 +16,6 @@ export default function PatientForms({ navigation }: any) {
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
-  const [agreed, setAgreed] = useState(false);
 
   const handleContinue = () => {
    navigation.navigate("PatientCondition");
@@ -219,55 +218,11 @@ export default function PatientForms({ navigation }: any) {
           <Input placeholder="Cidade" value={city} onChangeText={setCity}/>
           <Input placeholder="Estado" value={state} onChangeText={setState}/>
 
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginVertical: 12,
-              alignSelf: "flex-start",
-            }}
-            onPress={() => setAgreed(!agreed)}
-            activeOpacity={0.7}
-          >
-            <View
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: 4,
-                borderWidth: 1.5,
-                borderColor: agreed ? colors.green85F : colors.grayE8,
-                backgroundColor: agreed ? colors.green85F : "#fff",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 8,
-              }}
-            >
-              {agreed && (
-                <Text
-                  style={{
-                    color: "#fff",
-                    fontWeight: "bold",
-                    fontSize: 14,
-                  }}
-                >
-                  ✓
-                </Text>
-              )}
-            </View>
-            <Text
-              style={{
-                fontSize: 13,
-                color: colors.gray73,
-                flexShrink: 1,
-              }}
-            >
-              Declaro que todas as informações acima são verdadeiras
-            </Text>
-          </TouchableOpacity>
+          
 
           <TouchableOpacity
             style={{
-              backgroundColor: agreed ? colors.green382 : colors.grayE8,
+              backgroundColor: colors.green382,
               borderRadius: 8,
               width: "100%",
               alignItems: "center",
@@ -275,7 +230,6 @@ export default function PatientForms({ navigation }: any) {
               marginTop: 8,
             }}
             onPress={handleContinue}
-            disabled={!agreed}
           >
             <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>Continuar</Text>
           </TouchableOpacity>
