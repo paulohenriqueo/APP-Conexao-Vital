@@ -90,38 +90,56 @@ export default function PatientCondition({ navigation }: any) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.green382 }}>
+      {/* header com seta de voltar */}
+      <View
+        style={{
+          width: "100%",
+          paddingTop: 40,
+          paddingHorizontal: 16,
+          paddingBottom: 12,
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: 8,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => navigation.navigate("PatientForms")}
+          style={{ padding: 8 }}
+          accessibilityLabel="Voltar para formulário do paciente"
+        >
+          <Text style={{ fontSize: 26, color: colors.whiteFBFE }}>‹</Text>
+        </TouchableOpacity>
+
+        <Text
+          style={[
+            typography.montserratBold,
+            { color: colors.whiteFBFE, fontSize: 20, marginLeft: 8 },
+          ]}
+        >
+          Informações de cuidado
+        </Text>
+      </View>
+
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: "flex-start",
           alignItems: "center",
-          paddingTop: 150,
+          paddingTop: 8,
+          
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Text
-          style={[
-            typography.montserratBold,
-            { 
-                color: colors.whiteFBFE, 
-                fontSize: 22, 
-                marginBottom: 24, 
-                alignSelf: "center" 
-            },
-          ]}
-        >
-          Informações de cuidado
-        </Text>
-
         <View
           style={[
             styles.containerBox,
             {
               width: "90%",
               maxWidth: 430,
-              paddingTop: 20,
+              paddingTop: 100,
               paddingBottom: 24,
               borderRadius: 24,
+              overflow: "hidden", // garante recorte dos cantos arredondados
               backgroundColor: "#fff",
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
@@ -193,7 +211,7 @@ export default function PatientCondition({ navigation }: any) {
             })}
           </View>
 
-          <TouchableOpacity onPress={() => setShowInicioPicker(true)} activeOpacity={0.9}>
+          {/* <TouchableOpacity onPress={() => setShowInicioPicker(true)} activeOpacity={0.9}>
             <Input placeholder="Início do período" value={inicioPeriodo} editable={false} pointerEvents="none" style={{ marginBottom: 12 }} />
           </TouchableOpacity>
           {showInicioPicker && (
@@ -204,7 +222,7 @@ export default function PatientCondition({ navigation }: any) {
               onChange={handleInicioChange}
               maximumDate={new Date(2100, 0, 1)}
             />
-          )}
+          )} */}
 
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Observações</Text>
           <TextInput
@@ -256,9 +274,9 @@ export default function PatientCondition({ navigation }: any) {
           />
 
           {/* Medicamentos */}
-          <Text style={{ color: colors.gray73, marginBottom: 6 }}>Medicamentos</Text>
+          <Text style={{ color: colors.gray73, marginBottom: 10 }}>Medicamentos</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
-            <Input placeholder="Adicionar medicamento" value={medInput} onChangeText={setMedInput} style={{ flex: 1 }} />
+            <Input placeholder="Adicionar medicamento" value={medInput} onChangeText={setMedInput} style={{ flex: 1}} />
             <TouchableOpacity onPress={() => addToList(medInput, setMedicamentos, medicamentos, setMedInput)} style={{ marginLeft: 8, alignSelf: "center", paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
               <Text style={{ color: "#fff" }}>Adicionar</Text>
             </TouchableOpacity>
