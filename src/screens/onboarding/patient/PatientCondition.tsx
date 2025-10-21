@@ -95,7 +95,7 @@ export default function PatientCondition({ navigation }: any) {
           flexGrow: 1,
           justifyContent: "flex-start",
           alignItems: "center",
-          paddingTop: 150,
+          paddingTop: 50,
         }}
         showsVerticalScrollIndicator={false}
       >
@@ -106,7 +106,13 @@ export default function PatientCondition({ navigation }: any) {
                 color: colors.whiteFBFE, 
                 fontSize: 22, 
                 marginBottom: 24, 
-                alignSelf: "center" 
+                alignSelf: "center",
+                display: "flex",
+                textAlign: "center",
+                justifyContent: "center",
+                alignItems: "center",
+                paddingBottom: 90,
+                paddingTop: 30 
             },
           ]}
         >
@@ -193,7 +199,7 @@ export default function PatientCondition({ navigation }: any) {
             })}
           </View>
 
-          <TouchableOpacity onPress={() => setShowInicioPicker(true)} activeOpacity={0.9}>
+          {/* <TouchableOpacity onPress={() => setShowInicioPicker(true)} activeOpacity={0.9}>
             <Input placeholder="Início do período" value={inicioPeriodo} editable={false} pointerEvents="none" style={{ marginBottom: 12 }} />
           </TouchableOpacity>
           {showInicioPicker && (
@@ -204,7 +210,7 @@ export default function PatientCondition({ navigation }: any) {
               onChange={handleInicioChange}
               maximumDate={new Date(2100, 0, 1)}
             />
-          )}
+          )} */}
 
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Observações</Text>
           <TextInput
@@ -258,7 +264,7 @@ export default function PatientCondition({ navigation }: any) {
           {/* Medicamentos */}
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Medicamentos</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
-            <Input placeholder="Adicionar medicamento" value={medInput} onChangeText={setMedInput} style={{ flex: 1 }} />
+            <Input placeholder="Adicionar medicamento" value={medInput} onChangeText={setMedInput} style={{ flex: 1 , flexDirection: "column", marginBottom: 8}} />
             <TouchableOpacity onPress={() => addToList(medInput, setMedicamentos, medicamentos, setMedInput)} style={{ marginLeft: 8, alignSelf: "center", paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
               <Text style={{ color: "#fff" }}>Adicionar</Text>
             </TouchableOpacity>
