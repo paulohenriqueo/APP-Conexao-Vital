@@ -8,11 +8,13 @@ import { CompleteProfileModal } from "../../components/Modal";
 import { SearchBar } from "../../components/SearchBar";
 import Profile from "./profile/Profile";
 import { CustomList } from "../../components/CustomList";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import PopUpFormsModel from "../model/PopUpFormsModel";
 
 export default function Home() {
   const navigation = useNavigation<any>();
   const [selectedTab, setSelectedTab] = useState("home");
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false); // start false, set after check
   const [profileCompleted, setProfileCompleted] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -45,6 +47,33 @@ export default function Home() {
 
     return () => backHandler.remove();
   }, [navigation]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const seen = await AsyncStorage.getItem("hasSeenCompleteProfileModal");
+        if (!seen && !profileCompleted) setShowModal(true);
+      } catch (e) {
+        setShowModal(!profileCompleted);
+      }
+    })();
+  }, [profileCompleted]);
+
+  const handleSelectPatient = async () => {
+    try {
+      await AsyncStorage.setItem("hasSeenCompleteProfileModal", "true");
+    } catch (e) {}
+    setShowModal(false);
+    navigation.navigate("PatientForms");
+  };
+
+  const handleSelectCaregiver = async () => {
+    try {
+      await AsyncStorage.setItem("hasSeenCompleteProfileModal", "true");
+    } catch (e) {}
+    setShowModal(false);
+    Alert.alert("Em breve", "Formulário de cuidador em desenvolvimento.");
+  };
 
   const handleRequest = () => {
     if (!profileCompleted) {
@@ -156,68 +185,12 @@ export default function Home() {
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />
 
       {/* Modal para completar cadastro */}
-      {!profileCompleted && (
-        <Modal
-          visible={showModal}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowModal(false)}
-        >
-          <View style={{
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
-            <View style={{
-              backgroundColor: 'white',
-              borderRadius: 16,
-              padding: 28,
-              alignItems: 'center',
-              width: '80%'
-            }}>
-              <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12, textAlign: 'center' }}>
-                Complete seu cadastro
-              </Text>
-              <Text style={{ fontSize: 15, marginBottom: 24, textAlign: 'center' }}>
-                Para continuar, informe se você é um paciente ou cuidador.
-              </Text>
-              <View style={{ flexDirection: 'row', gap: 16 }}>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: '#00996D',
-                    paddingVertical: 12,
-                    paddingHorizontal: 24,
-                    borderRadius: 8,
-                    marginRight: 8
-                  }}
-                  onPress={() => {
-                    setShowModal(false);
-                    navigation.navigate("PatientForms");
-                  }}
-                >
-                  <Text style={{ color: 'white', fontWeight: 'bold' }}>Paciente</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: '#2196F3',
-                    paddingVertical: 12,
-                    paddingHorizontal: 24,
-                    borderRadius: 8
-                  }}
-                  onPress={() => {
-                    setShowModal(false);
-                    // Troque para a tela de cuidador se existir
-                    Alert.alert("Em breve", "Formulário de cuidador em desenvolvimento.");
-                  }}
-                >
-                  <Text style={{ color: 'white', fontWeight: 'bold' }}>Cuidador</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      )}
+      <PopUpFormsModel
+        visible={showModal && !profileCompleted}
+        onClose={() => setShowModal(false)}
+        onSelectPatient={handleSelectPatient}
+        onSelectCaregiver={handleSelectCaregiver}
+      />
     </View>
   );
 }
