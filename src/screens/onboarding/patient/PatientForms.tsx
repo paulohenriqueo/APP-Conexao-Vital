@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Platform } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Platform, Alert } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { Picker } from "@react-native-picker/picker";
+import { savePatientForm } from "../../../services/patientService";
 
 export default function PatientForms({ navigation }: any) {
   const [cpf, setCpf] = useState("");
@@ -16,9 +17,33 @@ export default function PatientForms({ navigation }: any) {
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const handleContinue = () => {
-   navigation.navigate("PatientCondition");
+  const handleContinue = async () => {
+    // validações simples (adicione as que precisar)
+    if (!cpf || !birthDate) {
+      Alert.alert("Atenção", "Preencha CPF e data de nascimento antes de continuar.");
+      return;
+    }
+    setSaving(true);
+    const payload = {
+      cpf,
+      birthDate,
+      phone,
+      gender,
+      cep,
+      street,
+      city,
+      state,
+    };
+    const res = await savePatientForm(payload);
+    setSaving(false);
+    if (res.ok) {
+      navigation.navigate("PatientCondition");
+    } else {
+      Alert.alert("Erro", "Não foi possível salvar os dados. Tente novamente.");
+      console.error(res.error);
+    }
   };
 
   const handleSelectPhoto = () => {
@@ -230,8 +255,11 @@ export default function PatientForms({ navigation }: any) {
               marginTop: 8,
             }}
             onPress={handleContinue}
+            disabled={saving}
           >
-            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>Continuar</Text>
+            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
+              {saving ? "Salvando..." : "Continuar"}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
