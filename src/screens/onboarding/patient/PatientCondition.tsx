@@ -7,10 +7,12 @@ import {
   FlatList,
   TextInput,
   Platform,
+  Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
+import { savePatientCondition } from "../../../services/patientService";
 
 export default function PatientCondition({ navigation }: any) {
   const [cuidadoTotal, setCuidadoTotal] = useState(false);
@@ -20,6 +22,7 @@ export default function PatientCondition({ navigation }: any) {
   const [showInicioPicker, setShowInicioPicker] = useState(false);
   const [observacoes, setObservacoes] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // listas dinâmicas
   const [alergiaInput, setAlergiaInput] = useState("");
@@ -72,10 +75,10 @@ export default function PatientCondition({ navigation }: any) {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const payload = {
       cuidadoTotal,
-      periodo,
+      periodos: selectedPeriods, // agora utiliza selectedPeriods
       inicioPeriodo,
       observacoes,
       alergias,
@@ -83,9 +86,15 @@ export default function PatientCondition({ navigation }: any) {
       condicoes,
       idiomasPreferidos,
     };
-    // salvar no backend ou state global
-    console.log("Patient condition saved:", payload);
-    navigation.navigate("Home");
+    setSaving(true);
+    const res = await savePatientCondition(payload);
+    setSaving(false);
+    if (res.ok) {
+      navigation.navigate("Home");
+    } else {
+      Alert.alert("Erro", "Não foi possível salvar as informações de cuidado.");
+      console.error(res.error);
+    }
   };
 
   return (
@@ -121,8 +130,9 @@ export default function PatientCondition({ navigation }: any) {
       </View>
 
       <ScrollView
+      style={{ flex: 1 }}
         contentContainerStyle={{
-          flexGrow: 1,
+          // flexGrow: 1,
           justifyContent: "flex-start",
           alignItems: "center",
           paddingTop: 8,
@@ -135,11 +145,11 @@ export default function PatientCondition({ navigation }: any) {
             styles.containerBox,
             {
               width: "90%",
-              maxWidth: 430,
-              paddingTop: 100,
-              paddingBottom: 24,
-              borderRadius: 24,
-              overflow: "hidden", // garante recorte dos cantos arredondados
+                maxWidth: 430,
+                paddingBottom: 24,
+                borderRadius: 24,
+                overflow: "hidden", // garante recorte dos cantos arredondados
+                marginTop: 0,
               backgroundColor: "#fff",
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
@@ -159,7 +169,7 @@ export default function PatientCondition({ navigation }: any) {
               style={{
                 width: 20,
                 height: 20,
-                borderRadius: 4,
+                borderRadius: 24,
                 borderWidth: 1.5,
                 borderColor: cuidadoTotal ? colors.green85F : colors.grayE8,
                 backgroundColor: cuidadoTotal ? colors.green85F : "#fff",
@@ -401,8 +411,11 @@ export default function PatientCondition({ navigation }: any) {
               marginTop: 8,
             }}
             onPress={handleSave}
+            disabled={saving}
           >
-            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>Salvar</Text>
+            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
+              {saving ? "Salvando..." : "Salvar"}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

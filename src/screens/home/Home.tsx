@@ -52,8 +52,17 @@ export default function Home() {
     (async () => {
       try {
         const seen = await AsyncStorage.getItem("hasSeenCompleteProfileModal");
-        if (!seen && !profileCompleted) setShowModal(true);
+        console.log("DEBUG: hasSeenCompleteProfileModal =", seen, "profileCompleted =", profileCompleted);
+        // só mostra se ainda não viu e perfil não completo
+        if (!seen && !profileCompleted) {
+          setShowModal(true);
+        } else if (__DEV__) {
+          // durante desenvolvimento, forçar a modal aparecer para testar
+          console.log("DEBUG: forcing modal visible in __DEV__");
+          setTimeout(() => setShowModal(true), 300);
+        }
       } catch (e) {
+        console.warn("AsyncStorage error", e);
         setShowModal(!profileCompleted);
       }
     })();
@@ -178,13 +187,28 @@ export default function Home() {
     }
   };
 
+  // limpa a flag de primeira execução (apenas para teste)
+  const clearOnboardingFlag = async () => {
+    try {
+      await AsyncStorage.removeItem("hasSeenCompleteProfileModal");
+      console.log("DEBUG: removed hasSeenCompleteProfileModal");
+      setShowModal(true); // opcional: reabre o modal após limpar
+    } catch (e) {
+      console.warn("DEBUG: failed to remove onboarding flag", e);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <TopBar title="" />
+      {/* botão temporário para debug (remova depois) */}
+      <TouchableOpacity onPress={clearOnboardingFlag} style={{ alignSelf: "flex-end", padding: 8, margin: 8 }}>
+        <Text style={{ color: "#fff" }}>Reset Onboarding</Text>
+      </TouchableOpacity>
+
       <View style={styles.contentArea}>{renderContent()}</View>
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />
 
-      {/* Modal para completar cadastro */}
       <PopUpFormsModel
         visible={showModal && !profileCompleted}
         onClose={() => setShowModal(false)}
