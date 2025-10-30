@@ -5,7 +5,7 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   onSelectPatient: () => void;
-  onSelectCaregiver?: () => void;
+  onSelectCaregiver: () => void;
 };
 
 export default function PopUpFormsModel({
@@ -29,9 +29,7 @@ export default function PopUpFormsModel({
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, styles.caregiver]}
-              onPress={onSelectCaregiver ?? onClose}
-            >
+              style={[styles.button, styles.caregiver]} onPress={onSelectCaregiver}>
               <Text style={styles.buttonTextSecondary}>Cuidador</Text>
             </TouchableOpacity>
           </View>
