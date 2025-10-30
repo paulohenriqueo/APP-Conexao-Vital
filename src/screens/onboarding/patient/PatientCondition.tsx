@@ -15,7 +15,6 @@ import { Input } from "../../../components/Input";
 import { savePatientCondition } from "../../../services/patientService";
 
 export default function PatientCondition({ navigation }: any) {
-  const [cuidadoTotal, setCuidadoTotal] = useState(false);
   const [periodo, setPeriodo] = useState("");
   const [inicioPeriodo, setInicioPeriodo] = useState("");
   const [inicioPeriodoObj, setInicioPeriodoObj] = useState<Date | undefined>(undefined);
@@ -77,7 +76,6 @@ export default function PatientCondition({ navigation }: any) {
 
   const handleSave = async () => {
     const payload = {
-      cuidadoTotal,
       periodos: selectedPeriods, // agora utiliza selectedPeriods
       inicioPeriodo,
       observacoes,
@@ -159,29 +157,6 @@ export default function PatientCondition({ navigation }: any) {
             },
           ]}
         >
-        <Text style={{ color: colors.gray73, marginBottom: 6 }}>Necessita de Cuidado Total?</Text>
-          <TouchableOpacity
-            onPress={() => setCuidadoTotal(!cuidadoTotal)}
-            style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}
-          >
-            
-            <View
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: 24,
-                borderWidth: 1.5,
-                borderColor: cuidadoTotal ? colors.green85F : colors.grayE8,
-                backgroundColor: cuidadoTotal ? colors.green85F : "#fff",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 8,
-              }}
-            >
-              {cuidadoTotal && <Text style={{ color: "#fff", fontWeight: "bold" }}>✓</Text>}
-            </View>
-            <Text style={{ color: colors.gray73 }}>Sim</Text>
-          </TouchableOpacity>
 
           {/* Períodos como checkboxes (múltipla seleção) */}
           <Text style={{ color: colors.gray73, marginBottom: 8 }}>Período</Text>

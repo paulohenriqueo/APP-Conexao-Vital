@@ -10,6 +10,7 @@ import Profile from "./profile/Profile";
 import { CustomList } from "../../components/CustomList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PopUpFormsModel from "../model/PopUpFormsModel";
+import FlashMessage, { showMessage } from 'react-native-flash-message';
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -81,7 +82,7 @@ export default function Home() {
       await AsyncStorage.setItem("hasSeenCompleteProfileModal", "true");
     } catch (e) {}
     setShowModal(false);
-    Alert.alert("Em breve", "Formulário de cuidador em desenvolvimento.");
+    navigation.navigate("CaregiverForms");
   };
 
   const handleRequest = () => {

@@ -12,6 +12,8 @@ import Home from "./src/screens/home/Home";
 import PatientForms from "./src/screens/onboarding/patient/PatientForms";
 import Specializations from "./src/screens/home/Specializations";
 import PatientCondition from "./src/screens/onboarding/patient/PatientCondition";
+import CaregiverForms from "./src/screens/onboarding/caregiver/CaregiverForms";
+import CaregiverSpecifications from "./src/screens/onboarding/caregiver/CaregiverSpecifications";
 
 const Stack = createStackNavigator();
 
@@ -29,6 +31,8 @@ export default function Routes() {
         <Stack.Screen name="PatientForms" component={PatientForms} />
         <Stack.Screen name="Specializations" component={Specializations} />
         <Stack.Screen name ="PatientCondition" component={PatientCondition} />
+        <Stack.Screen name="CaregiverForms" component={CaregiverForms} />
+        <Stack.Screen name="CaregiverSpecifications" component={CaregiverSpecifications} />
       </Stack.Navigator>
     </NavigationContainer>
   );
