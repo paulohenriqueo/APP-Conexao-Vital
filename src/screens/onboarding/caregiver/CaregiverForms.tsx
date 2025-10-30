@@ -15,6 +15,7 @@ export default function CaregiverForms({ navigation }: any) {
   const [gender, setGender] = useState("");
   const [cep, setCep] = useState("");
   const [street, setStreet] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [saving, setSaving] = useState(false);
@@ -33,6 +34,7 @@ export default function CaregiverForms({ navigation }: any) {
       gender,
       cep,
       street,
+      neighborhood,
       city,
       state,
     };
@@ -83,6 +85,41 @@ export default function CaregiverForms({ navigation }: any) {
       return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
     }
   }
+
+  function maskCep(value: string) {
+    let cleaned = value.replace(/\D/g, "");
+    cleaned = cleaned.slice(0, 8);
+    if (cleaned.length <= 5) {
+      return cleaned;
+    } else {
+      return `${cleaned.slice(0, 5)}-${cleaned.slice(5)}`;
+    }
+  }
+
+  const fetchAddress = async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length !== 8) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const data = await response.json();
+
+      if (data.erro) {
+        Alert.alert('Erro', 'CEP não encontrado.');
+        return;
+      }
+
+      setStreet(data.logradouro);
+      setNeighborhood(data.bairro);
+      setCity(data.localidade);
+      setState(data.uf);
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao buscar CEP.');
+      console.error(error);
+    }
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.green382 }}>
@@ -218,10 +255,19 @@ export default function CaregiverForms({ navigation }: any) {
             </Picker>
           </View>
 
-          <Input placeholder="CEP" value={cep} onChangeText={setCep} />
-          <Input placeholder="Rua" value={street} onChangeText={setStreet} />
-          <Input placeholder="Cidade" value={city} onChangeText={setCity} />
-          <Input placeholder="Estado" value={state} onChangeText={setState} />
+          <Input 
+          placeholder="CEP" 
+          value={cep} 
+          onChangeText={text => setCep(maskCep(text))}
+          onBlur={() => fetchAddress(cep)} 
+          keyboardType="numeric"
+          maxLength={9}
+          />
+
+          <Input placeholder="Rua" value={street} onChangeText={setStreet} editable={false}/>
+          <Input placeholder="Bairro" value={neighborhood} onChangeText={setNeighborhood} editable={false}/>
+          <Input placeholder="Cidade" value={city} onChangeText={setCity} editable={false}/>
+          <Input placeholder="Estado" value={state} onChangeText={setState} editable={false}/>
 
           <TouchableOpacity
             style={{
