@@ -203,9 +203,9 @@ export default function Home() {
     <View style={styles.container}>
       <TopBar title="" />
       {/* botão temporário para debug (remova depois) */}
-      <TouchableOpacity onPress={clearOnboardingFlag} style={{ alignSelf: "flex-end", padding: 8, margin: 8 }}>
+      {/* <TouchableOpacity onPress={clearOnboardingFlag} style={{ alignSelf: "flex-end", padding: 8, margin: 8 }}>
         <Text style={{ color: "#fff" }}>Reset Onboarding</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <View style={styles.contentArea}>{renderContent()}</View>
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />

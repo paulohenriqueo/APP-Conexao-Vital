@@ -20,16 +20,25 @@ export const styles = StyleSheet.create({
         shadowOpacity: 0.06,
         shadowRadius: 3,
         elevation: 4,
+        flexGrow: 1,
+    },
+    secondaryButton: {
+        backgroundColor: colors.grayEF1,
     },
     buttonText: {
         ...typography.M01M1624,
         color: colors.whiteFBFE,
     },
+    secondaryButtonText: {
+        ...typography.M01M1624,
+        color: colors.gray23,
+    },
     buttonOutilined: {
         backgroundColor: colors.whiteFBFE,
         paddingVertical: 12,
         borderRadius: 8,
-        borderWidth: 1,
+        borderWidth: 2,
+        borderColor: colors.green382,
         alignItems: "center",
         justifyContent: "center",
         shadowColor: colors.blackShadow,
@@ -37,10 +46,11 @@ export const styles = StyleSheet.create({
         shadowOpacity: 0.06,
         shadowRadius: 3,
         elevation: 4,
+        flexGrow: 1,
     },
     buttonOutilinedText: {
         ...typography.M01M1624,
-        color: colors.green85F,
+        color: colors.green382,
     },
     googleButton: {
         flexDirection: "row",

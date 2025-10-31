@@ -4,12 +4,10 @@ import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { getAuth, signOut } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { colors } from "../../../../styles/colors";
-import { fontWeights, typography } from "../../../../styles/typography";
+import { typography } from "../../../../styles/typography";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import ProfileItem from "../../../components/ProfileItem";
 import { SignOut } from "phosphor-react-native";
-import ProfileInfo from "../../../components/ProfileInfo";
-import Qualifications from "../../../components/Qualifications";
 import { Avatar } from "../../../components/Avatar";
 import { styles } from "../../../../styles/styles";
 import { Ionicons } from "@expo/vector-icons";
@@ -99,12 +97,13 @@ export default function Profile() {
   return (
     <ScrollView
       contentContainerStyle={{
-        justifyContent: "flex-start",
+        justifyContent: "center",
         padding: 4,
         backgroundColor: colors.whiteFBFE,
         flexGrow: 1,
       }}
       showsVerticalScrollIndicator={false}
+      style={{ flex: 1, width: "100%" }} // Adicionando estilo para ocupar a largura máxima
     >
       {/* Foto de perfil, nome e estrelas */}
       <View
@@ -155,61 +154,16 @@ export default function Profile() {
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: "center",
           width: "100%",
           marginBottom: 16,
         }}
-      >        
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: colors.green382,
-            paddingVertical: 10,
-            paddingHorizontal: 18,
-            borderRadius: 8,
-            marginRight: 8,
-            justifyContent: "center",
-          }}
-        >
-          <Feather name="edit-2" size={18} color="#fff" />
-          <Text
-            style={{
-              color: "#fff",
-              fontWeight: fontWeights.bold,
-              marginLeft: 8,
-            }}
-          >
-            Editar perfil
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            borderColor: colors.green382,
-            borderWidth: 1.5,
-            paddingVertical: 10,
-            paddingHorizontal: 18,
-            borderRadius: 8,
-            marginLeft: 8,
-            backgroundColor: "#fff",
-            justifyContent: "center",
-          }}
-        >
-          <Feather name="repeat" size={18} color={colors.green382} />
-          <Text
-            style={{
-              color: colors.green382,
-              fontWeight: fontWeights.bold,
-              marginLeft: 8,
-            }}
-          >
-            Alternar conta
-          </Text>
-        </TouchableOpacity>
+      >   
+      <PrimaryButton
+          title="Editar perfil"
+          onPress={() => console.log('Editar pressionado')}
+          icon={<Feather name="edit-2" size={20} color={colors.whiteFBFE} />}
+        />
       </View>
 
       {/* Abas */}
@@ -234,11 +188,11 @@ export default function Profile() {
         >
           <Text
             style={{
-              ...typography.M01B1418,
+              ...typography.M01B1624,
               color: activeTab === "info" ? colors.green382 : colors.gray75,
             }}
           >
-            Informações gerais
+            Informações {/* gerais */}
           </Text>
         </TouchableOpacity>
 
@@ -265,8 +219,40 @@ export default function Profile() {
 
       {/* Conteúdo da aba */}
       {activeTab === "info" && (
-        user.role === "caregiver"
+        user.role === "caregiver" //atualizar de acordo com o banco de dados
           ? (
+            <CaregiverProfileInfo
+              caregiverData={(user as any)?.caregiverSpecifications ?? {
+                experiencia: ["Item"],
+                qualificacoes: ["Item"],
+                dispoDia: [],
+                periodo: ["Item"],
+                publicoAtendido: ["Item"],
+                observacoes: "Teste",
+              }}
+            />
+            // <PatientProfileInfo patientData={
+            //   (user as any)?.patientSpecifications ?? {
+            //     alergias: ["Pólen", "Amendoim"],
+            //     medicamentos: ["Paracetamol", "Ibuprofeno"],
+            //     condicoes: ["Diabetes", "Hipertensão"],
+            //     idiomasPreferidos: ["Português", "Inglês"],
+            //     observacoes: "Paciente em tratamento contínuo.",
+            //   }
+            // }
+            // />
+          )
+          : (
+            <PatientProfileInfo patientData={
+              (user as any)?.patientSpecifications ?? {
+                alergias: ["Pólen", "Amendoim"],
+                medicamentos: ["Paracetamol", "Ibuprofeno"],
+                condicoes: ["Diabetes", "Hipertensão"],
+                idiomasPreferidos: ["Português", "Inglês"],
+                observacoes: "Paciente em tratamento contínuo.",
+              }
+            }
+             />
             // <CaregiverProfileInfo
             //   caregiverData={(user as any)?.caregiverSpecifications ?? {
             //     experiencia: ["Item"],
@@ -277,38 +263,6 @@ export default function Profile() {
             //     observacoes: "Teste",
             //   }}
             // />
-            <PatientProfileInfo patientData={
-              (user as any)?.patientSpecifications ?? {
-                alergias: ["Pólen", "Amendoim"],
-                medicamentos: ["Paracetamol", "Ibuprofeno"],
-                condicoes: ["Diabetes", "Hipertensão"],
-                idiomasPreferidos: ["Português", "Inglês"],
-                observacoes: "Paciente em tratamento contínuo.",
-              }
-            }
-            />
-          )
-          : (
-            // <PatientProfileInfo patientData={
-            //   (user as any)?.patientSpecifications ?? {
-            //     alergias: ["Pólen", "Amendoim"],
-            //     medicamentos: ["Paracetamol", "Ibuprofeno"],
-            //     condicoes: ["Diabetes", "Hipertensão"],
-            //     idiomasPreferidos: ["Português", "Inglês"],
-            //     observacoes: "Paciente em tratamento contínuo.",
-            //   }
-            // }
-            //  />
-            <CaregiverProfileInfo
-              caregiverData={(user as any)?.caregiverSpecifications ?? {
-                experiencia: ["Item"],
-                qualificacoes: ["Item"],
-                dispoDia: ["Item"],
-                periodo: ["Item"],
-                publicoAtendido: ["Item"],
-                observacoes: "Teste",
-              }}
-            />
           )
       )}
       {/* {activeTab === "qualifications" && <Qualifications user={user} />} */}

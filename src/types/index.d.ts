@@ -28,6 +28,7 @@ declare module "phosphor-react-native" {
   export const Check: React.FC<IconProps>;
   export const X: React.FC<IconProps>;
   export const SignOut: React.FC<IconProps>;
+  export const WhatsAppLogo: React.FC<IconProps>;
 
   export const PhosphorIcon: React.FC<IconProps>;
 }

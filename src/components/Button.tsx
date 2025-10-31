@@ -19,6 +19,28 @@ export function PrimaryButton({ title, onPress, icon }: ButtonProps) {
     );
 }
 
+export function SecondaryButton({ title, onPress, icon }: ButtonProps) {
+    return (
+        <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={onPress} activeOpacity={0.7}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
+                <Text style={styles.secondaryButtonText}>{title}</Text>
+            </View>
+        </TouchableOpacity>
+    );
+}
+
+export function OutlinedButton({ title, onPress, icon }: ButtonProps) {
+    return (
+        <TouchableOpacity style={styles.buttonOutilined} onPress={onPress} activeOpacity={0.7}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
+                <Text style={styles.buttonOutilinedText}>{title}</Text>
+            </View>
+        </TouchableOpacity>
+    );
+}
+
 type GoogleButtonProps = {
     title?: string;
     onPress: () => void;

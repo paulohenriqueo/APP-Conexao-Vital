@@ -1,8 +1,10 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { colors, typography } from "../../styles/styles";
+import { colors } from "../../styles/styles";
+import { profileTypography as typography } from "../../styles/typography";
 
 type PatientProfileInfoProps = {
+  //atualizar de acordo com banco de dados
   patientData: {
     alergias?: string[];
     medicamentos?: string[];
@@ -46,32 +48,32 @@ export function PatientProfileInfo({ patientData }: PatientProfileInfoProps) {
   return (
     <View style={{ padding: 4, marginTop: 0 }}>
       {/* Alergias */}
-      <Text style={[typography.montserratSemiBold, { fontSize: 16 }]}>Alergias</Text>
+      <Text style={[typography.ProfileInfoTitle]}>Alergias</Text>
       {renderPills(alergias)}
 
       {/* Medicamentos */}
-      <Text style={[typography.montserratSemiBold, { fontSize: 16, marginTop: 16 }]}>
+      <Text style={[typography.ProfileInfoTitle]}>
         Medicamentos
       </Text>
       {renderPills(medicamentos)}
 
       {/* Condições */}
-      <Text style={[typography.montserratSemiBold, { fontSize: 16, marginTop: 16 }]}>
+      <Text style={[typography.ProfileInfoTitle]}>
         Condições
       </Text>
       {renderPills(condicoes)}
 
       {/* Idiomas Preferidos */}
-      <Text style={[typography.montserratSemiBold, { fontSize: 16, marginTop: 16 }]}>
+      <Text style={[typography.ProfileInfoTitle]}>
         Idiomas Preferidos
       </Text>
       {renderPills(idiomasPreferidos)}
 
       {/* Observações */}
-      <Text style={[typography.montserratSemiBold, { fontSize: 16, marginTop: 16 }]}>
+      <Text style={[typography.ProfileInfoTitle]}>
         Observações
       </Text>
-      <Text style={{ color: colors.gray23, marginTop: 8, marginBottom: 16 }}>
+      <Text style={[typography.ProfileInfoText]}>
         {observacoes || "Nenhuma observação informada"}
       </Text>
     </View>

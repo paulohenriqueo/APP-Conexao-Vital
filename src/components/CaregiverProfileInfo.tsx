@@ -1,8 +1,10 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { colors, typography } from "../../styles/styles";
+import { colors } from "../../styles/styles";
+import { profileTypography as typography } from "../../styles/typography";
 
 type CaregiverProfileInfoProps = {
+  //atualizar de acordo com banco de dados
   caregiverData: {
     experiencia?: string[];
     qualificacoes?: string[];
@@ -47,32 +49,32 @@ export function CaregiverProfileInfo({ caregiverData }: CaregiverProfileInfoProp
   return (
     <View style={{ padding: 4, marginTop: 0 }}>
       {/* Experiência */}
-      <Text style={[typography.montserratSemiBold, { fontSize: 16 }]}>Experiência</Text>
+      <Text style={[typography.ProfileInfoTitle, {marginTop: 0}]}>Experiência</Text>
       {renderPills(experiencia)}
 
       {/* Disponibilidade */}
-      <Text style={[typography.montserratSemiBold, { fontSize: 16, marginTop: 16 }]}>
+      <Text style={[typography.ProfileInfoTitle]}>
         Disponibilidade de dias
       </Text>
       {renderPills(dispoDia)}
 
       {/* Período */}
-      <Text style={[typography.montserratSemiBold, { fontSize: 16, marginTop: 16 }]}>
+      <Text style={[typography.ProfileInfoTitle]}>
         Período de atendimento
       </Text>
       {renderPills(periodo)}
 
       {/* Público atendido */}
-      <Text style={[typography.montserratSemiBold, { fontSize: 16, marginTop: 16 }]}>
+      <Text style={[typography.ProfileInfoTitle]}>
         Público atendido
       </Text>
       {renderPills(publicoAtendido)}
 
       {/* Observações */}
-      <Text style={[typography.montserratSemiBold, { fontSize: 16, marginTop: 16 }]}>
+      <Text style={[typography.ProfileInfoTitle]}>
         Observações
       </Text>
-      <Text style={{ color: colors.gray23, marginTop: 8, marginBottom: 16 }}>
+      <Text style={[typography.ProfileInfoText]}>
         {observacoes || "Nenhuma observação informada"}
       </Text>
     </View>
