@@ -223,12 +223,12 @@ export default function Profile() {
           ? (
             <CaregiverProfileInfo
               caregiverData={(user as any)?.caregiverSpecifications ?? {
-                experiencia: ["Item"],
-                qualificacoes: ["Item"],
+                experiencia: [],
+                qualificacoes: [user.qualifications || []].flat(),
                 dispoDia: [],
-                periodo: ["Item"],
-                publicoAtendido: ["Item"],
-                observacoes: "Teste",
+                periodo: [],
+                publicoAtendido: [],
+                observacoes: "",
               }}
             />
             // <PatientProfileInfo patientData={

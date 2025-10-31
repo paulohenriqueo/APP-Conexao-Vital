@@ -4,7 +4,6 @@ import { colors } from "../../styles/styles";
 import { profileTypography as typography } from "../../styles/typography";
 
 type CaregiverProfileInfoProps = {
-  //atualizar de acordo com banco de dados
   caregiverData: {
     experiencia?: string[];
     qualificacoes?: string[];
@@ -16,8 +15,10 @@ type CaregiverProfileInfoProps = {
 };
 
 export function CaregiverProfileInfo({ caregiverData }: CaregiverProfileInfoProps) {
+  //atualizar de acordo com banco de dados
   const {
     experiencia = [],
+    qualificacoes = [],
     dispoDia = [],
     periodo = [],
     publicoAtendido = [],
@@ -51,6 +52,10 @@ export function CaregiverProfileInfo({ caregiverData }: CaregiverProfileInfoProp
       {/* Experiência */}
       <Text style={[typography.ProfileInfoTitle, {marginTop: 0}]}>Experiência</Text>
       {renderPills(experiencia)}
+
+      {/* Qualificações */}
+      <Text style={[typography.ProfileInfoTitle]}>Qualificações</Text>
+      {renderPills(qualificacoes)}
 
       {/* Disponibilidade */}
       <Text style={[typography.ProfileInfoTitle]}>
