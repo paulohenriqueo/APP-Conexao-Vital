@@ -13,6 +13,9 @@ import Qualifications from "../../../components/Qualifications";
 import { Avatar } from "../../../components/Avatar";
 import { styles } from "../../../../styles/styles";
 import { Ionicons } from "@expo/vector-icons";
+import { CaregiverProfileInfo } from "../../../components/CaregiverProfileInfo";
+import { PrimaryButton } from "../../../components/Button";
+import { PatientProfileInfo } from "../../../components/PatientProfileInfo";
 
 interface User {
   bio?: string;
@@ -136,7 +139,7 @@ export default function Profile() {
         >
           {userEmail}
         </Text>
-        <View style={{...styles.ratingContainer}}>
+        <View style={{ ...styles.ratingContainer }}>
           {Array.from({ length: 5 }).map((_, i) => (
             <Ionicons
               key={i}
@@ -156,7 +159,7 @@ export default function Profile() {
           width: "100%",
           marginBottom: 16,
         }}
-      >
+      >        
         <TouchableOpacity
           style={{
             flex: 1,
@@ -216,7 +219,7 @@ export default function Profile() {
           width: "100%",
           borderBottomWidth: 1,
           borderBottomColor: colors.grayE8,
-          marginBottom: 16,
+          marginBottom: 8,
         }}
       >
         <TouchableOpacity
@@ -239,7 +242,7 @@ export default function Profile() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={{
             flex: 1,
             alignItems: "center",
@@ -255,14 +258,60 @@ export default function Profile() {
               color: activeTab === "qualifications" ? colors.green382 : colors.gray75,
             }}
           >
-            Qualificações
+            {user.role === "caregiver" ? "Qualificações" : "Condições" }
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Conteúdo da aba */}
-      {activeTab === "info" && <ProfileInfo user={user} />}
-      {activeTab === "qualifications" && <Qualifications user={user} />}
+      {activeTab === "info" && (
+        user.role === "caregiver"
+          ? (
+            // <CaregiverProfileInfo
+            //   caregiverData={(user as any)?.caregiverSpecifications ?? {
+            //     experiencia: ["Item"],
+            //     qualificacoes: ["Item"],
+            //     dispoDia: ["Item"],
+            //     periodo: ["Item"],
+            //     publicoAtendido: ["Item"],
+            //     observacoes: "Teste",
+            //   }}
+            // />
+            <PatientProfileInfo patientData={
+              (user as any)?.patientSpecifications ?? {
+                alergias: ["Pólen", "Amendoim"],
+                medicamentos: ["Paracetamol", "Ibuprofeno"],
+                condicoes: ["Diabetes", "Hipertensão"],
+                idiomasPreferidos: ["Português", "Inglês"],
+                observacoes: "Paciente em tratamento contínuo.",
+              }
+            }
+            />
+          )
+          : (
+            // <PatientProfileInfo patientData={
+            //   (user as any)?.patientSpecifications ?? {
+            //     alergias: ["Pólen", "Amendoim"],
+            //     medicamentos: ["Paracetamol", "Ibuprofeno"],
+            //     condicoes: ["Diabetes", "Hipertensão"],
+            //     idiomasPreferidos: ["Português", "Inglês"],
+            //     observacoes: "Paciente em tratamento contínuo.",
+            //   }
+            // }
+            //  />
+            <CaregiverProfileInfo
+              caregiverData={(user as any)?.caregiverSpecifications ?? {
+                experiencia: ["Item"],
+                qualificacoes: ["Item"],
+                dispoDia: ["Item"],
+                periodo: ["Item"],
+                publicoAtendido: ["Item"],
+                observacoes: "Teste",
+              }}
+            />
+          )
+      )}
+      {/* {activeTab === "qualifications" && <Qualifications user={user} />} */}
 
       {/* Seções */}
       {sections.map(section => {

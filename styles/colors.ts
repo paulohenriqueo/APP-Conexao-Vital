@@ -9,6 +9,7 @@ export const colors = {
     gray7FD: "#F7F7FD",
     green85F: "#00785F",
     green382: "#00A382",
+    greenOpacity: "#00A3822C",
     darkGreen116: "#002116",
     whiteFBFE: "#FBFBFE",
     blackShadow: "#0000007D",

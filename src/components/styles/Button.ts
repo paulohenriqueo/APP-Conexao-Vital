@@ -7,6 +7,7 @@ export const styles = StyleSheet.create({
         width: 24,
         height: 24,
         resizeMode: "contain",
+        marginRight: 8,
     },
     button: {
         backgroundColor: colors.green382,

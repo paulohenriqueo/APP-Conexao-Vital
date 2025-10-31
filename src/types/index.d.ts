@@ -31,3 +31,5 @@ declare module "phosphor-react-native" {
 
   export const PhosphorIcon: React.FC<IconProps>;
 }
+declare module "firebase/auth";
+declare module "firebase/firestore";

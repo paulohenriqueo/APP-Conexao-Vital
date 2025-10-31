@@ -6,13 +6,15 @@ import Google from '../assets/google_logo.png'
 type ButtonProps = {
     title: string;
     onPress: () => void;
+    icon?: React.ReactNode;
 };
-
-export function PrimaryButton({ title, onPress }: ButtonProps) {
-
+export function PrimaryButton({ title, onPress, icon }: ButtonProps) {
     return (
         <TouchableOpacity style={styles.button} onPress={onPress} activeOpacity={0.7}>
-            <Text style={styles.buttonText}>{title}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
+                <Text style={styles.buttonText}>{title}</Text>
+            </View>
         </TouchableOpacity>
     );
 }
