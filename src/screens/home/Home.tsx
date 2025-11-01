@@ -206,7 +206,7 @@ export default function Home() {
       <TopBar title="" />
       {/* botão temporário para debug (remova depois) */}
       <TouchableOpacity onPress={clearOnboardingFlag} style={{ alignSelf: "flex-end", padding: 8, margin: 8 }}>
-        <Text style={{ color: "#fff" }}>Reset Onboarding</Text>
+        <Text style={{ color: "#ccc" }}>Reset Onboarding</Text>
       </TouchableOpacity>
 
       <View style={styles.contentArea}>{renderContent()}</View>
