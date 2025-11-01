@@ -68,9 +68,9 @@ export const typography: Record<string, TextStyle> = {
         lineHeight: 12,
         color: colors.gray47,
     },
-    M01R1014U: {
+    M01R1214U: {
         ...baseTypography.montserratRegular,
-        fontSize: 10,
+        fontSize: 12,
         lineHeight: 14,
         color: colors.darkGreen116,
         textDecorationLine: "underline",
@@ -119,6 +119,11 @@ export const typography: Record<string, TextStyle> = {
         fontSize: 16,
         lineHeight: 24,
         marginTop: 16,
+    },
+    M01SB2024: {
+        ...baseTypography.montserratSemiBold,
+        fontSize: 20,
+        lineHeight: 24,
     },
 
     // ===== Medium =====

@@ -6,21 +6,22 @@ import { profileTypography as typography } from "../../styles/typography";
 type PatientProfileInfoProps = {
   //atualizar de acordo com banco de dados
   patientData: {
-    alergias?: string[];
-    medicamentos?: string[];
-    condicoes?: string[];
-    idiomasPreferidos?: string[];
-    observacoes?: string;
+    careType?: string; //exibir para melhor identificação do tipo de paciente no histórico
+    allergies?: string[];
+    medications?: string[];
+    conditions?: string[];
+    preferredLanguages?: string[];
+    observations?: string;
   };
 };
 
 export function PatientProfileInfo({ patientData }: PatientProfileInfoProps) {
   const {
-    alergias = [],
-    medicamentos = [],
-    condicoes = [],
-    idiomasPreferidos = [],
-    observacoes = "",
+    allergies = [],
+    medications = [],
+    conditions = [],
+    preferredLanguages = [],
+    observations = "",
   } = patientData || {};
 
   const renderPills = (items: string[]) => (
@@ -49,32 +50,32 @@ export function PatientProfileInfo({ patientData }: PatientProfileInfoProps) {
     <View style={{ padding: 4, marginTop: 0 }}>
       {/* Alergias */}
       <Text style={[typography.ProfileInfoTitle]}>Alergias</Text>
-      {renderPills(alergias)}
+      {renderPills(allergies)}
 
       {/* Medicamentos */}
       <Text style={[typography.ProfileInfoTitle]}>
         Medicamentos
       </Text>
-      {renderPills(medicamentos)}
+      {renderPills(medications)}
 
       {/* Condições */}
       <Text style={[typography.ProfileInfoTitle]}>
         Condições
       </Text>
-      {renderPills(condicoes)}
+      {renderPills(conditions)}
 
       {/* Idiomas Preferidos */}
       <Text style={[typography.ProfileInfoTitle]}>
         Idiomas Preferidos
       </Text>
-      {renderPills(idiomasPreferidos)}
+      {renderPills(preferredLanguages)}
 
       {/* Observações */}
       <Text style={[typography.ProfileInfoTitle]}>
         Observações
       </Text>
       <Text style={[typography.ProfileInfoText]}>
-        {observacoes || "Nenhuma observação informada"}
+        {observations ? observations : <Text style={{ color: colors.gray73 }}>Nenhuma observação informada</Text>}
       </Text>
     </View>
   );

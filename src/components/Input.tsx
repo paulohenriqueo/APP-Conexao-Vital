@@ -70,7 +70,7 @@ export function InputPassword({
         <TouchableOpacity onPress={handleForgotPassword}>
           <Text
             style={{
-              ...typography.M01R1014U,
+              ...typography.M01R1214U,
               width: "100%",
               paddingHorizontal: 4,
               color: colors.green85F,

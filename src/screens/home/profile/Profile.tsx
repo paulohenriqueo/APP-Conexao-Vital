@@ -14,12 +14,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { CaregiverProfileInfo } from "../../../components/CaregiverProfileInfo";
 import { PrimaryButton } from "../../../components/Button";
 import { PatientProfileInfo } from "../../../components/PatientProfileInfo";
+import { Trash } from "phosphor-react-native";
 
 interface User {
+  //Dados necessários para exibir perfil de outros usuários
+  userContact?: number;
+  especification?: string;
   bio?: string;
   role?: "caregiver" | "client";
   qualifications?: string[];
   rating?: number;
+  imageUrl?: string;
 }
 
 interface SectionItem {
@@ -39,10 +44,38 @@ export default function Profile() {
   // Dados provisórios do usuário
   const user: User = {
     bio: "Cuidador experiente com foco em idosos.",
-    role: "caregiver", // agora é do tipo correto
-    qualifications: ["Primeiros Socorros", "Cuidador de Idosos"],
-    rating: 4.5,
+    role: "caregiver",
+    rating: 5, //Avaliação a ser exibida - já incluío na exibição de estrelas
+    imageUrl: "https://this-person-does-not-exist.com/img/avatar-gene3d99a090940ff2f92c3cd980b5e61d3.jpg", // Exemplo de URL de imagem
   };
+
+  // Definir o componente de informações do perfil com base na função do usuário
+  const ProfileInfoComponent = user.role === "caregiver" ? PatientProfileInfo : CaregiverProfileInfo;
+
+  const profileProps =
+    user.role === "caregiver"
+      // user.role === "patient" //teste de exibição de dados de paciente
+      ? {
+        caregiverData: (user as any)?.caregiverSpecifications ?? {
+          especialization: "Cuidador de Idosos",
+          experiencia: [],
+          qualificacoes: [],
+          dispoDia: [],
+          periodo: [],
+          publicoAtendido: [],
+          observacoes: "",
+        },
+      }
+      : {
+        patientData: (user as any)?.patientSpecifications ?? {
+          careType: "Cuidados Domiciliares",
+          allergies: ["Pólen", "Amendoim"],
+          medications: ["Paracetamol", "Ibuprofeno"],
+          conditions: ["Diabetes", "Hipertensão"],
+          preferredLanguages: ["Português", "Inglês"],
+          observations: "Paciente em tratamento contínuo.",
+        },
+      };
 
   // Buscar email e nome do usuário
   useEffect(() => {
@@ -77,6 +110,23 @@ export default function Profile() {
       alert("Ocorreu um erro ao deslogar. Tente novamente.");
     }
   };
+
+  // Delete Account
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Excluir conta",
+      "Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Excluir", style: "destructive", onPress: () => performDeleteAccount() },
+      ]
+    );
+  };
+
+  function performDeleteAccount(): void {
+    throw new Error("Function not implemented.");
+  }
+
   // Cria um array único com todas as seções e itens
   const items: SectionItem[] = [
     { section: "Históricos", title: "Avaliações realizadas", onPress: () => console.log("Completed Reviews") },
@@ -87,7 +137,8 @@ export default function Profile() {
     // Alternativa quando userRole estiver implementado
     // userRole === "caregiver" &&
     { section: "Ajuda e Suporte", title: "Solicitar especializações", onPress: () => navigation.navigate("Specializations") },
-    { section: "Ajuda e Suporte", title: "Sair", onPress: handleLogout, icon: <SignOut size={22} color={colors.gray75} weight="bold" />, },
+    { section: "Conta", title: "Sair", onPress: handleLogout, icon: <SignOut size={22} color={colors.gray75} weight="bold" />, },
+    { section: "Conta", title: "Deletar", onPress: handleDeleteAccount, icon: <Trash size={22} color={colors.orange360} weight="bold" />, }, //Criar função deletar conta
 
   ].filter(Boolean); // remove itens falsos
 
@@ -117,7 +168,11 @@ export default function Profile() {
           gap: 4,
         }}
       >
-        <Avatar size={84} name={userName} />
+        <Avatar
+          size={84}
+          name={userName}
+          imageUrl={user.imageUrl} // exibe a foto, se houver
+        />
         <Text
           style={{
             ...typography.H01B2024,
@@ -138,8 +193,18 @@ export default function Profile() {
         >
           {userEmail}
         </Text>
+        <Text
+          style={{
+            ...typography.H01SB1618,
+            color: colors.gray75,
+            textAlign: "center",
+            fontWeight: "600",
+          }}>
+          {user.role === "caregiver" ? (profileProps.caregiverData?.especialization) : (profileProps.patientData?.careType)}
+          {/* {user.role === "caregiver" ? (profileProps.patientData?.careType) : (profileProps.caregiverData?.especialization)}*/} {/*teste de exibição de dados de paciente */}
+        </Text>
         <View style={{ ...styles.ratingContainer }}>
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: Number(user.rating) }).map((_, i) => (
             <Ionicons
               key={i}
               name={i < (user.rating || 0) ? "star" : "star-outline"}
@@ -158,8 +223,8 @@ export default function Profile() {
           width: "100%",
           marginBottom: 16,
         }}
-      >   
-      <PrimaryButton
+      >
+        <PrimaryButton
           title="Editar perfil"
           onPress={() => console.log('Editar pressionado')}
           icon={<Feather name="edit-2" size={20} color={colors.whiteFBFE} />}
@@ -219,51 +284,16 @@ export default function Profile() {
 
       {/* Conteúdo da aba */}
       {activeTab === "info" && (
-        user.role === "caregiver" //atualizar de acordo com o banco de dados
-          ? (
-            <CaregiverProfileInfo
-              caregiverData={(user as any)?.caregiverSpecifications ?? {
-                experiencia: [],
-                qualificacoes: [user.qualifications || []].flat(),
-                dispoDia: [],
-                periodo: [],
-                publicoAtendido: [],
-                observacoes: "",
-              }}
-            />
-            // <PatientProfileInfo patientData={
-            //   (user as any)?.patientSpecifications ?? {
-            //     alergias: ["Pólen", "Amendoim"],
-            //     medicamentos: ["Paracetamol", "Ibuprofeno"],
-            //     condicoes: ["Diabetes", "Hipertensão"],
-            //     idiomasPreferidos: ["Português", "Inglês"],
-            //     observacoes: "Paciente em tratamento contínuo.",
-            //   }
-            // }
-            // />
-          )
-          : (
-            <PatientProfileInfo patientData={
-              (user as any)?.patientSpecifications ?? {
-                alergias: ["Pólen", "Amendoim"],
-                medicamentos: ["Paracetamol", "Ibuprofeno"],
-                condicoes: ["Diabetes", "Hipertensão"],
-                idiomasPreferidos: ["Português", "Inglês"],
-                observacoes: "Paciente em tratamento contínuo.",
-              }
-            }
-             />
-            // <CaregiverProfileInfo
-            //   caregiverData={(user as any)?.caregiverSpecifications ?? {
-            //     experiencia: ["Item"],
-            //     qualificacoes: ["Item"],
-            //     dispoDia: ["Item"],
-            //     periodo: ["Item"],
-            //     publicoAtendido: ["Item"],
-            //     observacoes: "Teste",
-            //   }}
-            // />
-          )
+        ProfileInfoComponent ? (
+          // renderiza apenas se o componente não for undefined
+          <ProfileInfoComponent {...(profileProps as any)} />
+        ) : (
+          // fallback e log para debugar
+          <View>
+            <Text style={{ color: colors.gray75 }}>Profile component not available</Text>
+            console.warn("Profile component is undefined for role:", user.role);
+          </View>
+        )
       )}
       {/* {activeTab === "qualifications" && <Qualifications user={user} />} */}
 

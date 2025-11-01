@@ -8,6 +8,8 @@ type HistoryData = {
   name: string;
   rating: number;
   date: string;
+  especialization: string;
+  imageUrl?: string;
 };
 
 type SearchData = {
@@ -15,6 +17,8 @@ type SearchData = {
   name: string;
   rating: number;
   tags: string[];
+  especialization: string;
+  imageUrl?: string;
 };
 
 type CustomListProps = {
@@ -34,6 +38,8 @@ export function CustomList({ type, data, onItemPress }: CustomListProps) {
             name={(item as HistoryData).name}
             rating={(item as HistoryData).rating}
             date={(item as HistoryData).date}
+            especialization={(item as HistoryData).especialization}
+            imageUrl={(item as HistoryData).imageUrl || ""}
             onPress={() => onItemPress(item.id)}
           />
         ) : (
@@ -41,6 +47,8 @@ export function CustomList({ type, data, onItemPress }: CustomListProps) {
             name={(item as SearchData).name}
             rating={(item as SearchData).rating}
             tags={(item as SearchData).tags}
+            especialization={(item as SearchData).especialization}
+            imageUrl={(item as SearchData).imageUrl || ""}
             onPress={() => onItemPress(item.id)}
           />
         )

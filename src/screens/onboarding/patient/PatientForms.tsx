@@ -5,6 +5,7 @@ import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { Picker } from "@react-native-picker/picker";
 import { savePatientForm } from "../../../services/patientService";
+import { Camera, CaretLeft } from "phosphor-react-native";
 
 export default function PatientForms({ navigation }: any) {
   const [cpf, setCpf] = useState("");
@@ -83,51 +84,51 @@ export default function PatientForms({ navigation }: any) {
     cleaned = cleaned.slice(0, 11);
     // Aplica a máscara
     if (cleaned.length <= 3) {
-        return cleaned;
+      return cleaned;
     } else if (cleaned.length <= 6) {
-        return `${cleaned.slice(0, 3)}.${cleaned.slice(3)}`;
+      return `${cleaned.slice(0, 3)}.${cleaned.slice(3)}`;
     } else if (cleaned.length <= 9) {
-        return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6)}`;
+      return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6)}`;
     } else {
-        return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
+      return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
     }
 
   }
 
   function maskCep(value: string) {
-      let cleaned = value.replace(/\D/g, "");
-      cleaned = cleaned.slice(0, 8);
-      if (cleaned.length <= 5) {
-        return cleaned;
-      } else {
-        return `${cleaned.slice(0, 5)}-${cleaned.slice(5)}`;
-      }
+    let cleaned = value.replace(/\D/g, "");
+    cleaned = cleaned.slice(0, 8);
+    if (cleaned.length <= 5) {
+      return cleaned;
+    } else {
+      return `${cleaned.slice(0, 5)}-${cleaned.slice(5)}`;
     }
-  
-    const fetchAddress = async (cep: string) => {
-      const cleanCep = cep.replace(/\D/g, '');
-      if (cleanCep.length !== 8) {
+  }
+
+  const fetchAddress = async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length !== 8) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const data = await response.json();
+
+      if (data.erro) {
+        Alert.alert('Erro', 'CEP não encontrado.');
         return;
       }
-  
-      try {
-        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
-        const data = await response.json();
-  
-        if (data.erro) {
-          Alert.alert('Erro', 'CEP não encontrado.');
-          return;
-        }
-  
-        setStreet(data.logradouro);
-        setNeighborhood(data.bairro);
-        setCity(data.localidade);
-        setState(data.uf);
-      } catch (error) {
-        Alert.alert('Erro', 'Erro ao buscar CEP.');
-        console.error(error);
-      }
-    };
+
+      setStreet(data.logradouro);
+      setNeighborhood(data.bairro);
+      setCity(data.localidade);
+      setState(data.uf);
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao buscar CEP.');
+      console.error(error);
+    }
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.green382 }}>
@@ -136,24 +137,18 @@ export default function PatientForms({ navigation }: any) {
           flexGrow: 1,
           justifyContent: "flex-start",
           alignItems: "center",
-          paddingTop: 80, // aumenta o espaço do topo
+          paddingTop: 40, // aumenta o espaço do topo
           paddingBottom: 40,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Text
-          style={[
-            typography.montserratBold,
-            {
-              color: colors.whiteFBFE,
-              fontSize: 22,
-              marginBottom: 24,
-              alignSelf: "center",
-            },
-          ]}
-        >
-          Complete seu cadastro
-        </Text>
+        <View style={[styles.header, { paddingTop: 20, marginVertical: 8}]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 8}}>
+            <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" accessibilityLabel="Voltar" />
+          </TouchableOpacity>
+          <Text style={[typography.M01SB2024, { color: colors.whiteFBFE }]}>Complete seu cadastro
+          </Text>
+        </View>
         {/* Template da foto */}
         <View
           style={{
@@ -182,11 +177,7 @@ export default function PatientForms({ navigation }: any) {
             onPress={handleSelectPhoto}
             activeOpacity={0.7}
           >
-            {/* <Image
-              source={require("../../../assets/camera.png")} // Substitua pelo seu ícone de câmera
-              style={{ width: 56, height: 56, tintColor: colors.gray73, marginBottom: 8 }}
-              resizeMode="contain"
-            /> */}
+            <Camera size={40} color={colors.gray73} weight="light" />
             <Text style={{ color: colors.gray73, fontSize: 15, textAlign: "center" }}>
               Selecione uma{"\n"}foto
             </Text>
@@ -215,12 +206,12 @@ export default function PatientForms({ navigation }: any) {
         >
 
           {/* Campo CPF */}
-          <Input 
-          placeholder="CPF" 
-          value={cpf} 
-          onChangeText={text => setCpf(maskCpf(text))}
-          keyboardType="numeric"
-          maxLength={14}
+          <Input
+            placeholder="CPF"
+            value={cpf}
+            onChangeText={text => setCpf(maskCpf(text))}
+            keyboardType="numeric"
+            maxLength={14}
           />
 
           {/* Campo Data de Nascimento com calendário */}
@@ -253,7 +244,7 @@ export default function PatientForms({ navigation }: any) {
             style={{
               backgroundColor: colors.gray7FD,
               borderRadius: 8,
-              marginBottom: 12,
+              // marginBottom: 12,
               borderWidth: 0,
               overflow: "hidden",
             }}
@@ -275,20 +266,20 @@ export default function PatientForms({ navigation }: any) {
               <Picker.Item label="Prefiro não informar" value="Prefiro não informar" />
             </Picker>
           </View>
-          <Input 
-            placeholder="CEP" 
-            value={cep} 
+          <Input
+            placeholder="CEP"
+            value={cep}
             onChangeText={text => setCep(maskCep(text))}
             onBlur={() => fetchAddress(cep)}
             keyboardType="numeric"
-            maxLength={9} 
+            maxLength={9}
           />
-          <Input placeholder="Rua" value={street} onChangeText={setStreet}/>
-          <Input placeholder="Bairro" value={neighborhood} onChangeText={setNeighborhood}/>
-          <Input placeholder="Cidade" value={city} onChangeText={setCity}/>
-          <Input placeholder="Estado" value={state} onChangeText={setState}/>
+          <Input placeholder="Rua" value={street} onChangeText={setStreet} />
+          <Input placeholder="Bairro" value={neighborhood} onChangeText={setNeighborhood} />
+          <Input placeholder="Cidade" value={city} onChangeText={setCity} />
+          <Input placeholder="Estado" value={state} onChangeText={setState} />
 
-          
+
 
           <TouchableOpacity
             style={{

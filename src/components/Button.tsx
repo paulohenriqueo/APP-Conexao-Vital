@@ -32,7 +32,7 @@ export function SecondaryButton({ title, onPress, icon }: ButtonProps) {
 
 export function OutlinedButton({ title, onPress, icon }: ButtonProps) {
     return (
-        <TouchableOpacity style={styles.buttonOutilined} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity style={[styles.button, styles.buttonOutilined]} onPress={onPress} activeOpacity={0.7}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
                 {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
                 <Text style={styles.buttonOutilinedText}>{title}</Text>

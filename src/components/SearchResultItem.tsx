@@ -10,24 +10,19 @@ type SearchResultItemProps = {
   name: string;
   rating: number;
   tags: string[];
-  principalRole: string;
+  especialization: string;
+  imageUrl?: string;
   onPress: () => void;
 };
 
-export function SearchResultItem({ name, principalRole, rating, tags, onPress }: SearchResultItemProps) {
+export function SearchResultItem({ name, especialization, rating, tags, imageUrl, onPress }: SearchResultItemProps) {
   return (
     <View style={resultStyles.container}>
-      <Avatar name={name} />
-
+      <Avatar name={name} imageUrl={imageUrl}/>
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={resultStyles.name}>{name}
-          <Text style={{ ...styles.principalRole }}>  Especialização {principalRole}</Text>
+          <Text style={resultStyles.especialization}>  {especialization}</Text>
         </Text>
-        {/*
-          <Text style={resultStyles.name}>{name}
-          </Text>
-          <Text style={{ ...styles.principalRole }}>Especialização {principalRole}</Text>
-        */}
         <View style={{ ...styles.ratingContainer }}>
           {Array.from({ length: 5 }).map((_, i) => (
             <Ionicons

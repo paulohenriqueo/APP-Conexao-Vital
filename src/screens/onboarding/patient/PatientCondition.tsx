@@ -13,6 +13,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { savePatientCondition } from "../../../services/patientService";
+import { CaretLeft } from "phosphor-react-native";
 
 export default function PatientCondition({ navigation }: any) {
   const [periodo, setPeriodo] = useState("");
@@ -101,40 +102,27 @@ export default function PatientCondition({ navigation }: any) {
       <View
         style={{
           width: "100%",
-          paddingTop: 40,
-          paddingHorizontal: 16,
-          paddingBottom: 12,
+          paddingTop: Platform.OS === "android" ? 24 : 40,
           flexDirection: "row",
           alignItems: "center",
-          marginBottom: 8,
         }}
       >
-        <TouchableOpacity
-          onPress={() => navigation.navigate("PatientForms")}
-          style={{ padding: 8 }}
-          accessibilityLabel="Voltar para formulário do paciente"
-        >
-          <Text style={{ fontSize: 26, color: colors.whiteFBFE }}>‹</Text>
-        </TouchableOpacity>
-
-        <Text
-          style={[
-            typography.montserratBold,
-            { color: colors.whiteFBFE, fontSize: 20, marginLeft: 8 },
-          ]}
-        >
-          Informações de cuidado
-        </Text>
+        <View style={[styles.header, { paddingTop: 20, marginVertical: 8 }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 8 }}>
+            <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" accessibilityLabel="Voltar para o formulário" />
+          </TouchableOpacity>
+          <Text style={{ ...typography.M01SB2024, color: colors.whiteFBFE }}>Informações de cuidado
+          </Text>
+        </View>
       </View>
-
       <ScrollView
-      style={{ flex: 1 }}
+        style={{ flex: 1 }}
         contentContainerStyle={{
           // flexGrow: 1,
           justifyContent: "flex-start",
           alignItems: "center",
           paddingTop: 8,
-          
+
         }}
         showsVerticalScrollIndicator={false}
       >
@@ -143,11 +131,11 @@ export default function PatientCondition({ navigation }: any) {
             styles.containerBox,
             {
               width: "90%",
-                maxWidth: 430,
-                paddingBottom: 24,
-                borderRadius: 24,
-                overflow: "hidden", // garante recorte dos cantos arredondados
-                marginTop: 0,
+              maxWidth: 430,
+              paddingBottom: 24,
+              borderRadius: 24,
+              overflow: "hidden", // garante recorte dos cantos arredondados
+              marginTop: 0,
               backgroundColor: "#fff",
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
@@ -261,7 +249,7 @@ export default function PatientCondition({ navigation }: any) {
           {/* Medicamentos */}
           <Text style={{ color: colors.gray73, marginBottom: 10 }}>Medicamentos</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
-            <Input placeholder="Adicionar medicamento" value={medInput} onChangeText={setMedInput} style={{ flex: 1}} />
+            <Input placeholder="Adicionar medicamento" value={medInput} onChangeText={setMedInput} style={{ flex: 1 }} />
             <TouchableOpacity onPress={() => addToList(medInput, setMedicamentos, medicamentos, setMedInput)} style={{ marginLeft: 8, alignSelf: "center", paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
               <Text style={{ color: "#fff" }}>Adicionar</Text>
             </TouchableOpacity>
@@ -394,6 +382,6 @@ export default function PatientCondition({ navigation }: any) {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </View >
   );
 }

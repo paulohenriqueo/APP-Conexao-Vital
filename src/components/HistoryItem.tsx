@@ -3,30 +3,26 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles as historyStyles } from "./styles/HistoryItem";
 import { colors } from "../../styles/colors";
-import { styles } from "../../styles/styles";
+import { styles, typography } from "../../styles/styles";
 import { Avatar } from "./Avatar";
 
 type HistoryItemProps = {
     name: string;
     rating: number;
     date: string;
-    principalRole: string;
+    especialization: string;
+    imageUrl?: string;
     onPress: () => void;
 };
 
-export function HistoryItem({ name, principalRole, rating, date, onPress }: HistoryItemProps) {
+export function HistoryItem({ name, especialization, rating, date, imageUrl, onPress }: HistoryItemProps) {
     return (
         <View style={historyStyles.container}>
-            <Avatar name={name} />
+            <Avatar name={name} imageUrl={imageUrl}/>
             <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={historyStyles.name}>{name}
-                    <Text style={{ ...styles.principalRole }}>  Especialização {principalRole}</Text>
+                    <Text style={historyStyles.especialization}>  {especialization}</Text>
                 </Text>
-                {/*
-                    <Text style={historyStyles.name}>{name}
-                    </Text>
-                    <Text style={{ ...styles.principalRole }}>Especialização {principalRole}</Text>
-                */}
                 <View style={{ ...styles.ratingContainer }}>
                     {Array.from({ length: 5 }).map((_, i) => (
                         <Ionicons

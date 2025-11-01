@@ -26,30 +26,24 @@ export const styles = StyleSheet.create({
         backgroundColor: colors.grayEF1,
     },
     buttonText: {
-        ...typography.M01M1624,
+        ...typography.M01SB1624,
+        marginTop: 0,
         color: colors.whiteFBFE,
     },
     secondaryButtonText: {
-        ...typography.M01M1624,
+        ...typography.M01SB1624,
+        marginTop: 0,
         color: colors.gray23,
     },
     buttonOutilined: {
         backgroundColor: colors.whiteFBFE,
-        paddingVertical: 12,
-        borderRadius: 8,
         borderWidth: 2,
+        paddingVertical: 10, // Adiciona espaço interno
         borderColor: colors.green382,
-        alignItems: "center",
-        justifyContent: "center",
-        shadowColor: colors.blackShadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 3,
-        elevation: 4,
-        flexGrow: 1,
     },
     buttonOutilinedText: {
-        ...typography.M01M1624,
+        ...typography.M01SB1624,
+        marginTop: 0,
         color: colors.green382,
     },
     googleButton: {

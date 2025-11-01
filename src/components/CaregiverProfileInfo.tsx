@@ -5,24 +5,25 @@ import { profileTypography as typography } from "../../styles/typography";
 
 type CaregiverProfileInfoProps = {
   caregiverData: {
-    experiencia?: string[];
-    qualificacoes?: string[];
-    dispoDia?: string[];
-    periodo?: string[];
-    publicoAtendido?: string[];
-    observacoes?: string;
+    especialization?: string; //exibir para melhor identificação da especialização do cuidador no histórico
+    experience?: string[];
+    qualifications?: string[];
+    availableDays?: string[];
+    period?: string[];
+    targetAudience?: string[];
+    observations?: string;
   };
 };
 
 export function CaregiverProfileInfo({ caregiverData }: CaregiverProfileInfoProps) {
   //atualizar de acordo com banco de dados
   const {
-    experiencia = [],
-    qualificacoes = [],
-    dispoDia = [],
-    periodo = [],
-    publicoAtendido = [],
-    observacoes = "",
+    experience  = [],
+    qualifications = [],
+    availableDays = [],
+    period = [],
+    targetAudience = [],
+    observations = "",
   } = caregiverData || {};
 
   const renderPills = (items: string[]) => (
@@ -51,36 +52,36 @@ export function CaregiverProfileInfo({ caregiverData }: CaregiverProfileInfoProp
     <View style={{ padding: 4, marginTop: 0 }}>
       {/* Experiência */}
       <Text style={[typography.ProfileInfoTitle, {marginTop: 0}]}>Experiência</Text>
-      {renderPills(experiencia)}
+      {renderPills(experience)}
 
       {/* Qualificações */}
       <Text style={[typography.ProfileInfoTitle]}>Qualificações</Text>
-      {renderPills(qualificacoes)}
+      {renderPills(qualifications)}
 
       {/* Disponibilidade */}
       <Text style={[typography.ProfileInfoTitle]}>
         Disponibilidade de dias
       </Text>
-      {renderPills(dispoDia)}
+      {renderPills(availableDays)}
 
       {/* Período */}
       <Text style={[typography.ProfileInfoTitle]}>
         Período de atendimento
       </Text>
-      {renderPills(periodo)}
+      {renderPills(period)}
 
       {/* Público atendido */}
       <Text style={[typography.ProfileInfoTitle]}>
         Público atendido
       </Text>
-      {renderPills(publicoAtendido)}
+      {renderPills(targetAudience)}
 
       {/* Observações */}
       <Text style={[typography.ProfileInfoTitle]}>
         Observações
       </Text>
       <Text style={[typography.ProfileInfoText]}>
-        {observacoes || "Nenhuma observação informada"}
+        {observations ? observations : <Text style={{ color: colors.gray73 }}>Nenhuma observação informada</Text>}
       </Text>
     </View>
   );
