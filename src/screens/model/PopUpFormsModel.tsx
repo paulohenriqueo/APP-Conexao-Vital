@@ -22,12 +22,12 @@ export default function PopUpFormsModel({
         <View style={styles.box}>
           <Text style={styles.title}>Complete seu cadastro</Text>
           <Text style={styles.message}>
-            Para continuar, informe se você é um paciente ou cuidador.
+            Para continuar, informe se você é um cliente ou profissional.
           </Text>
 
           <View style={styles.row}>
-            <PrimaryButton title="Paciente" onPress={onSelectPatient}></PrimaryButton>
-            <SecondaryButton title="Cuidador" onPress={onSelectCaregiver} ></SecondaryButton>
+            <PrimaryButton title="Cliente" onPress={onSelectPatient}></PrimaryButton>
+            <SecondaryButton title="Profissional" onPress={onSelectCaregiver} ></SecondaryButton>
             {/* 
             <TouchableOpacity style={[styles.button, styles.patient]} onPress={onSelectPatient}>
               <Text style={styles.buttonText}>Paciente</Text>

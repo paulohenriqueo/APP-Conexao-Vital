@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { baseTypography } from "../../styles/typography";
 
@@ -26,6 +26,10 @@ export function Avatar({
   imageUrl,
 }: AvatarProps) {
   const initials = getInitials(name);
+  const [isLoading, setIsLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  const showFallback = !imageUrl || isLoading || imageError;
 
   return (
     <View
@@ -40,7 +44,18 @@ export function Avatar({
         },
       ]}
     >
-      {imageUrl ? (
+      {showFallback && (
+        <Text
+          style={[
+            styles.text,
+            { color: textColor, fontSize: size * 0.45 },
+          ]}
+        >
+          {initials}
+        </Text>
+      )}
+
+      {imageUrl && !imageError && (
         <Image
           source={{ uri: imageUrl }}
           style={{
@@ -48,12 +63,15 @@ export function Avatar({
             height: size,
             borderRadius: size / 2,
             resizeMode: "cover",
+            position: "absolute", // sobrepõe o texto quando carregada
+          }}
+          onLoadStart={() => setIsLoading(true)}
+          onLoadEnd={() => setIsLoading(false)}
+          onError={() => {
+            setImageError(true);
+            setIsLoading(false);
           }}
         />
-      ) : (
-        <Text style={[styles.text, { color: textColor, fontSize: size * 0.45 }]}>
-          {initials}
-        </Text>
       )}
     </View>
   );

@@ -26,12 +26,12 @@ export default function NewPassword() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.boxTop}>
+      <View style={[styles.boxTop, {flex: 1}]}>
         <Image source={Logo} style={styles.logoLogin} />
         <Text style={typography.M0L3644}>Criar nova senha</Text>
       </View>
 
-      <View style={styles.containerBox}>
+      <View style={[styles.containerBox, {marginBottom: "70%"}]}>
         <InputPassword
           placeholder="Senha"
           value={password}

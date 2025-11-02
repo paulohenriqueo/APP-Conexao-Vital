@@ -6,6 +6,7 @@ import { styles, typography } from "../../../styles/styles";
 import Logo from "../../assets/logo.png";
 import { Input } from "../../components/Input";
 import { PrimaryButton } from "../../components/Button";
+import NewPassword from "./NewPassword";
 
 export default function PasswordRecover() {
   const navigation = useNavigation<any>();
@@ -17,18 +18,18 @@ export default function PasswordRecover() {
       Alert.alert("Preencha o e-mail.");
     } else {
       Alert.alert("Enviando link de redefinição para ", email);
-      navigation.navigate("NovaSenha"); // simulação
+      navigation.navigate(NewPassword); // simulação
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.boxTop}>
+      <View style={[styles.boxTop, {flex: 1}]}>
         <Image source={Logo} style={styles.logoLogin} />
         <Text style={typography.M0L3644}>Recuperação de senha</Text>
       </View>
 
-      <View style={styles.containerBox}>
+      <View style={[styles.containerBox, {marginBottom: "70%"}]}>
         <Input
           placeholder="E-mail"
           value={email}

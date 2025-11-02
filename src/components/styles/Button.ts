@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
     secondaryButtonText: {
         ...typography.M01SB1624,
         marginTop: 0,
-        color: colors.gray23,
+        color: colors.green6FF,
     },
     buttonOutilined: {
         backgroundColor: colors.whiteFBFE,

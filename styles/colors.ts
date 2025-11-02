@@ -8,6 +8,7 @@ export const colors = {
     grayE8: "#E8E8E8",
     gray7FD: "#F7F7FD",
     grayEF1: "#E6EEF1",
+    green6FF: "#005746FF",
     green85F: "#00785F",
     green382: "#00A382",
     greenOpacity: "#00A3822C",

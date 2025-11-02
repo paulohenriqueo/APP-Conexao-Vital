@@ -136,7 +136,6 @@ export default function Home() {
             <CustomList
               type="search"
               data={homeData}
-              onItemPress={(id) => console.log("Abrir perfil:", id)}
             />
           </View>
         );
@@ -157,7 +156,6 @@ export default function Home() {
             <CustomList
               type="search"
               data={searchData}
-              onItemPress={(id) => console.log("Abrir perfil:", id)}
             />
           </View>
         );
@@ -177,14 +175,13 @@ export default function Home() {
             <CustomList
               type="history"
               data={historyData}
-              onItemPress={(id) => console.log("Abrir perfil:", id)}
             />
           </View>
         );
 
       case "profile":
         return <Profile />;
-      // return <ExternalUser />; //teste de perfil externo - adicionar acesso pela lista de histórico e pesquisa
+        // return <ExternalUser />; //teste de perfil externo - adicionar acesso pela lista de histórico e pesquisa
       default:
         return <Text style={styles.contentText}>Início</Text>;
     }
@@ -205,9 +202,9 @@ export default function Home() {
     <View style={styles.container}>
       <TopBar title="" />
       {/* botão temporário para debug (remova depois) */}
-      <TouchableOpacity onPress={clearOnboardingFlag} style={{ alignSelf: "flex-end", padding: 8, margin: 8 }}>
+      {/* <TouchableOpacity onPress={clearOnboardingFlag} style={{ alignSelf: "flex-end", padding: 8, margin: 8 }}>
         <Text style={{ color: "#ccc" }}>Reset Onboarding</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <View style={styles.contentArea}>{renderContent()}</View>
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />

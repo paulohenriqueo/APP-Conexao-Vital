@@ -7,7 +7,7 @@ import { colors } from "../../../../styles/colors";
 import { typography } from "../../../../styles/typography";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import ProfileItem from "../../../components/ProfileItem";
-import { SignOut, WhatsappLogo } from "phosphor-react-native";
+import { CaretLeft, SignOut, WhatsappLogo } from "phosphor-react-native";
 import { Avatar } from "../../../components/Avatar";
 import { styles } from "../../../../styles/styles";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +15,7 @@ import { CaregiverProfileInfo } from "../../../components/CaregiverProfileInfo";
 import { OutlinedButton, PrimaryButton } from "../../../components/Button";
 import { PatientProfileInfo } from "../../../components/PatientProfileInfo";
 import { openWhatsApp } from "../../../../utils/openWhatsApp";
+import Home from "../Home";
 
 interface User {
     //Dados necessários para exibir perfil de outros usuários
@@ -130,6 +131,13 @@ export default function ExternalUser() {
                     gap: 4,
                 }}
             >
+                <TouchableOpacity 
+                onPress={() => navigation.navigate("Home")} //trocar para goBack quando estiver voltando corretamente para a tela anterior (home/pesquisa/histórico) 
+                style={{
+                    padding: 8, position: "absolute", top: 8, left: 8
+                }}>
+                    <CaretLeft size={24} color={colors.gray73} weight="bold" accessibilityLabel="Voltar" />
+                </TouchableOpacity>
                 <Avatar
                     size={84}
                     name={userName}
