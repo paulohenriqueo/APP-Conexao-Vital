@@ -32,7 +32,7 @@ export default function ExternalUser() {
     const [userName, setUserName] = useState("");
     const [userEmail, setUserEmail] = useState("");
     const [contactRequested, setContactRequested] = useState(false); // Estado para controlar se o contato foi solicitado
-    const [showStars, setShowStars] = useState(true); // Estado para controlar se entrou em contato
+    const [showStars, setShowStars] = useState(false); // Estado para controlar se entrou em contato
     const [rating, setRating] = useState(0);
     
     const navigation = useNavigation<NavigationProp<any>>();

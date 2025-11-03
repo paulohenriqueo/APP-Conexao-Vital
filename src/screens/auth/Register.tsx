@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Image, Alert, ScrollView } from "react-native";
+import { View, Text, Image, Alert, ScrollView, Modal, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { styles, typography } from "../../../styles/styles";
 import Logo from "../../assets/logo.png";
@@ -9,6 +9,9 @@ import { PrimaryButton, GoogleButton } from "../../components/Button";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../FirebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
+import TermsContent from "../legal/TermsContent";
+import PrivacyPolicyContent from "../legal/PrivacyPolicyContent";
+import TermsModal from "../legal/TermsModal";
 
 
 
@@ -19,53 +22,65 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
   const auth = FIREBASE_AUTH;
 
+  // Validação de email simples
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  // Validação de senha (mínimo 6 caracteres)
+  const isPasswordValid = password.length >= 6;
+
   // SignUp com Firebase Authentication
-      const signUp = async () => {
-          setLoading(true);
+  const signUp = async () => {
+    setLoading(true);
 
-          if (password !== confirmPassword) {
-            Alert.alert("Senhas distintas","As senhas não coincidem. Por favor, tente novamente.");
-            setLoading(false);
-            return;
-          }
+    if (password !== confirmPassword) {
+      Alert.alert("Senhas distintas", "As senhas não coincidem. Por favor, tente novamente.");
+      setLoading(false);
+      return;
+    }
 
-          try {
-              const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-              const user = userCredential.user;
+    if (!termsAccepted) {
+      setShowTermsModal(true);
+      setLoading(false);
+      return;
+    }
 
-              await setDoc(doc(FIRESTORE_DB, "Users", user.uid), {
-                name: nome,
-                email: email,
-                createdAt: new Date(),
-                
-              });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-              Alert.alert("Conta criada com sucesso!", "Bem-vindo(a)!");
-              navigation.navigate("Home");
+      await setDoc(doc(FIRESTORE_DB, "Users", user.uid), {
+        name: nome,
+        email: email,
+        createdAt: new Date(),
+      });
 
-          } catch (error: any) {
-            if(error.code === 'auth/invalid-email') {
-              Alert.alert("Email inválido", "Por favor, insira um email válido.");
-            }
-            if(password.length < 6) {
-              Alert.alert("Senha fraca", "A senha deve conter no mínimo 6 caracteres.");
-            }
-            if(error.code === 'auth/email-already-in-use'){
-              Alert.alert("Email já cadastrado", "Este email já está em uso. Tente outro.");
-            }
+      Alert.alert("Conta criada com sucesso!", "Bem-vindo(a)!");
+      navigation.navigate("Home");
 
-          } finally {
-              setLoading(false);
-          }
+    } catch (error: any) {
+      if (error.code === 'auth/invalid-email') {
+        Alert.alert("Email inválido", "Por favor, insira um email válido.");
+      }
+      if (password.length < 6) {
+        Alert.alert("Senha fraca", "A senha deve conter no mínimo 6 caracteres.");
+      }
+      if (error.code === 'auth/email-already-in-use') {
+        Alert.alert("Email já cadastrado", "Este email já está em uso. Tente outro.");
       }
 
-  const handleRegister = () => {
-    console.log("Cadastro pressionado");
-    Alert.alert("Cadastro concluído com sucesso!", "Bem-vindo(a)!");
-    navigation.navigate("Login"); // simulação
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleAcceptTerms = () => {
+    setTermsAccepted(true);
+    setShowTermsModal(false);
+    signUp(); // prossegue com o cadastro
   };
 
   const handleRegisterGoogle = () => {
@@ -73,11 +88,6 @@ export default function Register() {
     Alert.alert("Cadastro com Google concluído com sucesso!");
     navigation.navigate("Login"); // simulação
   }
-
-   // Validação de email simples
-  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  // Validação de senha (mínimo 6 caracteres)
-  const isPasswordValid = password.length >= 6;
 
   return (
     <View style={styles.container}>
@@ -103,11 +113,11 @@ export default function Register() {
             A senha deve ter no mínimo 6 caracteres.*
           </Text>
           <InputPassword placeholder="Repita a senha" value={confirmPassword} onChangeText={setConfirmPassword} showForgotPassword={false} />
-          <Text style={{ ...typography.M01R1014, color: colors.gray75 }}>
+          {/* <Text style={{ ...typography.M01R1014, color: colors.gray75 }}>
             Ao cadastrar, você aceita os{" "}
             <Text style={{ color: colors.green382 }} onPress={() => navigation.navigate("Terms")}>Termos de Uso</Text> e a{" "}
             <Text style={{ color: colors.green382 }} onPress={() => navigation.navigate("PrivacyPolicy")}>Política de Privacidade</Text>.
-          </Text>
+          </Text> */}
 
           <PrimaryButton title="Criar conta" onPress={signUp} />
 
@@ -120,7 +130,7 @@ export default function Register() {
         </View>
 
         <View style={{ ...styles.boxBottom, marginTop: 16 }}>
-          <Text style={{ ...typography.M01R1624}}>
+          <Text style={{ ...typography.M01R1624 }}>
             Já possui cadastro?{" "}
             <Text
               style={{ color: colors.green85F }}
@@ -131,6 +141,13 @@ export default function Register() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Modal de termos e política */}
+      <TermsModal
+        visible={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={handleAcceptTerms}
+      />
     </View>
   );
 }

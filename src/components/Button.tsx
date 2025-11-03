@@ -7,10 +7,11 @@ type ButtonProps = {
     title: string;
     onPress: () => void;
     icon?: React.ReactNode;
+    disabled?: boolean;
 };
-export function PrimaryButton({ title, onPress, icon }: ButtonProps) {
+export function PrimaryButton({ title, onPress, icon, disabled }: ButtonProps) {
     return (
-        <TouchableOpacity style={styles.button} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity style={[styles.button, disabled && { opacity: 0.5 }]} onPress={onPress} activeOpacity={0.7}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
                 {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
                 <Text style={styles.buttonText}>{title}</Text>
@@ -19,9 +20,9 @@ export function PrimaryButton({ title, onPress, icon }: ButtonProps) {
     );
 }
 
-export function SecondaryButton({ title, onPress, icon }: ButtonProps) {
+export function SecondaryButton({ title, onPress, icon, disabled }: ButtonProps) {
     return (
-        <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity style={[styles.button, styles.secondaryButton, disabled && { opacity: 0.5 }]} onPress={onPress} activeOpacity={0.7}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
                 {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
                 <Text style={styles.secondaryButtonText}>{title}</Text>
