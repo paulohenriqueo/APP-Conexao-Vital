@@ -68,6 +68,12 @@ export const typography: Record<string, TextStyle> = {
         lineHeight: 12,
         color: colors.gray47,
     },
+    M01R1214: {
+        ...baseTypography.montserratRegular,
+        fontSize: 14,
+        lineHeight: 18,
+        color: colors.darkGreen116,
+    },
     M01R1214U: {
         ...baseTypography.montserratRegular,
         fontSize: 12,

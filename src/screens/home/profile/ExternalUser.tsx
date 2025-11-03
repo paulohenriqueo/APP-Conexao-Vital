@@ -31,9 +31,11 @@ export default function ExternalUser() {
     const [activeTab, setActiveTab] = useState<"info" | "qualifications">("info");
     const [userName, setUserName] = useState("");
     const [userEmail, setUserEmail] = useState("");
-
-    const navigation = useNavigation<NavigationProp<any>>();
     const [contactRequested, setContactRequested] = useState(false); // Estado para controlar se o contato foi solicitado
+    const [showStars, setShowStars] = useState(true); // Estado para controlar se entrou em contato
+    const [rating, setRating] = useState(0);
+    
+    const navigation = useNavigation<NavigationProp<any>>();
 
     // Dados provisórios do usuário
     const user: User = {
@@ -47,6 +49,7 @@ export default function ExternalUser() {
     // Definir o componente de informações do perfil com base na função do usuário
     const ProfileInfoComponent = user.role === "caregiver" ? CaregiverProfileInfo : PatientProfileInfo;
 
+    //colocar nomes em inglês
     const profileProps =
         user.role === "caregiver"
             ? {
@@ -92,17 +95,31 @@ export default function ExternalUser() {
         fetchUserName();
     }, []);
 
-    // Logout
-    const handleLogout = async () => {
-        const auth = getAuth();
-        try {
-            await signOut(auth);
-            Alert.alert("Logout", "Você saiu da sua conta com sucesso!", [{ text: "OK" }]);
-            navigation.reset({ index: 0, routes: [{ name: "Login" }] });
-        } catch (error) {
-            console.error("Erro ao deslogar:", error);
-            alert("Ocorreu um erro ao deslogar. Tente novamente.");
+    const renderStar = (starNumber: number) => {
+
+        return (
+            <TouchableOpacity key={starNumber} onPress={() => setRating(starNumber)}>
+                <Ionicons
+                    name={starNumber <= rating ? "star" : "star-outline"} // preenche estrelas anteriores
+                    size={20}
+                    color={colors.green85F}
+                />
+            </TouchableOpacity>
+        );
+    };
+
+    const submitRating = () => {
+        if (rating === 0) {
+            Alert.alert("Selecione uma avaliação antes de enviar!");
+            return;
         }
+
+        // fazer a lógica de envio para o backend
+        console.log("Avaliação enviada:", rating);
+        Alert.alert("Obrigado pela avaliação!", `Você avaliou com ${rating} estrelas.`);
+
+        // Reset opcional
+        setRating(0);
     };
 
     return (
@@ -131,11 +148,11 @@ export default function ExternalUser() {
                     gap: 4,
                 }}
             >
-                <TouchableOpacity 
-                onPress={() => navigation.navigate("Home")} //trocar para goBack quando estiver voltando corretamente para a tela anterior (home/pesquisa/histórico) 
-                style={{
-                    padding: 8, position: "absolute", top: 8, left: 8
-                }}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate("Home")} //trocar para goBack quando estiver voltando corretamente para a tela anterior (home/pesquisa/histórico) 
+                    style={{
+                        padding: 8, margin: 8, position: "absolute", top: 0, left: 0
+                    }}>
                     <CaretLeft size={24} color={colors.gray73} weight="bold" accessibilityLabel="Voltar" />
                 </TouchableOpacity>
                 <Avatar
@@ -191,7 +208,8 @@ export default function ExternalUser() {
                         onPress={() => {
                             console.log('Redirecionado pelo WhatsApp para o número:', user.userContact)
                             setContactRequested(false);
-                            openWhatsApp(String(user.userContact), 'Olá! Vi seu perfil e gostaria de conversar.')
+                            setShowStars(true)
+                            // openWhatsApp(String(user.userContact), 'Olá! Vi seu perfil e gostaria de conversar.')
                         }}
                         icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
                     />
@@ -206,6 +224,52 @@ export default function ExternalUser() {
                         icon={<WhatsappLogo size={20} color={colors.green382} />}
                     />
                 )}
+            </View>
+
+            <View>
+                {showStars ? (
+                    <View
+                        style={{
+                            flexDirection: "column",
+                            alignContent: "center",
+                            justifyContent: "center",
+                            gap: 12,
+                            backgroundColor: colors.grayEF1,
+                            paddingVertical: 16,
+                            paddingHorizontal: 12,
+                            borderRadius: 12,
+                        }}
+                    >
+                        <Text style={{ textAlign: "center", ...typography.M01R1214 }}>
+                            Gostaria de avaliar esse perfil?
+                        </Text>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                alignContent: "center",
+                                justifyContent: "center",
+                                gap: 8,
+                            }}
+                        >
+                            {[1, 2, 3, 4, 5].map((starNumber) => renderStar(starNumber))}
+                        </View>
+                        <TouchableOpacity
+                            onPress={() => {
+                                submitRating
+                                setShowStars(false)
+                            }}
+                            disabled={rating === 0}
+                            style={{
+                                paddingVertical: 4,
+                                opacity: rating === 0 ? 0.6 : 1,
+                            }}
+                        >
+                            <Text style={{ ...typography.M01R1214, color: colors.green85F, textAlign: "center", fontWeight: "600", textDecorationLine: "underline" }}>
+                                Enviar avaliação
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : null}
             </View>
 
             {/* Abas */}
