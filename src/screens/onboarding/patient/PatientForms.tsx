@@ -6,6 +6,7 @@ import { Input } from "../../../components/Input";
 import { Picker } from "@react-native-picker/picker";
 import { savePatientForm } from "../../../services/patientService";
 import { Camera, CaretLeft } from "phosphor-react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function PatientForms({ navigation }: any) {
   const [cpf, setCpf] = useState("");
@@ -132,7 +133,7 @@ export default function PatientForms({ navigation }: any) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.green382 }}>
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: "flex-start",
@@ -141,9 +142,12 @@ export default function PatientForms({ navigation }: any) {
           paddingBottom: 40,
         }}
         showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={[styles.header, { paddingTop: 20, marginVertical: 8}]}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 8}}>
+        <View style={[styles.header, { paddingTop: 20, marginVertical: 8 }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 8 }}>
             <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" accessibilityLabel="Voltar" />
           </TouchableOpacity>
           <Text style={[typography.M01SB2024, { color: colors.whiteFBFE }]}>Complete seu cadastro
@@ -298,7 +302,7 @@ export default function PatientForms({ navigation }: any) {
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

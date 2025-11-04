@@ -14,6 +14,7 @@ import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { savePatientCondition } from "../../../services/patientService";
 import { CaretLeft } from "phosphor-react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function PatientCondition({ navigation }: any) {
   const [periodo, setPeriodo] = useState("");
@@ -115,7 +116,7 @@ export default function PatientCondition({ navigation }: any) {
           </Text>
         </View>
       </View>
-      <ScrollView
+      <KeyboardAwareScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
           // flexGrow: 1,
@@ -125,6 +126,9 @@ export default function PatientCondition({ navigation }: any) {
 
         }}
         showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
       >
         <View
           style={[
@@ -381,7 +385,7 @@ export default function PatientCondition({ navigation }: any) {
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View >
   );
 }

@@ -13,6 +13,7 @@ import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { saveCaregiverSpecifications } from "../../../services/CaregiverService";
 import { CaretLeft } from "phosphor-react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function CaregiverSpecifications({ navigation }: any) {
   const [experienciaInput, setExperienciaInput] = useState("");
@@ -105,15 +106,15 @@ export default function CaregiverSpecifications({ navigation }: any) {
           alignItems: "center",
         }}
       >
-      <View style={[styles.header, { paddingTop: 20, marginVertical: 8 }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 8 }}>
-          <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" accessibilityLabel="Voltar para o formulário" />
-        </TouchableOpacity>
+        <View style={[styles.header, { paddingTop: 20, marginVertical: 8 }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 8 }}>
+            <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" accessibilityLabel="Voltar para o formulário" />
+          </TouchableOpacity>
           <Text style={{ ...typography.M01SB2024, color: colors.whiteFBFE }}>Especificações do cuidador</Text>
         </View>
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={{
           justifyContent: "flex-start",
           alignItems: "center",
@@ -121,6 +122,9 @@ export default function CaregiverSpecifications({ navigation }: any) {
           paddingBottom: 40,
         }}
         showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
       >
         <View
           style={[
@@ -435,7 +439,7 @@ export default function CaregiverSpecifications({ navigation }: any) {
             <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>{saving ? "Salvando..." : "Salvar"}</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

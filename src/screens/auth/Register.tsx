@@ -12,6 +12,7 @@ import { doc, setDoc } from "firebase/firestore";
 import TermsContent from "../legal/TermsContent";
 import PrivacyPolicyContent from "../legal/PrivacyPolicyContent";
 import TermsModal from "../legal/TermsModal";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
 
@@ -90,12 +91,16 @@ export default function Register() {
   }
 
   return (
+
     <View style={styles.container}>
-      <ScrollView
+      <KeyboardAwareScrollView
         style={{ flex: 1, width: "100%" }}
         contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
         horizontal={false}
         showsVerticalScrollIndicator={true}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={styles.boxTop}>
           <Image source={Logo} style={styles.logoLogin} />
@@ -140,7 +145,7 @@ export default function Register() {
             </Text>
           </Text>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Modal de termos e política */}
       <TermsModal

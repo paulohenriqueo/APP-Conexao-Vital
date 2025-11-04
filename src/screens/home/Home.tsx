@@ -180,8 +180,8 @@ export default function Home() {
         );
 
       case "profile":
-        // return <Profile />;
-        return <ExternalUser />; //teste de perfil externo - adicionar acesso pela lista de histórico e pesquisa
+        return <Profile />;
+        // return <ExternalUser />; //teste de perfil externo - adicionar acesso pela lista de histórico e pesquisa
       default:
         return <Text style={styles.contentText}>Início</Text>;
     }

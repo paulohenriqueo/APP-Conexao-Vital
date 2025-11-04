@@ -7,6 +7,7 @@ import { Picker } from "@react-native-picker/picker";
 import { saveCaregiverForm } from "../../../services/CaregiverService";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Camera, CaretLeft } from "phosphor-react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function CaregiverForms({ navigation }: any) {
   const [cpf, setCpf] = useState("");
@@ -125,7 +126,7 @@ export default function CaregiverForms({ navigation }: any) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.green382 }}>
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: "flex-start",
@@ -134,6 +135,9 @@ export default function CaregiverForms({ navigation }: any) {
           paddingBottom: 40,
         }}
         showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.header, { paddingTop: 20, marginVertical: 8 }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{
@@ -285,7 +289,7 @@ export default function CaregiverForms({ navigation }: any) {
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }
