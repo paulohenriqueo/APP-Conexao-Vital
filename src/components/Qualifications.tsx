@@ -26,7 +26,7 @@ const Qualifications: React.FC<QualificationsProps> = ({ user }) => {
   }
 
   return (
-    <View style={{...styles.container, marginBottom: 24}}>
+    <View style={{...styles.container, marginBottom: 24, marginHorizontal: 0, paddingHorizontal: 4}}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {qualifications.map((q, index) => (
           <View key={index} style={qualiStyles.tag}>
@@ -39,8 +39,8 @@ const Qualifications: React.FC<QualificationsProps> = ({ user }) => {
 };
 
 const qualiStyles = StyleSheet.create({
-  tag: { backgroundColor: colors.gray7FD, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginRight: 8 },
-  tagText: { fontSize: 14, color: colors.gray23 },
+  tag: { backgroundColor: colors.greenOpacity, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginRight: 8 },
+  tagText: { fontSize: 14, color: colors.green85F, fontWeight: "600" },
   message: { fontSize: 16, color: colors.gray75 },
 });
 

@@ -11,6 +11,7 @@ import { CustomList } from "../../components/CustomList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PopUpFormsModel from "../model/PopUpFormsModel";
 import FlashMessage, { showMessage } from 'react-native-flash-message';
+import ExternalUser from "./profile/ExternalUser";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -72,7 +73,7 @@ export default function Home() {
   const handleSelectPatient = async () => {
     try {
       await AsyncStorage.setItem("hasSeenCompleteProfileModal", "true");
-    } catch (e) {}
+    } catch (e) { }
     setShowModal(false);
     navigation.navigate("PatientForms");
   };
@@ -80,7 +81,7 @@ export default function Home() {
   const handleSelectCaregiver = async () => {
     try {
       await AsyncStorage.setItem("hasSeenCompleteProfileModal", "true");
-    } catch (e) {}
+    } catch (e) { }
     setShowModal(false);
     navigation.navigate("CaregiverForms");
   };
@@ -100,21 +101,21 @@ export default function Home() {
   // Dados para teste de lista
   // Melhores avaliados - perfis que aparecem no inicio
   const homeData = [
-    { id: "1", name: "Maria Bellone", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], principalRole: "Cuidado Domiciliar" },
-    { id: "2", name: "João Moura", rating: 5, tags: ["Enfermagem", "Acompanhante"], principalRole: "Enfermeiro" },
-    { id: "3", name: "Julia Almeida", rating: 4, tags: ["Enfermagem", "Acompanhante"], principalRole: "Acompanhante" },
+    { id: "1", name: "Maria Bellone", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen841edd2024216a6064de82e3b39a66ac.jpg", especialization: "Cuidado Domiciliar" },
+    { id: "2", name: "João Moura", rating: 5, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3db975f6be246415b0ef820d8446b5bc.jpg", especialization: "Enfermeiro" },
+    { id: "3", name: "Julia Almeida", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-genf3f99c3fb1c099c668d89fcaafbc5c59.jpg", especialization: "Acompanhante" },
   ];
 
   const historyData = [
-    { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", principalRole: "Cuidado Domiciliar" },
-    { id: "2", name: "João Souza", rating: 4, date: "15 mar.", principalRole: "Enfermeiro" },
-    { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", principalRole: "Cuidado Domiciliar" },
+    { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-genbccd101bd8dbac5f8bb60897e38ab2be.jpg", especialization: "Cuidado Domiciliar" },
+    { id: "2", name: "João Souza", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen6b3b5faef405b1681627466f154dd5bf.jpg", especialization: "Enfermeiro" },
+    { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gend4affcf39479b0e32a6b292ee316cc18.jpg", especialization: "Cuidado Domiciliar" },
   ];
 
   const searchData = [
-    { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], principalRole: "Cuidado Domiciliar" },
-    { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], principalRole: "Enfermeiro" },
-    { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], principalRole: "Acompanhante" },
+    { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3de81692a53179ab914d9ff7d102fee1.jpg", especialization: "Cuidado Domiciliar" },
+    { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen80b45514e179756196f7b7682ba17bb0.jpg", especialization: "Enfermeiro" },
+    { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen63cb16d668b8c7c84a755fc3a4450b7b.jpg", especialization: "Acompanhante" },
   ];
 
   // Função para renderizar conteúdo dependendo da aba selecionada
@@ -135,7 +136,6 @@ export default function Home() {
             <CustomList
               type="search"
               data={homeData}
-              onItemPress={(id) => console.log("Abrir perfil:", id)}
             />
           </View>
         );
@@ -156,7 +156,6 @@ export default function Home() {
             <CustomList
               type="search"
               data={searchData}
-              onItemPress={(id) => console.log("Abrir perfil:", id)}
             />
           </View>
         );
@@ -176,13 +175,13 @@ export default function Home() {
             <CustomList
               type="history"
               data={historyData}
-              onItemPress={(id) => console.log("Abrir perfil:", id)}
             />
           </View>
         );
 
       case "profile":
         return <Profile />;
+        // return <ExternalUser />; //teste de perfil externo - adicionar acesso pela lista de histórico e pesquisa
       default:
         return <Text style={styles.contentText}>Início</Text>;
     }
@@ -203,9 +202,9 @@ export default function Home() {
     <View style={styles.container}>
       <TopBar title="" />
       {/* botão temporário para debug (remova depois) */}
-      <TouchableOpacity onPress={clearOnboardingFlag} style={{ alignSelf: "flex-end", padding: 8, margin: 8 }}>
-        <Text style={{ color: "#fff" }}>Reset Onboarding</Text>
-      </TouchableOpacity>
+      {/* <TouchableOpacity onPress={clearOnboardingFlag} style={{ alignSelf: "flex-end", padding: 8, margin: 8 }}>
+        <Text style={{ color: "#ccc" }}>Reset Onboarding</Text>
+      </TouchableOpacity> */}
 
       <View style={styles.contentArea}>{renderContent()}</View>
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />

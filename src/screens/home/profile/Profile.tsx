@@ -4,21 +4,27 @@ import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { getAuth, signOut } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { colors } from "../../../../styles/colors";
-import { fontWeights, typography } from "../../../../styles/typography";
+import { typography } from "../../../../styles/typography";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import ProfileItem from "../../../components/ProfileItem";
 import { SignOut } from "phosphor-react-native";
-import ProfileInfo from "../../../components/ProfileInfo";
-import Qualifications from "../../../components/Qualifications";
 import { Avatar } from "../../../components/Avatar";
 import { styles } from "../../../../styles/styles";
 import { Ionicons } from "@expo/vector-icons";
+import { CaregiverProfileInfo } from "../../../components/CaregiverProfileInfo";
+import { PrimaryButton } from "../../../components/Button";
+import { PatientProfileInfo } from "../../../components/PatientProfileInfo";
+import { Trash } from "phosphor-react-native";
 
 interface User {
+  //Dados necessários para exibir perfil de outros usuários
+  userContact?: number;
+  especification?: string;
   bio?: string;
   role?: "caregiver" | "client";
   qualifications?: string[];
   rating?: number;
+  imageUrl?: string;
 }
 
 interface SectionItem {
@@ -38,10 +44,38 @@ export default function Profile() {
   // Dados provisórios do usuário
   const user: User = {
     bio: "Cuidador experiente com foco em idosos.",
-    role: "caregiver", // agora é do tipo correto
-    qualifications: ["Primeiros Socorros", "Cuidador de Idosos"],
-    rating: 4.5,
+    role: "caregiver",
+    rating: 5, //Avaliação a ser exibida - já incluío na exibição de estrelas
+    imageUrl: "https://this-person-does-not-exist.com/img/avatar-gene3d99a090940ff2f92c3cd980b5e61d3.jpg", // Exemplo de URL de imagem
   };
+
+  // Definir o componente de informações do perfil com base na função do usuário
+  const ProfileInfoComponent = user.role === "caregiver" ? PatientProfileInfo : CaregiverProfileInfo;
+
+  const profileProps =
+    user.role === "caregiver"
+      // user.role === "patient" //teste de exibição de dados de paciente
+      ? {
+        caregiverData: (user as any)?.caregiverSpecifications ?? {
+          especialization: "Cuidador de Idosos",
+          experiencia: [],
+          qualificacoes: [],
+          dispoDia: [],
+          periodo: [],
+          publicoAtendido: [],
+          observacoes: "",
+        },
+      }
+      : {
+        patientData: (user as any)?.patientSpecifications ?? {
+          careType: "Cuidados Domiciliares",
+          allergies: ["Pólen", "Amendoim"],
+          medications: ["Paracetamol", "Ibuprofeno"],
+          conditions: ["Diabetes", "Hipertensão"],
+          preferredLanguages: ["Português", "Inglês"],
+          observations: "Paciente em tratamento contínuo.",
+        },
+      };
 
   // Buscar email e nome do usuário
   useEffect(() => {
@@ -76,6 +110,23 @@ export default function Profile() {
       alert("Ocorreu um erro ao deslogar. Tente novamente.");
     }
   };
+
+  // Delete Account
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Excluir conta",
+      "Tem certeza de que deseja excluir sua conta? Essa ação não pode ser desfeita.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Excluir", style: "destructive", onPress: () => performDeleteAccount() },
+      ]
+    );
+  };
+
+  function performDeleteAccount(): void {
+    throw new Error("Function not implemented.");
+  }
+
   // Cria um array único com todas as seções e itens
   const items: SectionItem[] = [
     { section: "Históricos", title: "Avaliações realizadas", onPress: () => console.log("Completed Reviews") },
@@ -86,7 +137,8 @@ export default function Profile() {
     // Alternativa quando userRole estiver implementado
     // userRole === "caregiver" &&
     { section: "Ajuda e Suporte", title: "Solicitar especializações", onPress: () => navigation.navigate("Specializations") },
-    { section: "Ajuda e Suporte", title: "Sair", onPress: handleLogout, icon: <SignOut size={22} color={colors.gray75} weight="bold" />, },
+    { section: "Conta", title: "Sair", onPress: handleLogout, icon: <SignOut size={22} color={colors.gray75} weight="bold" />, },
+    { section: "Conta", title: "Deletar", onPress: handleDeleteAccount, icon: <Trash size={22} color={colors.orange360} weight="bold" />, }, //Criar função deletar conta
 
   ].filter(Boolean); // remove itens falsos
 
@@ -96,12 +148,13 @@ export default function Profile() {
   return (
     <ScrollView
       contentContainerStyle={{
-        justifyContent: "flex-start",
+        justifyContent: "center",
         padding: 4,
         backgroundColor: colors.whiteFBFE,
         flexGrow: 1,
       }}
       showsVerticalScrollIndicator={false}
+      style={{ flex: 1, width: "100%" }} // Adicionando estilo para ocupar a largura máxima
     >
       {/* Foto de perfil, nome e estrelas */}
       <View
@@ -115,7 +168,11 @@ export default function Profile() {
           gap: 4,
         }}
       >
-        <Avatar size={84} name={userName} />
+        <Avatar
+          size={84}
+          name={userName}
+          imageUrl={user.imageUrl} // exibe a foto, se houver
+        />
         <Text
           style={{
             ...typography.H01B2024,
@@ -136,8 +193,18 @@ export default function Profile() {
         >
           {userEmail}
         </Text>
-        <View style={{...styles.ratingContainer}}>
-          {Array.from({ length: 5 }).map((_, i) => (
+        <Text
+          style={{
+            ...typography.H01SB1618,
+            color: colors.gray75,
+            textAlign: "center",
+            fontWeight: "600",
+          }}>
+          {user.role === "caregiver" ? (profileProps.caregiverData?.especialization) : (profileProps.patientData?.careType)}
+          {/* {user.role === "caregiver" ? (profileProps.patientData?.careType) : (profileProps.caregiverData?.especialization)}*/} {/*teste de exibição de dados de paciente */}
+        </Text>
+        <View style={{ ...styles.ratingContainer }}>
+          {Array.from({ length: Number(user.rating) }).map((_, i) => (
             <Ionicons
               key={i}
               name={i < (user.rating || 0) ? "star" : "star-outline"}
@@ -152,61 +219,16 @@ export default function Profile() {
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: "center",
           width: "100%",
           marginBottom: 16,
         }}
       >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: colors.green382,
-            paddingVertical: 10,
-            paddingHorizontal: 18,
-            borderRadius: 8,
-            marginRight: 8,
-            justifyContent: "center",
-          }}
-        >
-          <Feather name="edit-2" size={18} color="#fff" />
-          <Text
-            style={{
-              color: "#fff",
-              fontWeight: fontWeights.bold,
-              marginLeft: 8,
-            }}
-          >
-            Editar perfil
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            borderColor: colors.green382,
-            borderWidth: 1.5,
-            paddingVertical: 10,
-            paddingHorizontal: 18,
-            borderRadius: 8,
-            marginLeft: 8,
-            backgroundColor: "#fff",
-            justifyContent: "center",
-          }}
-        >
-          <Feather name="repeat" size={18} color={colors.green382} />
-          <Text
-            style={{
-              color: colors.green382,
-              fontWeight: fontWeights.bold,
-              marginLeft: 8,
-            }}
-          >
-            Alternar conta
-          </Text>
-        </TouchableOpacity>
+        <PrimaryButton
+          title="Editar perfil"
+          onPress={() => console.log('Editar pressionado')}
+          icon={<Feather name="edit-2" size={20} color={colors.whiteFBFE} />}
+        />
       </View>
 
       {/* Abas */}
@@ -216,7 +238,7 @@ export default function Profile() {
           width: "100%",
           borderBottomWidth: 1,
           borderBottomColor: colors.grayE8,
-          marginBottom: 16,
+          marginBottom: 8,
         }}
       >
         <TouchableOpacity
@@ -231,15 +253,15 @@ export default function Profile() {
         >
           <Text
             style={{
-              ...typography.M01B1418,
+              ...typography.M01B1624,
               color: activeTab === "info" ? colors.green382 : colors.gray75,
             }}
           >
-            Informações gerais
+            Informações {/* gerais */}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={{
             flex: 1,
             alignItems: "center",
@@ -255,14 +277,25 @@ export default function Profile() {
               color: activeTab === "qualifications" ? colors.green382 : colors.gray75,
             }}
           >
-            Qualificações
+            {user.role === "caregiver" ? "Qualificações" : "Condições" }
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Conteúdo da aba */}
-      {activeTab === "info" && <ProfileInfo user={user} />}
-      {activeTab === "qualifications" && <Qualifications user={user} />}
+      {activeTab === "info" && (
+        ProfileInfoComponent ? (
+          // renderiza apenas se o componente não for undefined
+          <ProfileInfoComponent {...(profileProps as any)} />
+        ) : (
+          // fallback e log para debugar
+          <View>
+            <Text style={{ color: colors.gray75 }}>Profile component not available</Text>
+            console.warn("Profile component is undefined for role:", user.role);
+          </View>
+        )
+      )}
+      {/* {activeTab === "qualifications" && <Qualifications user={user} />} */}
 
       {/* Seções */}
       {sections.map(section => {

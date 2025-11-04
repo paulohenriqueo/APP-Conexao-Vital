@@ -5,6 +5,9 @@ import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { Picker } from "@react-native-picker/picker";
 import { saveCaregiverForm } from "../../../services/CaregiverService";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Camera, CaretLeft } from "phosphor-react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function CaregiverForms({ navigation }: any) {
   const [cpf, setCpf] = useState("");
@@ -123,29 +126,28 @@ export default function CaregiverForms({ navigation }: any) {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.green382 }}>
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: "flex-start",
           alignItems: "center",
-          paddingTop: 80,
+          paddingTop: 40,
           paddingBottom: 40,
         }}
         showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
       >
-        <Text
-          style={[
-            typography.montserratBold,
-            {
-              color: colors.whiteFBFE,
-              fontSize: 22,
-              marginBottom: 24,
-              alignSelf: "center",
-            },
-          ]}
-        >
-          Complete seu cadastro
-        </Text>
+        <View style={[styles.header, { paddingTop: 20, marginVertical: 8 }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{
+            padding: 8
+          }}>
+            <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" accessibilityLabel="Voltar" />
+          </TouchableOpacity>
+          <Text style={[typography.M01SB2024, { color: colors.whiteFBFE }]}>Complete seu cadastro
+          </Text>
+        </View>
 
         <View
           style={{
@@ -174,6 +176,7 @@ export default function CaregiverForms({ navigation }: any) {
             onPress={handleSelectPhoto}
             activeOpacity={0.7}
           >
+            <Camera size={40} color={colors.gray73} weight="light" />
             <Text style={{ color: colors.gray73, fontSize: 15, textAlign: "center" }}>
               Selecione uma{"\n"}foto
             </Text>
@@ -232,7 +235,7 @@ export default function CaregiverForms({ navigation }: any) {
             style={{
               backgroundColor: colors.gray7FD,
               borderRadius: 8,
-              marginBottom: 12,
+              // marginBottom: 12, 
               borderWidth: 0,
               overflow: "hidden",
             }}
@@ -255,19 +258,19 @@ export default function CaregiverForms({ navigation }: any) {
             </Picker>
           </View>
 
-          <Input 
-          placeholder="CEP" 
-          value={cep} 
-          onChangeText={text => setCep(maskCep(text))}
-          onBlur={() => fetchAddress(cep)} 
-          keyboardType="numeric"
-          maxLength={9}
+          <Input
+            placeholder="CEP"
+            value={cep}
+            onChangeText={text => setCep(maskCep(text))}
+            onBlur={() => fetchAddress(cep)}
+            keyboardType="numeric"
+            maxLength={9}
           />
 
-          <Input placeholder="Rua" value={street} onChangeText={setStreet} editable={false}/>
-          <Input placeholder="Bairro" value={neighborhood} onChangeText={setNeighborhood} editable={false}/>
-          <Input placeholder="Cidade" value={city} onChangeText={setCity} editable={false}/>
-          <Input placeholder="Estado" value={state} onChangeText={setState} editable={false}/>
+          <Input placeholder="Rua" value={street} onChangeText={setStreet} editable={false} />
+          <Input placeholder="Bairro" value={neighborhood} onChangeText={setNeighborhood} editable={false} />
+          <Input placeholder="Cidade" value={city} onChangeText={setCity} editable={false} />
+          <Input placeholder="Estado" value={state} onChangeText={setState} editable={false} />
 
           <TouchableOpacity
             style={{
@@ -286,7 +289,7 @@ export default function CaregiverForms({ navigation }: any) {
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

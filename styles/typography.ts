@@ -12,7 +12,7 @@ export const fontWeights = {
 export const baseTypography = {
     montserratRegular: { fontFamily: 'Montserrat_400Regular', letterSpacing: 0.1 },
     montserratMedium: { fontFamily: 'Montserrat_500Medium', letterSpacing: 0.1 },
-    montserratSemibold: { fontFamily: 'Montserrat_600SemiBold', letterSpacing: 0.1 },
+    montserratSemiBold: { fontFamily: 'Montserrat_600SemiBold', letterSpacing: 0.1 },
     montserratBold: { fontFamily: 'Montserrat_700Bold', letterSpacing: 0.1 },
     montserratLight: { fontFamily: 'Montserrat_300Light', letterSpacing: 0 },
     hindRegular: { fontFamily: 'Hind_400Regular', letterSpacing: 0.1 },
@@ -68,9 +68,15 @@ export const typography: Record<string, TextStyle> = {
         lineHeight: 12,
         color: colors.gray47,
     },
-    M01R1014U: {
+    M01R1214: {
         ...baseTypography.montserratRegular,
-        fontSize: 10,
+        fontSize: 14,
+        lineHeight: 18,
+        color: colors.darkGreen116,
+    },
+    M01R1214U: {
+        ...baseTypography.montserratRegular,
+        fontSize: 12,
         lineHeight: 14,
         color: colors.darkGreen116,
         textDecorationLine: "underline",
@@ -110,9 +116,20 @@ export const typography: Record<string, TextStyle> = {
 
     // ===== SemiBold =====
     M01SB1214: {
-        ...baseTypography.montserratSemibold,
+        ...baseTypography.montserratSemiBold,
         fontSize: 12,
         lineHeight: 14,
+    },
+    M01SB1624: {
+        ...baseTypography.montserratSemiBold,
+        fontSize: 16,
+        lineHeight: 24,
+        marginTop: 16,
+    },
+    M01SB2024: {
+        ...baseTypography.montserratSemiBold,
+        fontSize: 20,
+        lineHeight: 24,
     },
 
     // ===== Medium =====
@@ -151,3 +168,22 @@ export const typography: Record<string, TextStyle> = {
         textAlign: "center",
     },
 };
+
+export const profileTypography: Record<string, TextStyle> = {
+    ProfileInfoTitle: {
+        ...baseTypography.montserratMedium,
+        fontSize: 16,
+        lineHeight: 18,
+        marginTop: 16,
+        color: colors.gray47,
+    },
+    ProfileInfoText: {
+        ...baseTypography.hindRegular,
+        fontSize: 14,
+        lineHeight: 18,
+        marginTop: 8,
+        marginBottom: 16,
+        color: colors.gray47,
+    },
+};
+

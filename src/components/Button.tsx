@@ -6,13 +6,38 @@ import Google from '../assets/google_logo.png'
 type ButtonProps = {
     title: string;
     onPress: () => void;
+    icon?: React.ReactNode;
+    disabled?: boolean;
 };
-
-export function PrimaryButton({ title, onPress }: ButtonProps) {
-
+export function PrimaryButton({ title, onPress, icon, disabled }: ButtonProps) {
     return (
-        <TouchableOpacity style={styles.button} onPress={onPress} activeOpacity={0.7}>
-            <Text style={styles.buttonText}>{title}</Text>
+        <TouchableOpacity style={[styles.button, disabled && { opacity: 0.5 }]} onPress={onPress} activeOpacity={0.7}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
+                <Text style={styles.buttonText}>{title}</Text>
+            </View>
+        </TouchableOpacity>
+    );
+}
+
+export function SecondaryButton({ title, onPress, icon, disabled }: ButtonProps) {
+    return (
+        <TouchableOpacity style={[styles.button, styles.secondaryButton, disabled && { opacity: 0.5 }]} onPress={onPress} activeOpacity={0.7}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
+                <Text style={styles.secondaryButtonText}>{title}</Text>
+            </View>
+        </TouchableOpacity>
+    );
+}
+
+export function OutlinedButton({ title, onPress, icon }: ButtonProps) {
+    return (
+        <TouchableOpacity style={[styles.button, styles.buttonOutilined]} onPress={onPress} activeOpacity={0.7}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
+                <Text style={styles.buttonOutilinedText}>{title}</Text>
+            </View>
         </TouchableOpacity>
     );
 }

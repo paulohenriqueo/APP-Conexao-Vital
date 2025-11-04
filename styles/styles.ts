@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput } from "react-native";
+import { StyleSheet } from "react-native";
 import { colors } from "./colors";
 import { typography } from "./typography";
 import { scale } from 'react-native-size-matters';
@@ -126,11 +126,5 @@ export const styles = StyleSheet.create({
         color: "#00796b",
         fontSize: 12,
     },
-    principalRole: {
-        fontSize: 12,
-        lineHeight: 14,
-        fontWeight: "500",
-        color: colors.gray75,
-    }
 });
 export { typography, colors };

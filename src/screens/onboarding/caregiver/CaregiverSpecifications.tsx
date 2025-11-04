@@ -12,6 +12,8 @@ import {
 import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { saveCaregiverSpecifications } from "../../../services/CaregiverService";
+import { CaretLeft } from "phosphor-react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function CaregiverSpecifications({ navigation }: any) {
   const [experienciaInput, setExperienciaInput] = useState("");
@@ -40,7 +42,7 @@ export default function CaregiverSpecifications({ navigation }: any) {
   const [agreed, setAgreed] = useState(false);
   const [saving, setSaving] = useState(false);
 
-   const periodOptions = [
+  const periodOptions = [
     { key: "matutino", label: "Matutino" },
     { key: "vespertino", label: "Vespertino" },
     { key: "noturno", label: "Noturno" },
@@ -60,7 +62,7 @@ export default function CaregiverSpecifications({ navigation }: any) {
     setter(copy);
   };
 
-   const togglePeriod = (key: string) => {
+  const togglePeriod = (key: string) => {
     setSelectedPeriods(prev =>
       prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
     );
@@ -71,7 +73,7 @@ export default function CaregiverSpecifications({ navigation }: any) {
       Alert.alert("Atenção", "É necessário declarar que as informações são verdadeiras.");
       return;
     }
-    
+
     const payload = {
       experiencia: experiencias,
       qualificacoes,
@@ -100,22 +102,19 @@ export default function CaregiverSpecifications({ navigation }: any) {
         style={{
           width: "100%",
           paddingTop: Platform.OS === "android" ? 24 : 40,
-          paddingHorizontal: 16,
-          paddingBottom: 12,
           flexDirection: "row",
           alignItems: "center",
         }}
       >
-        <TouchableOpacity onPress={() => navigation.navigate("CaregiverForms")} style={{ padding: 8 }}>
-          <Text style={{ fontSize: 26, color: colors.whiteFBFE }}>‹</Text>
-        </TouchableOpacity>
-
-        <Text style={[typography.montserratBold, { color: colors.whiteFBFE, fontSize: 20, marginLeft: 8 }]}>
-          Especificações do cuidador
-        </Text>
+        <View style={[styles.header, { paddingTop: 20, marginVertical: 8 }]}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 8 }}>
+            <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" accessibilityLabel="Voltar para o formulário" />
+          </TouchableOpacity>
+          <Text style={{ ...typography.M01SB2024, color: colors.whiteFBFE }}>Especificações do cuidador</Text>
+        </View>
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={{
           justifyContent: "flex-start",
           alignItems: "center",
@@ -123,6 +122,9 @@ export default function CaregiverSpecifications({ navigation }: any) {
           paddingBottom: 40,
         }}
         showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
+        keyboardShouldPersistTaps="handled"
       >
         <View
           style={[
@@ -279,41 +281,41 @@ export default function CaregiverSpecifications({ navigation }: any) {
 
           {/* Disponibilidade por horário */}
           <Text style={{ color: colors.gray73, marginBottom: 8 }}>Período</Text>
-                    <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 12 }}>
-                      {periodOptions.map(opt => {
-                        const selected = selectedPeriods.includes(opt.key);
-                        return (
-                          <TouchableOpacity
-                            key={opt.key}
-                            onPress={() => togglePeriod(opt.key)}
-                            activeOpacity={0.8}
-                            style={{
-                              flexDirection: "row",
-                              alignItems: "center",
-                              marginRight: 12,
-                              marginBottom: 8,
-                            }}
-                          >
-                            <View
-                              style={{
-                                width: 20,
-                                height: 20,
-                                borderRadius: 4,
-                                borderWidth: 1.5,
-                                borderColor: selected ? colors.green85F : colors.grayE8,
-                                backgroundColor: selected ? colors.green85F : "#fff",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                marginRight: 8,
-                              }}
-                            >
-                              {selected && <Text style={{ color: "#fff", fontSize: 12 }}>✓</Text>}
-                            </View>
-                            <Text style={{ color: colors.gray73 }}>{opt.label}</Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 12 }}>
+            {periodOptions.map(opt => {
+              const selected = selectedPeriods.includes(opt.key);
+              return (
+                <TouchableOpacity
+                  key={opt.key}
+                  onPress={() => togglePeriod(opt.key)}
+                  activeOpacity={0.8}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginRight: 12,
+                    marginBottom: 8,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: 4,
+                      borderWidth: 1.5,
+                      borderColor: selected ? colors.green85F : colors.grayE8,
+                      backgroundColor: selected ? colors.green85F : "#fff",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 8,
+                    }}
+                  >
+                    {selected && <Text style={{ color: "#fff", fontSize: 12 }}>✓</Text>}
+                  </View>
+                  <Text style={{ color: colors.gray73 }}>{opt.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
           <FlatList
             data={dispoHora}
             horizontal
@@ -437,7 +439,7 @@ export default function CaregiverSpecifications({ navigation }: any) {
             <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>{saving ? "Salvando..." : "Salvar"}</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }
