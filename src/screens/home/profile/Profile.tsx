@@ -11,9 +11,9 @@ import { SignOut } from "phosphor-react-native";
 import { Avatar } from "../../../components/Avatar";
 import { styles } from "../../../../styles/styles";
 import { Ionicons } from "@expo/vector-icons";
-import { CaregiverProfileInfo } from "../../../components/CaregiverProfileInfo";
+import { CaregiverProfileInfo } from "./CaregiverProfileInfo";
 import { PrimaryButton } from "../../../components/Button";
-import { PatientProfileInfo } from "../../../components/PatientProfileInfo";
+import { PatientProfileInfo } from "./PatientProfileInfo";
 import { Trash } from "phosphor-react-native";
 
 interface User {

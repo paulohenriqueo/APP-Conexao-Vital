@@ -7,7 +7,7 @@ import { styles } from "../../../styles/styles";
 import { CompleteProfileModal } from "../../components/Modal";
 import { SearchBar } from "../../components/SearchBar";
 import Profile from "./profile/Profile";
-import { CustomList } from "../../components/CustomList";
+import { CustomList } from "./profile/CustomList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PopUpFormsModel from "../model/PopUpFormsModel";
 import FlashMessage, { showMessage } from 'react-native-flash-message';
