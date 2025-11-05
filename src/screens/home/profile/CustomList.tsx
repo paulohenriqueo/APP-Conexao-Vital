@@ -1,7 +1,7 @@
 import React from "react";
 import { FlatList, View } from "react-native";
-import { HistoryItem } from "./HistoryItem";
-import { SearchResultItem } from "./SearchResultItem";
+import { HistoryItem } from "../../../components/HistoryItem";
+import { SearchResultItem } from "../../../components/SearchResultItem";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
