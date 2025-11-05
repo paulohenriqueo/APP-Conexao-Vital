@@ -12,6 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import PopUpFormsModel from "../model/PopUpFormsModel";
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import ExternalUser from "./profile/ExternalUser";
+import { getCurrentUserType, getProfilesByType, PublicProfile } from "../../services/userService";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -19,6 +20,39 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false); // start false, set after check
   const [profileCompleted, setProfileCompleted] = useState(false);
   const [search, setSearch] = useState("");
+
+  // novo estado
+  const [currentProfileType, setCurrentProfileType] = useState<string | null>(null);
+  const [profilesList, setProfilesList] = useState<PublicProfile[]>([]);
+  const [loadingProfiles, setLoadingProfiles] = useState(false);
+
+  useEffect(() => {
+    // carrega tipo do usuário e lista de perfis opostos
+    (async () => {
+      try {
+        const type = await getCurrentUserType();
+        setCurrentProfileType(type);
+        // se não houver tipagem, não mostra perfis
+        if (!type) {
+          setProfilesList([]);
+          return;
+        }
+        // se usuário for caregiver -> buscar patients; se for patient -> buscar caregivers
+        const targetType = type === "caregiver" ? "patient" : type === "patient" ? "caregiver" : null;
+        if (!targetType) {
+          setProfilesList([]);
+          return;
+        }
+        setLoadingProfiles(true);
+        const items = await getProfilesByType(targetType);
+        setProfilesList(items);
+      } catch (e) {
+        console.warn("Erro carregando perfis:", e);
+      } finally {
+        setLoadingProfiles(false);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     const backAction = () => {
@@ -130,13 +164,23 @@ export default function Home() {
               onPressFilter={() => console.log("Filter pressed in Home")}
               placeholder="Pesquisar..."
             />
+
             <Text style={{ ...styles.subtitleText, textAlign: "left", paddingVertical: 16 }}>
               Melhores avaliados
             </Text>
-            <CustomList
-              type="search"
-              data={homeData}
-            />
+
+            {currentProfileType ? (
+              <CustomList
+                type="search"
+                data={profilesList as any} // cast para evitar conflito de tipos com HistoryData/SearchData
+              />
+            ) : (
+               <View style={{ paddingHorizontal: 16 }}>
+                 <Text style={{ color: "#666", textAlign: "center" }}>
+                   Complete seu perfil para visualizar profissionais ou selecione seu tipo de conta.
+                 </Text>
+               </View>
+             )}
           </View>
         );
 
@@ -180,8 +224,8 @@ export default function Home() {
         );
 
       case "profile":
-        return <Profile />;
-        // return <ExternalUser />; //teste de perfil externo - adicionar acesso pela lista de histórico e pesquisa
+        return <Profile/>
+        // return <ExternalUser />; // teste de perfil externo
       default:
         return <Text style={styles.contentText}>Início</Text>;
     }

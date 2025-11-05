@@ -44,6 +44,7 @@ export async function savePatientForm(data: PatientFormPayload, uid?: string) {
       {
         patientProfile: data,
         profileCompleted: true,
+        profileType: "patient", // grava tipo ao finalizar formulário
         updatedAt: serverTimestamp(),
       },
       { merge: true }
@@ -70,6 +71,7 @@ export async function savePatientCondition(condition: PatientConditionPayload, u
       {
         condition: condition,
         conditionUpdatedAt: serverTimestamp(),
+        profileType: "patient", // garante tipo ao salvar condições também
       },
       { merge: true }
     );

@@ -41,6 +41,7 @@ export async function saveCaregiverForm(data: CaregiverFormPayload, uid?: string
       {
         caregiverProfile: data,
         profileCompleted: true,
+        profileType: "caregiver", // grava tipo ao finalizar formulário
         updatedAt: serverTimestamp(),
       },
       { merge: true }
@@ -66,6 +67,7 @@ export async function saveCaregiverSpecifications(specifications: CaregiverSpeci
       {
         caregiverSpecifications: specifications,
         specificationsUpdatedAt: serverTimestamp(),
+        profileType: "caregiver", // garante tipo ao salvar especificações
       },
       { merge: true }
     );
