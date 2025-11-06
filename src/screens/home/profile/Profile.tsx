@@ -11,7 +11,7 @@ import { SignOut } from "phosphor-react-native";
 import { Avatar } from "../../../components/Avatar";
 import { styles } from "../../../../styles/styles";
 import { Ionicons } from "@expo/vector-icons";
-import { CaregiverProfileInfo } from "./CaregiverProfileInfo";
+import CaregiverProfileInfo from "./CaregiverProfileInfo";
 import { PrimaryButton } from "../../../components/Button";
 import { PatientProfileInfo } from "./PatientProfileInfo";
 import { Trash } from "phosphor-react-native";
@@ -137,6 +137,7 @@ export default function Profile() {
     // Alternativa quando userRole estiver implementado
     // userRole === "caregiver" &&
     { section: "Ajuda e Suporte", title: "Solicitar especializações", onPress: () => navigation.navigate("Specializations") },
+    { section: "Ajuda e Suporte", title: "redefinir senha", onPress: () => navigation.navigate("NewPassword") },
     { section: "Conta", title: "Sair", onPress: handleLogout, icon: <SignOut size={22} color={colors.gray75} weight="bold" />, },
     { section: "Conta", title: "Deletar", onPress: handleDeleteAccount, icon: <Trash size={22} color={colors.orange360} weight="bold" />, }, //Criar função deletar conta
 
@@ -226,7 +227,7 @@ export default function Profile() {
       >
         <PrimaryButton
           title="Editar perfil"
-          onPress={() => console.log('Editar pressionado')}
+          onPress={() => navigation.navigate("EditProfile", { userRole: user.role })}
           icon={<Feather name="edit-2" size={20} color={colors.whiteFBFE} />}
         />
       </View>

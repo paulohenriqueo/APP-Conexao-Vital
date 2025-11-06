@@ -14,8 +14,6 @@ import PrivacyPolicyContent from "../legal/PrivacyPolicyContent";
 import TermsModal from "../legal/TermsModal";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
-
-
 export default function Register() {
   const navigation = useNavigation<any>();
   const [nome, setNome] = useState("");
@@ -30,8 +28,12 @@ export default function Register() {
 
   // Validação de email simples
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  // Validação de senha (mínimo 6 caracteres)
-  const isPasswordValid = password.length >= 6;
+  // Função para validar força da senha
+  const isStrongPassword = (password: string) => {
+    const strongPasswordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    return strongPasswordRegex.test(password);
+  };
 
   // SignUp com Firebase Authentication
   const signUp = async () => {
@@ -43,11 +45,11 @@ export default function Register() {
       return;
     }
 
-    if (!termsAccepted) {
-      setShowTermsModal(true);
-      setLoading(false);
-      return;
-    }
+    // if (!termsAccepted) {
+    //   setShowTermsModal(true);
+    //   setLoading(false);
+    //   return;
+    // }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -60,28 +62,37 @@ export default function Register() {
       });
 
       Alert.alert("Conta criada com sucesso!", "Bem-vindo(a)!");
+      console.log("Usuário cadastrado:", user.uid);
       navigation.navigate("Home");
 
     } catch (error: any) {
       if (error.code === 'auth/invalid-email') {
         Alert.alert("Email inválido", "Por favor, insira um email válido.");
+        console.log("Email inválido");
       }
-      if (password.length < 6) {
-        Alert.alert("Senha fraca", "A senha deve conter no mínimo 6 caracteres.");
+      if (!isStrongPassword(password)) {
+        Alert.alert(
+          "Senha fraca",
+          "A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas, números e símbolos."
+        );
+        setLoading(false);
+        return;
       }
       if (error.code === 'auth/email-already-in-use') {
         Alert.alert("Email já cadastrado", "Este email já está em uso. Tente outro.");
+        console.log("Email já cadastrado");
       }
-
     } finally {
       setLoading(false);
     }
   }
 
   const handleAcceptTerms = () => {
-    setTermsAccepted(true);
+    // setTermsAccepted(true);
     setShowTermsModal(false);
-    signUp(); // prossegue com o cadastro
+    // setTimeout(() => {
+    //   signUp(); // espera o estado atualizar antes de chamar
+    // }, 100);
   };
 
   const handleRegisterGoogle = () => {
@@ -90,8 +101,21 @@ export default function Register() {
     navigation.navigate("Login"); // simulação
   }
 
-  return (
+  // Função para formatar o nome corretamente
+  const formatarNome = (texto: string) => {
+    const excecoes = ["de", "da", "do", "dos", "das", "e"];
+    return texto
+      .toLowerCase()
+      .split(" ")
+      .map((palavra) =>
+        excecoes.includes(palavra)
+          ? palavra
+          : palavra.charAt(0).toUpperCase() + palavra.slice(1)
+      )
+      .join(" ");
+  };
 
+  return (
     <View style={styles.container}>
       <KeyboardAwareScrollView
         style={{ flex: 1, width: "100%" }}
@@ -108,14 +132,14 @@ export default function Register() {
         </View>
 
         <View style={styles.containerBox}>
-          <Input placeholder="Nome completo" value={nome} onChangeText={setNome} />
+          <Input placeholder="Nome completo" value={nome} onChangeText={(text) => { setNome(formatarNome(text)) }} />
           <Input placeholder="E-mail" value={email} autoCapitalize="none" onChangeText={(text) => setEmail(text)} />
           <Text style={{ color: isEmailValid ? 'green' : 'red', fontSize: 12, alignSelf: 'flex-start', marginLeft: 8, marginTop: -8 }}>
             Exemplo: usuario@email.com*
           </Text>
           <InputPassword placeholder="Senha" value={password} autoCapitalize="none" onChangeText={(text) => setPassword(text)} showForgotPassword={false} />
-          <Text style={{ color: isPasswordValid ? 'green' : 'red', fontSize: 12, alignSelf: 'flex-start', marginLeft: 8, marginTop: -8 }}>
-            A senha deve ter no mínimo 6 caracteres.*
+          <Text style={{ color: isStrongPassword(password) ? 'green' : 'red', fontSize: 12, alignSelf: 'flex-start', marginLeft: 8, marginTop: -8 }}>
+            A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas, números e símbolos.*
           </Text>
           <InputPassword placeholder="Repita a senha" value={confirmPassword} onChangeText={setConfirmPassword} showForgotPassword={false} />
           {/* <Text style={{ ...typography.M01R1014, color: colors.gray75 }}>
@@ -126,12 +150,12 @@ export default function Register() {
 
           <PrimaryButton title="Criar conta" onPress={signUp} />
 
-          <View style={styles.dividerContainer}>
+          {/* <View style={styles.dividerContainer}>
             <View style={styles.line} />
             <Text style={styles.dividerText}>ou</Text>
             <View style={styles.line} />
           </View>
-          <GoogleButton onPress={handleRegisterGoogle} />
+          <GoogleButton onPress={handleRegisterGoogle} /> */}
         </View>
 
         <View style={{ ...styles.boxBottom, marginTop: 16 }}>
@@ -151,7 +175,7 @@ export default function Register() {
       <TermsModal
         visible={showTermsModal}
         onClose={() => setShowTermsModal(false)}
-        onAccept={handleAcceptTerms}
+        onAccept={() => { handleAcceptTerms(), setTimeout(() => { signUp(), 100 }), console.log("Termos aceitos") }}
       />
     </View>
   );
