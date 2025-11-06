@@ -63,7 +63,7 @@ export default function Login() {
             } else {
                 Alert.alert("Erro", "Ocorreu um erro durante o login. Tente novamente.");
             }
-    
+
         } finally {
             setLoading(false);
         }
@@ -95,57 +95,58 @@ export default function Login() {
 
     return (
         <View style={styles.container}>
-            <KeyboardAvoidingView behavior="padding" style={{ flex: 1, width: "100%", alignItems: 'center', justifyContent: 'center' }}>  
-            <ScrollView
-                style={{ flex: 1, width: "100%" }}
-                contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
-                horizontal={false}
-                showsVerticalScrollIndicator={true}
-            >
-                <View style={styles.boxTop}>
-                    <Image source={Logo} style={styles.logoLogin} />
-                    <Text style={typography.M0L3644}>Entrar</Text>
-                </View>
-
-                <View style={styles.containerBox}>
-                    <Input
-                        placeholder="E-mail"
-                        value={email}
-                        autoCapitalize="none"
-                        onChangeText={(text) => setEmail(text)}
-                    />
-                    <InputPassword
-                        placeholder="Senha"
-                        value={password}
-                        autoCapitalize="none"
-                        onChangeText={(text) => setPassword(text)}
-                    />
-                    {loading ? (
-                        <ActivityIndicator size="large" color={colors.green382} />
-                    ) : (
-                        <>  
-                        <PrimaryButton title="Entrar" onPress={singIn} />
-                    <View style={styles.dividerContainer}>
-                        <View style={styles.line} />
-                        <Text style={styles.dividerText}>ou</Text>
-                        <View style={styles.line} />
+            <KeyboardAvoidingView behavior="padding" style={{ flex: 1, width: "100%", alignItems: 'center', justifyContent: 'center' }}>
+                <ScrollView
+                    style={{ flex: 1, width: "100%" }}
+                    contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
+                    horizontal={false}
+                    showsVerticalScrollIndicator={true}
+                >
+                    <View style={styles.boxTop}>
+                        <Image source={Logo} style={styles.logoLogin} />
+                        <Text style={typography.M0L3644}>Entrar</Text>
                     </View>
-                        <GoogleButton onPress={handleGoogleLogin} />
-                        </>
-                    )}
-                    
-                </View>
 
-                <View style={styles.boxBottom}>
-                    <Text style={typography.M01R1624}>
-                        Novo aqui?{" "}
-                        <Text style={{ color: colors.green85F }} onPress={() => navigation.navigate("Register")}>
-                            Crie a sua conta!
+                    <View style={styles.containerBox}>
+                        <Input
+                            placeholder="E-mail"
+                            value={email}
+                            autoCapitalize="none"
+                            onChangeText={(text) => setEmail(text)}
+                        />
+                        <InputPassword
+                            placeholder="Senha"
+                            value={password}
+                            autoCapitalize="none"
+                            onChangeText={(text) => setPassword(text)}
+                        />
+                        {loading ? (
+                            <ActivityIndicator size="large" color={colors.green382} />
+                        ) : (
+                            <>
+                                <PrimaryButton title="Entrar" onPress={singIn} />
+                                {/* <View style={styles.dividerContainer}>
+                                    <View style={styles.line} />
+                                    <Text style={styles.dividerText}>ou</Text>
+                                    <View style={styles.line} />
+                                </View>
+                                <GoogleButton onPress={handleGoogleLogin} />
+                                */}
+                            </>
+                        )}
+
+                    </View>
+
+                    <View style={styles.boxBottom}>
+                        <Text style={typography.M01R1624}>
+                            Novo aqui?{" "}
+                            <Text style={{ color: colors.green85F }} onPress={() => navigation.navigate("Register")}>
+                                Crie a sua conta!
+                            </Text>
                         </Text>
-                    </Text>
-                </View>
-            </ScrollView>
-            </KeyboardAvoidingView> 
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </View >
     )
 }
