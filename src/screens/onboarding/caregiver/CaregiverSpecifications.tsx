@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   FlatList,
   TextInput,
@@ -14,8 +13,11 @@ import { Input } from "../../../components/Input";
 import { saveCaregiverSpecifications } from "../../../services/CaregiverService";
 import { CaretLeft } from "phosphor-react-native";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { capitalizeFirstLetter } from "../../../../utils/formatUtils";
+import CareCategoryPicker from "../../../components/careCateogryPicker";
 
 export default function CaregiverSpecifications({ navigation }: any) {
+  const [careCategory, setCareCategory] = useState("");
   const [experienciaInput, setExperienciaInput] = useState("");
   const [experiencias, setExperiencias] = useState<string[]>([]);
 
@@ -145,13 +147,19 @@ export default function CaregiverSpecifications({ navigation }: any) {
             },
           ]}
         >
+          <CareCategoryPicker
+            selectedValue={careCategory}
+            onValueChange={setCareCategory}
+            label="Área de atuação"
+          />
+
           {/* Experiência */}
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Experiência</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
             <Input
               placeholder="Adicionar experiência (ex: cuidados com idosos)"
               value={experienciaInput}
-              onChangeText={setExperienciaInput}
+              onChangeText={(text) => (setExperienciaInput(capitalizeFirstLetter(text)))}
               style={{ flex: 1 }}
             />
             <TouchableOpacity
@@ -200,7 +208,7 @@ export default function CaregiverSpecifications({ navigation }: any) {
           {/* Qualificações */}
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Qualificações</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
-            <Input placeholder="Adicionar qualificação" value={qualInput} onChangeText={setQualInput} style={{ flex: 1 }} />
+            <Input placeholder="Adicionar qualificação" value={qualInput} onChangeText={(text) => (setQualInput(capitalizeFirstLetter(text)))} style={{ flex: 1 }} />
             <TouchableOpacity
               onPress={() => addToList(qualInput, setQualificacoes, qualificacoes, setQualInput)}
               style={{
@@ -380,7 +388,7 @@ export default function CaregiverSpecifications({ navigation }: any) {
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Observações</Text>
           <TextInput
             value={observacoes}
-            onChangeText={setObservacoes}
+            onChangeText={(text) => (setObservacoes(capitalizeFirstLetter(text)))}
             placeholder="Informações adicionais..."
             placeholderTextColor={colors.gray75}
             style={{

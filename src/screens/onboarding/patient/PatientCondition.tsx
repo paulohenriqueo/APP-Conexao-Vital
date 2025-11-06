@@ -15,8 +15,11 @@ import { Input } from "../../../components/Input";
 import { savePatientCondition } from "../../../services/patientService";
 import { CaretLeft } from "phosphor-react-native";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { capitalizeFirstLetter } from "../../../../utils/formatUtils";
+import CareCategoryPicker from "../../../components/careCateogryPicker";
 
 export default function PatientCondition({ navigation }: any) {
+  const [careCategory, setCareCategory] = useState("");
   const [periodo, setPeriodo] = useState("");
   const [inicioPeriodo, setInicioPeriodo] = useState("");
   const [inicioPeriodoObj, setInicioPeriodoObj] = useState<Date | undefined>(undefined);
@@ -119,7 +122,6 @@ export default function PatientCondition({ navigation }: any) {
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          // flexGrow: 1,
           justifyContent: "flex-start",
           alignItems: "center",
           paddingTop: 8,
@@ -138,7 +140,7 @@ export default function PatientCondition({ navigation }: any) {
               maxWidth: 430,
               paddingBottom: 24,
               borderRadius: 24,
-              overflow: "hidden", // garante recorte dos cantos arredondados
+              overflow: "hidden",
               marginTop: 0,
               backgroundColor: "#fff",
               shadowColor: "#000",
@@ -149,6 +151,11 @@ export default function PatientCondition({ navigation }: any) {
             },
           ]}
         >
+          <CareCategoryPicker
+            selectedValue={careCategory}
+            onValueChange={setCareCategory}
+            label="Tipo de cuidado necessário"
+          />
 
           {/* Períodos como checkboxes (múltipla seleção) */}
           <Text style={{ color: colors.gray73, marginBottom: 8 }}>Período</Text>
@@ -204,7 +211,7 @@ export default function PatientCondition({ navigation }: any) {
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Observações</Text>
           <TextInput
             value={observacoes}
-            onChangeText={setObservacoes}
+            onChangeText={(text) => (setObservacoes(capitalizeFirstLetter(text)))}
             placeholder="Anotações, restrições, orientações..."
             placeholderTextColor={colors.gray75}
             style={{
@@ -224,7 +231,7 @@ export default function PatientCondition({ navigation }: any) {
             <Input
               placeholder="Adicionar alergia"
               value={alergiaInput}
-              onChangeText={setAlergiaInput}
+              onChangeText={(text) => (setAlergiaInput(capitalizeFirstLetter(text)))}
               style={{ flex: 1 }}
             />
             <TouchableOpacity
@@ -253,7 +260,7 @@ export default function PatientCondition({ navigation }: any) {
           {/* Medicamentos */}
           <Text style={{ color: colors.gray73, marginBottom: 10 }}>Medicamentos</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
-            <Input placeholder="Adicionar medicamento" value={medInput} onChangeText={setMedInput} style={{ flex: 1 }} />
+            <Input placeholder="Adicionar medicamento" value={medInput} onChangeText={(text) => (setMedInput(capitalizeFirstLetter(text)))} style={{ flex: 1 }} />
             <TouchableOpacity onPress={() => addToList(medInput, setMedicamentos, medicamentos, setMedInput)} style={{ marginLeft: 8, alignSelf: "center", paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
               <Text style={{ color: "#fff" }}>Adicionar</Text>
             </TouchableOpacity>
@@ -277,7 +284,7 @@ export default function PatientCondition({ navigation }: any) {
           {/* Condições */}
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Condições (ex: Diabetes, Hipertensão)</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
-            <Input placeholder="Adicionar condição" value={condInput} onChangeText={setCondInput} style={{ flex: 1 }} />
+            <Input placeholder="Adicionar condição" value={condInput} onChangeText={(text) => (setCondInput(capitalizeFirstLetter(text)))} style={{ flex: 1 }} />
             <TouchableOpacity onPress={() => addToList(condInput, setCondicoes, condicoes, setCondInput)} style={{ marginLeft: 8, alignSelf: "center", paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
               <Text style={{ color: "#fff" }}>Adicionar</Text>
             </TouchableOpacity>
@@ -301,7 +308,7 @@ export default function PatientCondition({ navigation }: any) {
           {/* Idiomas preferidos */}
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Idiomas preferidos</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
-            <Input placeholder="Adicionar idioma" value={idiomaInput} onChangeText={setIdiomaInput} style={{ flex: 1 }} />
+            <Input placeholder="Adicionar idioma" value={idiomaInput} onChangeText={(text) => (setIdiomaInput(capitalizeFirstLetter(text)))} style={{ flex: 1 }} />
             <TouchableOpacity onPress={() => addToList(idiomaInput, setIdiomasPreferidos, idiomasPreferidos, setIdiomaInput)} style={{ marginLeft: 8, alignSelf: "center", paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
               <Text style={{ color: "#fff" }}>Adicionar</Text>
             </TouchableOpacity>
