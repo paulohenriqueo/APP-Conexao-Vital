@@ -45,11 +45,11 @@ export default function Register() {
       return;
     }
 
-    if (!termsAccepted) {
-      setShowTermsModal(true);
-      setLoading(false);
-      return;
-    }
+    // if (!termsAccepted) {
+    //   setShowTermsModal(true);
+    //   setLoading(false);
+    //   return;
+    // }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -88,11 +88,11 @@ export default function Register() {
   }
 
   const handleAcceptTerms = () => {
-    setTermsAccepted(true);
+    // setTermsAccepted(true);
     setShowTermsModal(false);
-    setTimeout(() => {
-      signUp(); // espera o estado atualizar antes de chamar
-    }, 100);
+    // setTimeout(() => {
+    //   signUp(); // espera o estado atualizar antes de chamar
+    // }, 100);
   };
 
   const handleRegisterGoogle = () => {
@@ -150,12 +150,12 @@ export default function Register() {
 
           <PrimaryButton title="Criar conta" onPress={signUp} />
 
-          <View style={styles.dividerContainer}>
+          {/* <View style={styles.dividerContainer}>
             <View style={styles.line} />
             <Text style={styles.dividerText}>ou</Text>
             <View style={styles.line} />
           </View>
-          <GoogleButton onPress={handleRegisterGoogle} />
+          <GoogleButton onPress={handleRegisterGoogle} /> */}
         </View>
 
         <View style={{ ...styles.boxBottom, marginTop: 16 }}>
@@ -175,7 +175,7 @@ export default function Register() {
       <TermsModal
         visible={showTermsModal}
         onClose={() => setShowTermsModal(false)}
-        onAccept={handleAcceptTerms}
+        onAccept={() => { handleAcceptTerms(), setTimeout(() => { signUp(), 100 }), console.log("Termos aceitos") }}
       />
     </View>
   );
