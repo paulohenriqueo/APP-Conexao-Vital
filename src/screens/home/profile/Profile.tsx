@@ -19,7 +19,7 @@ import { Trash } from "phosphor-react-native";
 interface User {
   //Dados necessários para exibir perfil de outros usuários
   userContact?: number;
-  especification?: string;
+  careCategory?: string;
   bio?: string;
   role?: "caregiver" | "client";
   qualifications?: string[];
@@ -47,6 +47,7 @@ export default function Profile() {
     role: "caregiver",
     rating: 5, //Avaliação a ser exibida - já incluío na exibição de estrelas
     imageUrl: "https://this-person-does-not-exist.com/img/avatar-gene3d99a090940ff2f92c3cd980b5e61d3.jpg", // Exemplo de URL de imagem
+    careCategory: "Cuidados Domiciliares",
   };
 
   // Definir o componente de informações do perfil com base na função do usuário
@@ -54,10 +55,9 @@ export default function Profile() {
 
   const profileProps =
     user.role === "caregiver"
-      // user.role === "patient" //teste de exibição de dados de paciente
+      // user.role === "client" //teste de exibição de dados de paciente
       ? {
         caregiverData: (user as any)?.caregiverSpecifications ?? {
-          especialization: "Cuidador de Idosos",
           experiencia: [],
           qualificacoes: [],
           dispoDia: [],
@@ -68,7 +68,6 @@ export default function Profile() {
       }
       : {
         patientData: (user as any)?.patientSpecifications ?? {
-          careType: "Cuidados Domiciliares",
           allergies: ["Pólen", "Amendoim"],
           medications: ["Paracetamol", "Ibuprofeno"],
           conditions: ["Diabetes", "Hipertensão"],
@@ -133,11 +132,8 @@ export default function Profile() {
     { section: "Históricos", title: "Compra de créditos", onPress: () => console.log("Purchase Credits") },
     { section: "Ajuda e Suporte", title: "Termos de Uso", onPress: () => navigation.navigate("Terms") },
     { section: "Ajuda e Suporte", title: "Política de Privacidade", onPress: () => navigation.navigate("PrivacyPolicy") },
-    // Exibe sempre por enquanto
-    // Alternativa quando userRole estiver implementado
-    // userRole === "caregiver" &&
-    { section: "Ajuda e Suporte", title: "Solicitar especializações", onPress: () => navigation.navigate("Specializations") },
-    { section: "Ajuda e Suporte", title: "redefinir senha", onPress: () => navigation.navigate("NewPassword") },
+    // { section: "Ajuda e Suporte", title: "Solicitar especializações", onPress: () => navigation.navigate("Specializations") },
+    { section: "Ajuda e Suporte", title: "Alterar senha", onPress: () => navigation.navigate("NewPassword") },
     { section: "Conta", title: "Sair", onPress: handleLogout, icon: <SignOut size={22} color={colors.gray75} weight="bold" />, },
     { section: "Conta", title: "Deletar", onPress: handleDeleteAccount, icon: <Trash size={22} color={colors.orange360} weight="bold" />, }, //Criar função deletar conta
 
@@ -201,8 +197,7 @@ export default function Profile() {
             textAlign: "center",
             fontWeight: "600",
           }}>
-          {user.role === "caregiver" ? (profileProps.caregiverData?.especialization) : (profileProps.patientData?.careType)}
-          {/* {user.role === "caregiver" ? (profileProps.patientData?.careType) : (profileProps.caregiverData?.especialization)}*/} {/*teste de exibição de dados de paciente */}
+          {user.careCategory}
         </Text>
         <View style={{ ...styles.ratingContainer }}>
           {Array.from({ length: Number(user.rating) }).map((_, i) => (
@@ -261,26 +256,6 @@ export default function Profile() {
             Informações {/* gerais */}
           </Text>
         </TouchableOpacity>
-
-        {/* <TouchableOpacity
-          style={{
-            flex: 1,
-            alignItems: "center",
-            paddingVertical: 8,
-            borderBottomWidth: activeTab === "qualifications" ? 2 : 0,
-            borderBottomColor: colors.green382,
-          }}
-          onPress={() => setActiveTab("qualifications")}
-        >
-          <Text
-            style={{
-              ...typography.M01B1418,
-              color: activeTab === "qualifications" ? colors.green382 : colors.gray75,
-            }}
-          >
-            {user.role === "caregiver" ? "Qualificações" : "Condições" }
-          </Text>
-        </TouchableOpacity> */}
       </View>
 
       {/* Conteúdo da aba */}

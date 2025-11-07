@@ -9,10 +9,9 @@ import { PrimaryButton, GoogleButton } from "../../components/Button";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../FirebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
-import TermsContent from "../legal/TermsContent";
-import PrivacyPolicyContent from "../legal/PrivacyPolicyContent";
 import TermsModal from "../legal/TermsModal";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { formatName, toLowerCaseText } from "../../../utils/formatUtils";
 
 export default function Register() {
   const navigation = useNavigation<any>();
@@ -101,20 +100,6 @@ export default function Register() {
     navigation.navigate("Login"); // simulação
   }
 
-  // Função para formatar o nome corretamente
-  const formatarNome = (texto: string) => {
-    const excecoes = ["de", "da", "do", "dos", "das", "e"];
-    return texto
-      .toLowerCase()
-      .split(" ")
-      .map((palavra) =>
-        excecoes.includes(palavra)
-          ? palavra
-          : palavra.charAt(0).toUpperCase() + palavra.slice(1)
-      )
-      .join(" ");
-  };
-
   return (
     <View style={styles.container}>
       <KeyboardAwareScrollView
@@ -132,8 +117,8 @@ export default function Register() {
         </View>
 
         <View style={styles.containerBox}>
-          <Input placeholder="Nome completo" value={nome} onChangeText={(text) => { setNome(formatarNome(text)) }} />
-          <Input placeholder="E-mail" value={email} autoCapitalize="none" onChangeText={(text) => setEmail(text)} />
+          <Input placeholder="Nome completo" value={nome} onChangeText={(text) => { setNome(formatName(text)) }} />
+          <Input placeholder="E-mail" value={email} autoCapitalize="none" onChangeText={(text) => setEmail(toLowerCaseText(text))} />
           <Text style={{ color: isEmailValid ? 'green' : 'red', fontSize: 12, alignSelf: 'flex-start', marginLeft: 8, marginTop: -8 }}>
             Exemplo: usuario@email.com*
           </Text>

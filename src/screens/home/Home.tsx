@@ -13,6 +13,7 @@ import PopUpFormsModel from "../model/PopUpFormsModel";
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import ExternalUser from "./profile/ExternalUser";
 import { getCurrentUserType, getProfilesByType, PublicProfile } from "../../services/userService";
+import EditProfile from "./profile/EditProfile";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -166,7 +167,7 @@ export default function Home() {
             />
 
             <Text style={{ ...styles.subtitleText, textAlign: "left", paddingVertical: 16 }}>
-              Melhores avaliados
+              {/* Melhores avaliados */} Novos usuários
             </Text>
 
             {currentProfileType ? (

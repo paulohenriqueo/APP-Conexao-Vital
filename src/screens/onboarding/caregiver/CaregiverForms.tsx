@@ -5,9 +5,9 @@ import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { Picker } from "@react-native-picker/picker";
 import { saveCaregiverForm } from "../../../services/CaregiverService";
-import { MaterialIcons } from "@expo/vector-icons";
 import { Camera, CaretLeft } from "phosphor-react-native";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { maskCPF, maskPhone, maskCEP, isValidCPF, isValidPhone } from "../../../../utils/validationUtils"; // ✅ import centralizado
 
 export default function CaregiverForms({ navigation }: any) {
   const [cpf, setCpf] = useState("");
@@ -24,11 +24,21 @@ export default function CaregiverForms({ navigation }: any) {
   const [saving, setSaving] = useState(false);
 
   const handleContinue = async () => {
-    // validações simples (adicione as que precisar)
-    if (!cpf || !birthDate) {
-      Alert.alert("Atenção", "Preencha CPF e data de nascimento antes de continuar.");
+    if (!cpf || !birthDate || !phone) {
+      Alert.alert("Atenção", "Preencha CPF, data de nascimento e telefone antes de continuar.");
       return;
     }
+
+    if (!isValidCPF(cpf)) {
+      Alert.alert("CPF inválido", "Digite um CPF válido antes de continuar.");
+      return;
+    }
+
+    if (!isValidPhone(phone)) {
+      Alert.alert("Telefone inválido", "Digite um número de telefone válido com DDD.");
+      return;
+    }
+
     setSaving(true);
     const payload = {
       cpf,
@@ -51,10 +61,6 @@ export default function CaregiverForms({ navigation }: any) {
     }
   };
 
-  const handleSelectPhoto = () => {
-    // lógica para selecionar foto
-  };
-
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
@@ -66,51 +72,16 @@ export default function CaregiverForms({ navigation }: any) {
     }
   };
 
-  // Função para aplicar a máscara no telefone
-  function maskPhone(value: string) {
-    let cleaned = value.replace(/\D/g, "");
-    cleaned = cleaned.slice(0, 11);
-    if (cleaned.length <= 2) return `(${cleaned}`;
-    if (cleaned.length <= 7) return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
-    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
-  }
-
-  function maskCpf(value: string) {
-    let cleaned = value.replace(/\D/g, "");
-    cleaned = cleaned.slice(0, 11);
-    if (cleaned.length <= 3) {
-      return cleaned;
-    } else if (cleaned.length <= 6) {
-      return `${cleaned.slice(0, 3)}.${cleaned.slice(3)}`;
-    } else if (cleaned.length <= 9) {
-      return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6)}`;
-    } else {
-      return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
-    }
-  }
-
-  function maskCep(value: string) {
-    let cleaned = value.replace(/\D/g, "");
-    cleaned = cleaned.slice(0, 8);
-    if (cleaned.length <= 5) {
-      return cleaned;
-    } else {
-      return `${cleaned.slice(0, 5)}-${cleaned.slice(5)}`;
-    }
-  }
-
   const fetchAddress = async (cep: string) => {
-    const cleanCep = cep.replace(/\D/g, '');
-    if (cleanCep.length !== 8) {
-      return;
-    }
+    const cleanCep = cep.replace(/\D/g, "");
+    if (cleanCep.length !== 8) return;
 
     try {
       const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
       const data = await response.json();
 
       if (data.erro) {
-        Alert.alert('Erro', 'CEP não encontrado.');
+        Alert.alert("Erro", "CEP não encontrado.");
         return;
       }
 
@@ -119,7 +90,7 @@ export default function CaregiverForms({ navigation }: any) {
       setCity(data.localidade);
       setState(data.uf);
     } catch (error) {
-      Alert.alert('Erro', 'Erro ao buscar CEP.');
+      Alert.alert("Erro", "Erro ao buscar CEP.");
       console.error(error);
     }
   };
@@ -135,20 +106,20 @@ export default function CaregiverForms({ navigation }: any) {
           paddingBottom: 40,
         }}
         showsVerticalScrollIndicator={false}
-        enableOnAndroid={true}
+        enableOnAndroid
         extraScrollHeight={20}
         keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.header, { paddingTop: 20, marginVertical: 8 }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{
-            padding: 8
-          }}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 8 }}>
             <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" accessibilityLabel="Voltar" />
           </TouchableOpacity>
-          <Text style={[typography.M01SB2024, { color: colors.whiteFBFE }]}>Complete seu cadastro
+          <Text style={[typography.M01SB2024, { color: colors.whiteFBFE }]}>
+            Complete seu cadastro
           </Text>
         </View>
 
+        {/* Foto */}
         <View
           style={{
             width: 140,
@@ -167,13 +138,8 @@ export default function CaregiverForms({ navigation }: any) {
           }}
         >
           <TouchableOpacity
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: "100%",
-            }}
-            onPress={handleSelectPhoto}
+            style={{ alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}
+            onPress={() => { }}
             activeOpacity={0.7}
           >
             <Camera size={40} color={colors.gray73} weight="light" />
@@ -205,7 +171,7 @@ export default function CaregiverForms({ navigation }: any) {
           <Input
             placeholder="CPF"
             value={cpf}
-            onChangeText={text => setCpf(maskCpf(text))}
+            onChangeText={(text) => setCpf(maskCPF(text))}
             keyboardType="numeric"
             maxLength={14}
           />
@@ -226,20 +192,17 @@ export default function CaregiverForms({ navigation }: any) {
           <Input
             placeholder="Telefone"
             value={phone}
-            onChangeText={text => setPhone(maskPhone(text))}
+            onChangeText={(text) => setPhone(maskPhone(text))}
             keyboardType="numeric"
             maxLength={15}
           />
 
-          <View
-            style={{
-              backgroundColor: colors.gray7FD,
-              borderRadius: 8,
-              // marginBottom: 12, 
-              borderWidth: 0,
-              overflow: "hidden",
-            }}
-          >
+          <View style={{
+            backgroundColor: colors.gray7FD,
+            borderRadius: 8,
+            borderWidth: 0,
+            overflow: "hidden",
+          }}>
             <Picker
               selectedValue={gender}
               onValueChange={setGender}
@@ -261,7 +224,7 @@ export default function CaregiverForms({ navigation }: any) {
           <Input
             placeholder="CEP"
             value={cep}
-            onChangeText={text => setCep(maskCep(text))}
+            onChangeText={(text) => setCep(maskCEP(text))}
             onBlur={() => fetchAddress(cep)}
             keyboardType="numeric"
             maxLength={9}

@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.H02B1820,
-    color: colors.black000,
+    color: colors.gray14,
     marginBottom: 6,
   },
   content: {
