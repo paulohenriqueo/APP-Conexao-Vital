@@ -222,7 +222,7 @@ export default function Profile() {
       >
         <PrimaryButton
           title="Editar perfil"
-          onPress={() => navigation.navigate("EditProfile", { userRole: user.role })}
+          onPress={() => navigation.navigate("EditProfile", "caregiver")}
           icon={<Feather name="edit-2" size={20} color={colors.whiteFBFE} />}
         />
       </View>

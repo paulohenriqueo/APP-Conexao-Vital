@@ -20,23 +20,14 @@ export default function PopUpFormsModel({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.box}>
-          <Text style={styles.title}>Complete seu cadastro</Text>
+          <Text style={styles.title}>Como você quer se conectar?</Text>
           <Text style={styles.message}>
-            Para continuar, informe se você é um cliente ou profissional.
+            Escolha seu tipo de conta para seguir com o cadastro e personalizar sua experiência no app.
           </Text>
 
           <View style={styles.row}>
             <PrimaryButton title="Cliente" onPress={onSelectPatient}></PrimaryButton>
             <SecondaryButton title="Profissional" onPress={onSelectCaregiver} ></SecondaryButton>
-            {/* 
-            <TouchableOpacity style={[styles.button, styles.patient]} onPress={onSelectPatient}>
-              <Text style={styles.buttonText}>Paciente</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.button, styles.caregiver]} onPress={onSelectCaregiver}>
-              <Text style={styles.buttonTextSecondary}>Cuidador</Text>
-            </TouchableOpacity> */}
           </View>
 
           <TouchableOpacity style={styles.skip} onPress={onClose}>

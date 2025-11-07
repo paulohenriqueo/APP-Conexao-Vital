@@ -1,8 +1,8 @@
 import React from "react";
 import { View } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { colors } from "../../styles/colors"; // ajuste o caminho conforme sua estrutura
-import { careCategories } from "../../utils/careCategories"; // ajuste o caminho conforme o projeto
+import { colors } from "../../styles/colors";
+import { careCategories } from "../../utils/careCategories";
 
 type Props = {
   selectedValue: string;

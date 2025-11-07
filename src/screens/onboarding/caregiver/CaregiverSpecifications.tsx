@@ -14,7 +14,7 @@ import { saveCaregiverSpecifications } from "../../../services/CaregiverService"
 import { CaretLeft } from "phosphor-react-native";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { capitalizeFirstLetter } from "../../../../utils/formatUtils";
-import CareCategoryPicker from "../../../components/careCateogryPicker";
+import CareCategoryPicker from "../../../components/CareCateogryPicker";
 
 export default function CaregiverSpecifications({ navigation }: any) {
   const [careCategory, setCareCategory] = useState("");
@@ -157,7 +157,7 @@ export default function CaregiverSpecifications({ navigation }: any) {
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Experiência</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
             <Input
-              placeholder="Adicionar experiência (ex: cuidados com idosos)"
+              placeholder="Adicionar experiência"
               value={experienciaInput}
               onChangeText={(text) => (setExperienciaInput(capitalizeFirstLetter(text)))}
               style={{ flex: 1 }}

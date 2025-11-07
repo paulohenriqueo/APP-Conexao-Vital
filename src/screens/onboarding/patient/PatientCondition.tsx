@@ -16,7 +16,7 @@ import { savePatientCondition } from "../../../services/patientService";
 import { CaretLeft } from "phosphor-react-native";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { capitalizeFirstLetter } from "../../../../utils/formatUtils";
-import CareCategoryPicker from "../../../components/careCateogryPicker";
+import CareCategoryPicker from "../../../components/CareCateogryPicker";
 
 export default function PatientCondition({ navigation }: any) {
   const [careCategory, setCareCategory] = useState("");
@@ -208,23 +208,6 @@ export default function PatientCondition({ navigation }: any) {
             />
           )} */}
 
-          <Text style={{ color: colors.gray73, marginBottom: 6 }}>Observações</Text>
-          <TextInput
-            value={observacoes}
-            onChangeText={(text) => (setObservacoes(capitalizeFirstLetter(text)))}
-            placeholder="Anotações, restrições, orientações..."
-            placeholderTextColor={colors.gray75}
-            style={{
-              backgroundColor: colors.gray7FD,
-              borderRadius: 8,
-              height: 100,
-              textAlignVertical: "top",
-              padding: 12,
-              marginBottom: 12,
-            }}
-            multiline
-          />
-
           {/* Alergias */}
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Alergias</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
@@ -327,6 +310,23 @@ export default function PatientCondition({ navigation }: any) {
               </View>
             )}
             style={{ marginBottom: 12 }}
+          />
+
+          <Text style={{ color: colors.gray73, marginBottom: 6 }}>Observações</Text>
+          <TextInput
+            value={observacoes}
+            onChangeText={(text) => (setObservacoes(capitalizeFirstLetter(text)))}
+            placeholder="Anotações, restrições, orientações..."
+            placeholderTextColor={colors.gray75}
+            style={{
+              backgroundColor: colors.gray7FD,
+              borderRadius: 8,
+              height: 100,
+              textAlignVertical: "top",
+              padding: 12,
+              marginBottom: 12,
+            }}
+            multiline
           />
 
           <TouchableOpacity

@@ -36,7 +36,6 @@ export default function Login() {
         androidClientId: '582696474367-ri81htmh94qvp3345ebtu158ef2bgqho.apps.googleusercontent.com',
     });
 
-
     // SignIn com Firebase Authentication
     const singIn = async () => {
         if (email === "" || password === "") {
@@ -69,36 +68,35 @@ export default function Login() {
         }
     }
 
-    useEffect(() => {
-        const signInWithGoogle = async () => {
-            if (response?.type === 'success') {
-                const { authentication } = response;
-                if (authentication?.accessToken) {
-                    const credential = GoogleAuthProvider.credential(null, authentication.accessToken);
-                    try {
-                        await signInWithCredential(auth, credential);
-                        Alert.alert("Login Google bem-sucedido!");
-                        navigation.navigate("Home");
-                    } catch (error) {
-                        Alert.alert("Erro ao autenticar com Firebase.");
-                    }
-                }
-            }
-        };
-        signInWithGoogle();
-    }, [response]);
+    // useEffect(() => {
+    //     const signInWithGoogle = async () => {
+    //         if (response?.type === 'success') {
+    //             const { authentication } = response;
+    //             if (authentication?.accessToken) {
+    //                 const credential = GoogleAuthProvider.credential(null, authentication.accessToken);
+    //                 try {
+    //                     await signInWithCredential(auth, credential);
+    //                     Alert.alert("Login Google bem-sucedido!");
+    //                     navigation.navigate("Home");
+    //                 } catch (error) {
+    //                     Alert.alert("Erro ao autenticar com Firebase.");
+    //                 }
+    //             }
+    //         }
+    //     };
+    //     signInWithGoogle();
+    // }, [response]);
 
-    const handleGoogleLogin = () => {
-        promptAsync();
-    };
-
+    // const handleGoogleLogin = () => {
+    //     promptAsync();
+    // };
 
     return (
         <View style={styles.container}>
             <KeyboardAvoidingView behavior="padding" style={{ flex: 1, width: "100%", alignItems: 'center', justifyContent: 'center' }}>
                 <ScrollView
-                    style={{ flex: 1, width: "100%" }}
-                    contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
+                    style={{ width: "100%" }}
+                    contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}
                     horizontal={false}
                     showsVerticalScrollIndicator={true}
                 >
