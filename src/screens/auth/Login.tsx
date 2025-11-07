@@ -31,7 +31,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const auth = FIREBASE_AUTH;
     const [request, response, promptAsync] = useAuthRequest({
-        webClientId: '582696474367-m4r89vgv17k52h64ulgc27babi75ou8e.apps.googleusercontent.com',
+        webClientId: '219189836911-f3ctfh7196h8flpitlvete1t9uc8i5le.apps.googleusercontent.com',
         iosClientId: '582696474367-b9skl4jd704sqvpni9auinid4ksc35ti.apps.googleusercontent.com',
         androidClientId: '582696474367-ri81htmh94qvp3345ebtu158ef2bgqho.apps.googleusercontent.com',
     });

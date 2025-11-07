@@ -14,7 +14,7 @@ import { saveCaregiverSpecifications } from "../../../services/CaregiverService"
 import { CaretLeft } from "phosphor-react-native";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { capitalizeFirstLetter } from "../../../../utils/formatUtils";
-import CareCategoryPicker from "../../../components/careCateogryPicker";
+import CareCategoryPicker from "../../../components/CareCategoryPicker";
 
 export default function CaregiverSpecifications({ navigation }: any) {
   const [careCategory, setCareCategory] = useState("");
