@@ -14,8 +14,10 @@ import {
   isValidCPF,
   isValidPhone,
 } from "../../../../utils/validationUtils";
+import { PhotoPicker } from "../../../components/PhotoPicker";
 
 export default function PatientForms({ navigation }: any) {
+  const [photo, setPhoto] = useState("");
   const [cpf, setCpf] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [birthDateObj, setBirthDateObj] = useState<Date | undefined>();
@@ -48,6 +50,7 @@ export default function PatientForms({ navigation }: any) {
 
     setSaving(true);
     const payload = {
+      photo,
       cpf,
       birthDate,
       phone,
@@ -133,39 +136,7 @@ export default function PatientForms({ navigation }: any) {
         </View>
 
         {/* Foto */}
-        <View
-          style={{
-            width: 140,
-            height: 140,
-            borderRadius: 70,
-            backgroundColor: "#fff",
-            alignItems: "center",
-            justifyContent: "center",
-            alignSelf: "center",
-            zIndex: 2,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 8,
-            elevation: 4,
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              height: "100%",
-            }}
-            onPress={handleSelectPhoto}
-            activeOpacity={0.7}
-          >
-            <Camera size={40} color={colors.gray73} weight="light" />
-            <Text style={{ color: colors.gray73, fontSize: 15, textAlign: "center" }}>
-              Selecione uma{"\n"}foto
-            </Text>
-          </TouchableOpacity>
-        </View>
+          <PhotoPicker value={photo} onChange={setPhoto} />
 
         {/* Formulário */}
         <View

@@ -9,7 +9,6 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { savePatientCondition } from "../../../services/patientService";
@@ -195,19 +194,6 @@ export default function PatientCondition({ navigation }: any) {
               );
             })}
           </View>
-
-          {/* <TouchableOpacity onPress={() => setShowInicioPicker(true)} activeOpacity={0.9}>
-            <Input placeholder="Início do período" value={inicioPeriodo} editable={false} pointerEvents="none" style={{ marginBottom: 12 }} />
-          </TouchableOpacity>
-          {showInicioPicker && (
-            <DateTimePicker
-              value={inicioPeriodoObj || new Date()}
-              mode="date"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={handleInicioChange}
-              maximumDate={new Date(2100, 0, 1)}
-            />
-          )} */}
 
           {/* Alergias */}
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Alergias</Text>

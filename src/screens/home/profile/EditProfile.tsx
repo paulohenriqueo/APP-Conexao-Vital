@@ -19,221 +19,67 @@ import { PrimaryButton } from "../../../components/Button";
 import { colors, styles, typography } from "../../../../styles/styles";
 import { FIRESTORE_DB, FIREBASE_AUTH } from "../../../../FirebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { CaretLeft, Camera } from "phosphor-react-native";
+import { CaretLeft } from "phosphor-react-native";
 import { careCategories } from "../../../../utils/careCategories";
-import * as ImagePicker from "expo-image-picker";
 import { capitalizeFirstLetter } from "../../../../utils/formatUtils";
-
-type UserRole = "profissional" | "client";
-
-type RouteParams = {
-  EditProfile: { userRole: UserRole };
-};
+import { useEditProfile } from "../../../../utils/useEditProfile";
+import { PhotoPicker } from "../../../components/PhotoPicker";
+import { Avatar } from "../../../components/Avatar";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 export default function EditProfile() {
   const navigation = useNavigation<any>();
-  const route = useRoute<RouteProp<RouteParams, "EditProfile">>();
-  const { userRole } = route.params;
+  const {
+    // Gerais
+    currentProfileType, loading, saving,
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+    // Pessoais
+    photo, setPhoto,
+    handleSelectPhoto,
+    phone, setPhone,
+    cep, setCep,
+    street, setStreet,
+    neighborhood, setNeighborhood,
+    city, setCity,
+    state, setState,
+    handleSavePersonal,
+    fetchAddress,
 
-  // Pessoais
-  const [phone, setPhone] = useState("");
-  const [photo, setPhoto] = useState<string | null>(null);
-  const [cep, setCep] = useState("");
-  const [street, setStreet] = useState("");
-  const [neighborhood, setNeighborhood] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
+    // Específicas
+    careCategory, setCareCategory,
+    selectedPeriods, setSelectedPeriods,
+    periodOptions,
+    languages, setLanguages,
+    languageInput, setLanguageInput,
+    observations, setObservations,
+    toggleItem,
+    addToList,
+    removeFromList,
 
-  // Específicas
-  const [careCategory, setCareCategory] = useState("");
-  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
-  const [languageInput, setLanguageInput] = useState("");
-  const [languages, setLanguages] = useState<string[]>([]);
-  const [observations, setObservations] = useState("");
+    // Profissional
+    qualifications, setQualifications,
+    qualificationInput, setQualificationInput,
+    experiences, setExperiences,
+    experienceInput, setExperienceInput,
+    selectedAudience, setSelectedAudience,
+    selectedDays, setSelectedDays,
 
-  // Profissional
-  const [qualificationInput, setQualificationInput] = useState("");
-  const [qualifications, setQualifications] = useState<string[]>([]);
-  const [experienceInput, setExperienceInput] = useState("");
-  const [experiences, setExperiences] = useState<string[]>([]);
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [selectedAudience, setSelectedAudience] = useState<string[]>([]);
-  const [targetAudience, setTargetAudience] = useState<string[]>([]);
+    // Cliente
+    conditions, setConditions,
+    conditionInput, setConditionInput,
+    allergies, setAllergies,
+    allergyInput, setAllergyInput,
+    medications, setMedications,
+    medicationInput, setMedicationInput,
 
-  // Client
-  const [conditionInput, setConditionInput] = useState("");
-  const [conditions, setConditions] = useState<string[]>([]);
-  const [allergyInput, setAllergyInput] = useState("");
-  const [allergies, setAllergies] = useState<string[]>([]);
-  const [medicationInput, setMedicationInput] = useState("");
-  const [medications, setMedications] = useState<string[]>([]);
+    // Salvar
+    handleSaveSpecific,
+  } = useEditProfile();
 
-  const currentUser = FIREBASE_AUTH.currentUser;
-
-  const periodOptions = ["Matutino", "Vespertino", "Noturno"];
+  // Opções fixas
   const weekDays = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
   const audienceOptions = ["Crianças", "Adultos", "Idosos"];
-  const toggleItem = (list: string[], item: string, setter: (val: string[]) => void) => {
-    setter(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
-  };
-
-  const addToList = (value: string, setter: (v: string[]) => void, list: string[], clear: (v: string) => void) => {
-    const trimmed = value.trim();
-    if (!trimmed) return;
-    setter([...list, capitalizeFirstLetter(trimmed)]);
-    clear("");
-  };
-
-  const removeFromList = (index: number, setter: (v: string[]) => void, list: string[]) => {
-    const copy = [...list];
-    copy.splice(index, 1);
-    setter(copy);
-  };
-
-  const fetchAddress = async (cepValue: string) => {
-    const cleanCep = cepValue.replace(/\D/g, "");
-    if (cleanCep.length !== 8) return;
-
-    try {
-      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
-      const data = await response.json();
-      if (data.erro) {
-        Alert.alert("Erro", "CEP não encontrado.");
-        return;
-      }
-      setStreet(data.logradouro);
-      setNeighborhood(data.bairro);
-      setCity(data.localidade);
-      setState(data.uf);
-    } catch (error) {
-      Alert.alert("Erro", "Erro ao buscar CEP.");
-      console.error(error);
-    }
-  };
-
-  const handleSelectPhoto = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Permissão necessária", "É necessário permitir o acesso às fotos.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    });
-    if (!result.canceled) setPhoto(result.assets[0].uri);
-  };
-
-  // Buscar dados do usuário
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const ref = doc(FIRESTORE_DB, "Users", currentUser?.uid || "");
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          const data = snap.data();
-          setPhone(data.phone || "");
-          setCep(data.cep || "");
-          setStreet(data.street || "");
-          setNeighborhood(data.neighborhood || "");
-          setCity(data.city || "");
-          setState(data.state || "");
-          setPhoto(data.photo || null);
-          // Dados específicos
-          setCareCategory(data.careCategorie || "");
-          setLanguages(data.preferredLanguages || []);
-          setObservations(data.observations || "");
-          if (userRole === "profissional") {
-            setQualifications(data.qualifications || []);
-            setExperiences(data.experiences || []);
-            setSelectedDays(data.dispoDia || []);
-            setTargetAudience(data.publicoAtendido || []);
-          } else {
-            setConditions(data.conditions || []);
-            setAllergies(data.allergies || []);
-            setMedications(data.medications || []);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        Alert.alert("Erro", "Falha ao carregar dados do usuário.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  const handleSavePersonal = async () => {
-    setSaving(true);
-    try {
-      const ref = doc(FIRESTORE_DB, "Users", currentUser?.uid || "");
-      await updateDoc(ref, {
-        phone,
-        cep,
-        street,
-        neighborhood,
-        city,
-        state,
-        photo,
-      });
-      Alert.alert("Sucesso", "Informações pessoais atualizadas!");
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Não foi possível atualizar as informações pessoais.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveSpecific = async () => {
-    setSaving(true);
-    try {
-      const ref = doc(FIRESTORE_DB, "Users", currentUser?.uid || "");
-      const baseData = {
-        careCategorie: careCategory,
-        periodo: selectedPeriods,
-        preferredLanguages: languages,
-        observations,
-      };
-
-      if (userRole === "profissional") {
-        await updateDoc(ref, {
-          ...baseData,
-          qualifications,
-          experiences,
-          dispoDia: selectedDays,
-          publicoAtendido: targetAudience,
-        });
-      } else {
-        await updateDoc(ref, {
-          ...baseData,
-          conditions,
-          allergies,
-          medications,
-        });
-      }
-      Alert.alert("Sucesso", "Informações específicas atualizadas!");
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Não foi possível atualizar as informações específicas.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.green382 }}>
-        <ActivityIndicator size="large" color="#fff" />
-      </View>
-    );
-  }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.green382 }}>
@@ -253,37 +99,21 @@ export default function EditProfile() {
         {/* Seção 1 — Informações pessoais */}
         <View style={[styles.containerBox, { width: "90%", marginTop: 16, backgroundColor: "#fff", borderRadius: 24, padding: 20, paddingTop: 20, gap: 12 }]}>
           <Text style={[typography.M01M1824, { color: colors.gray23, marginBottom: 8, marginTop: 0 }]}>Informações pessoais</Text>
-
-          {/* Foto */}
-          <TouchableOpacity onPress={handleSelectPhoto} activeOpacity={0.8} style={{ alignSelf: "center", marginBottom: 12 }}>
-            <View
-              style={{
-                width: 120,
-                height: 120,
-                borderRadius: 60,
-                backgroundColor: "#f3f3f3",
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden",
-              }}
-            >
-              {photo ? (
-                <Image source={{ uri: photo }} style={{ width: "100%", height: "100%" }} />
-              ) : (
-                <>
-                  <Camera size={40} color={colors.gray73} />
-                  <Text style={{ color: colors.gray73, fontSize: 13 }}>Selecionar foto</Text>
-                </>
-              )}
-            </View>
-          </TouchableOpacity>
+          <PhotoPicker
+            value={photo}
+            onChange={(uri) => {
+              setPhoto(uri);
+              // console.log(uri);
+              // setTimeout(()=>{console.log(photo)}, 1000)
+            }}
+          />
 
           <Input placeholder="Telefone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
           <Input placeholder="CEP" value={cep} onChangeText={setCep} onBlur={() => fetchAddress(cep)} keyboardType="numeric" />
-          <Input placeholder="Rua" value={street} onChangeText={setStreet} />
-          <Input placeholder="Bairro" value={neighborhood} onChangeText={setNeighborhood} />
-          <Input placeholder="Cidade" value={city} onChangeText={setCity} />
-          <Input placeholder="Estado" value={state} onChangeText={setState} />
+          <Input placeholder="Rua" value={street} onChangeText={(text) => (setStreet(capitalizeFirstLetter(text)))} />
+          <Input placeholder="Bairro" value={neighborhood} onChangeText={(text) => (setNeighborhood(capitalizeFirstLetter(text)))} />
+          <Input placeholder="Cidade" value={city} onChangeText={(text) => (setCity(capitalizeFirstLetter(text)))} />
+          <Input placeholder="Estado" value={state} onChangeText={(text) => (setState(capitalizeFirstLetter(text)))} />
 
           <PrimaryButton title={saving ? "Salvando..." : "Salvar informações pessoais"} onPress={handleSavePersonal} />
         </View>
@@ -291,9 +121,9 @@ export default function EditProfile() {
         {/* Seção 2 — Informações específicas */}
         <View style={[styles.containerBox, { width: "90%", marginTop: 20, backgroundColor: "#fff", borderRadius: 24, padding: 20, paddingTop: 20, gap: 8 }]}>
           <Text style={[typography.M01M1824, { color: colors.gray23, marginBottom: 8, marginTop: 0 }]}> Informações específicas</Text>
-          {userRole === "profissional" ? (
+          {currentProfileType === "caregiver" ? (
             <Text style={{ color: colors.gray75, marginBottom: 8 }}>Área de atuação</Text>
-          ) : (userRole === "client" ? (
+          ) : (currentProfileType === "patient" ? (
             <Text style={{ color: colors.gray75, marginBottom: 8 }}>Tipo de cuidado necessário</Text>
           ) : null)}
           {/* Categoria */}
@@ -332,11 +162,11 @@ export default function EditProfile() {
           </View>
 
           {/* Campos dinâmicos por tipo de usuário */}
-          {userRole === "profissional" ? (
+          {currentProfileType === "caregiver" ? (
             <View style={{ gap: 8 }}>
               <Text style={{ color: colors.gray73, marginTop: 4 }}>Qualificações</Text>
               <View style={{ flexDirection: "row", marginBottom: 8 }}>
-                <Input placeholder="Adicionar qualificação" value={qualificationInput} onChangeText={setQualificationInput} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
+                <Input placeholder="Adicionar qualificação" value={qualificationInput} onChangeText={(text) => (setQualificationInput(capitalizeFirstLetter(text)))} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
                 <TouchableOpacity onPress={() => addToList(qualificationInput, setQualifications, qualifications, setQualificationInput)} style={{ marginLeft: 8, paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
                   <Text style={{ color: "#fff" }}>Adicionar</Text>
                 </TouchableOpacity>
@@ -356,7 +186,7 @@ export default function EditProfile() {
 
               <Text style={{ color: colors.gray73, marginTop: 4 }}>Experiência</Text>
               <View style={{ flexDirection: "row", marginBottom: 8 }}>
-                <Input placeholder="Adicionar experiência" value={experienceInput} onChangeText={setExperienceInput} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
+                <Input placeholder="Adicionar experiência" value={experienceInput} onChangeText={(text) => (setExperienceInput(capitalizeFirstLetter(text)))} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
                 <TouchableOpacity onPress={() => addToList(experienceInput, setExperiences, experiences, setExperienceInput)} style={{ marginLeft: 8, paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
                   <Text style={{ color: "#fff" }}>Adicionar</Text>
                 </TouchableOpacity>
@@ -398,7 +228,6 @@ export default function EditProfile() {
                 ))}
               </View>
 
-              {/* Target Audience */}
               <Text style={{ color: colors.gray73, marginBottom: 6 }}>Público atendido</Text>
               <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 12 }}>
                 {audienceOptions.map((opt) => {
@@ -440,11 +269,11 @@ export default function EditProfile() {
                 })}
               </View>
             </View>
-          ) : (userRole === "client" ? (
+          ) : (currentProfileType === "patient" ? (
             <View style={{ gap: 8 }}>
               <Text style={{ color: colors.gray73, marginTop: 4 }}>Condições</Text>
               <View style={{ flexDirection: "row", marginBottom: 8 }}>
-                <Input placeholder="Adicionar condição" value={conditionInput} onChangeText={setConditionInput} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
+                <Input placeholder="Adicionar condição" value={conditionInput} onChangeText={(text) => (setConditionInput(capitalizeFirstLetter(text)))} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
                 <TouchableOpacity onPress={() => addToList(conditionInput, setConditions, conditions, setConditionInput)} style={{ marginLeft: 8, paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
                   <Text style={{ color: "#fff" }}>Adicionar</Text>
                 </TouchableOpacity>
@@ -464,7 +293,7 @@ export default function EditProfile() {
 
               <Text style={{ color: colors.gray73, marginTop: 4 }}>Alergias</Text>
               <View style={{ flexDirection: "row", marginBottom: 8 }}>
-                <Input placeholder="Adicionar alergia" value={allergyInput} onChangeText={setAllergyInput} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
+                <Input placeholder="Adicionar alergia" value={allergyInput} onChangeText={(text) => (setAllergyInput(capitalizeFirstLetter(text)))} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
                 <TouchableOpacity onPress={() => addToList(allergyInput, setAllergies, allergies, setAllergyInput)} style={{ marginLeft: 8, paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
                   <Text style={{ color: "#fff" }}>Adicionar</Text>
                 </TouchableOpacity>
@@ -484,7 +313,7 @@ export default function EditProfile() {
 
               <Text style={{ color: colors.gray73, marginTop: 4 }}>Medicamentos</Text>
               <View style={{ flexDirection: "row", marginBottom: 8 }}>
-                <Input placeholder="Adicionar medicamento" value={medicationInput} onChangeText={setMedicationInput} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
+                <Input placeholder="Adicionar medicamento" value={medicationInput} onChangeText={(text) => (setMedicationInput(capitalizeFirstLetter(text)))} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
                 <TouchableOpacity onPress={() => addToList(medicationInput, setMedications, medications, setMedicationInput)} style={{ marginLeft: 8, paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
                   <Text style={{ color: "#fff" }}>Adicionar</Text>
                 </TouchableOpacity>
@@ -502,12 +331,12 @@ export default function EditProfile() {
                 )}
               />
             </View>
-          ) : null)}
+          ) : <></>)}
 
           {/* Languages */}
           <Text style={{ color: colors.gray73, marginTop: 4 }}>Idiomas</Text>
           <View style={{ flexDirection: "row", marginBottom: 0 }}>
-            <Input placeholder="Adicionar idioma" value={languageInput} onChangeText={setLanguageInput} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
+            <Input placeholder="Adicionar idioma" value={languageInput} onChangeText={(text) => (setLanguageInput(capitalizeFirstLetter(text)))} style={{ flex: 1, backgroundColor: colors.gray7FD, borderRadius: 8 }} />
             <TouchableOpacity onPress={() => addToList(languageInput, setLanguages, languages, setLanguageInput)} style={{ marginLeft: 8, paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
               <Text style={{ color: "#fff" }}>Adicionar</Text>
             </TouchableOpacity>
@@ -528,7 +357,7 @@ export default function EditProfile() {
           <Text style={{ color: colors.gray73, marginTop: 4, marginBottom: 4 }}>Observações</Text>
           <TextInput
             value={observations}
-            onChangeText={setObservations}
+            onChangeText={(text) => (setObservations(capitalizeFirstLetter(text)))}
             placeholder="Anotações, restrições, orientações..."
             placeholderTextColor={colors.gray75}
             style={{

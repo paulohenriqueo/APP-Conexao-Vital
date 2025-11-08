@@ -5,11 +5,13 @@ import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { Picker } from "@react-native-picker/picker";
 import { saveCaregiverForm } from "../../../services/CaregiverService";
-import { Camera, CaretLeft } from "phosphor-react-native";
+import { CaretLeft } from "phosphor-react-native";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { maskCPF, maskPhone, maskCEP, isValidCPF, isValidPhone } from "../../../../utils/validationUtils"; // ✅ import centralizado
+import { PhotoPicker } from "../../../components/PhotoPicker";
 
 export default function CaregiverForms({ navigation }: any) {
+  const [photo, setPhoto] = useState("");
   const [cpf, setCpf] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [birthDateObj, setBirthDateObj] = useState<Date | undefined>(undefined);
@@ -41,6 +43,7 @@ export default function CaregiverForms({ navigation }: any) {
 
     setSaving(true);
     const payload = {
+      photo,
       cpf,
       birthDate,
       phone,
@@ -137,16 +140,7 @@ export default function CaregiverForms({ navigation }: any) {
             elevation: 4,
           }}
         >
-          <TouchableOpacity
-            style={{ alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}
-            onPress={() => { }}
-            activeOpacity={0.7}
-          >
-            <Camera size={40} color={colors.gray73} weight="light" />
-            <Text style={{ color: colors.gray73, fontSize: 15, textAlign: "center" }}>
-              Selecione uma{"\n"}foto
-            </Text>
-          </TouchableOpacity>
+          <PhotoPicker value={photo} onChange={setPhoto} />
         </View>
 
         <View

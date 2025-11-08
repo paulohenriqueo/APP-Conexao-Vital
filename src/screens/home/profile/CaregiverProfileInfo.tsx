@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { colors } from "../../../../styles/colors";
 import { typography } from "../../../../styles/typography";
+import { UserProfile } from "../../../types/UserProfile";
 
 type Props = {
   caregiverData?: any;
@@ -26,7 +27,7 @@ const CaregiverProfileInfo: React.FC<Props> = ({ caregiverData = {} }) => {
   const experiencia = caregiverData.experiencia ?? caregiverData.experience ?? [];
   const qualificacoes = caregiverData.qualificacoes ?? caregiverData.qualifications ?? [];
   const dispoDia = caregiverData.dispoDia ?? caregiverData.dispoDia ?? [];
-  const dispoHora = caregiverData.dispoHora ?? caregiverData.dispoHora ?? [];
+  // const dispoHora = caregiverData.dispoHora ?? caregiverData.dispoHora ?? [];
   const periodo = caregiverData.periodo ?? caregiverData.periodos ?? [];
   const publicoAtendido = caregiverData.publicoAtendido ?? caregiverData.publicoAtendido ?? [];
   const observacoes = caregiverData.observacoes ?? caregiverData.notes ?? "";
@@ -36,7 +37,7 @@ const CaregiverProfileInfo: React.FC<Props> = ({ caregiverData = {} }) => {
       <Section title="Experiência" content={joinOrNone(experiencia)} />
       <Section title="Qualificações" content={joinOrNone(qualificacoes)} />
       <Section title="Disponibilidade (dias)" content={joinOrNone(dispoDia)} />
-      <Section title="Disponibilidade (horário)" content={joinOrNone(dispoHora)} />
+      {/* <Section title="Disponibilidade (horário)" content={joinOrNone(dispoHora)} /> */}
       <Section title="Período de atendimento" content={joinOrNone(periodo)} />
       <Section title="Público atendido" content={joinOrNone(publicoAtendido)} />
       <Section title="Observações" content={observacoes ? observacoes : "Nenhuma observação informada"} />

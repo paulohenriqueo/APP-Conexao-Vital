@@ -1,5 +1,5 @@
 /** User role type */
-export type UserRole = "professional" | "client";
+export type currentProfileType = "caregiver" | "patient";
 
 /** Base fields shared by all users */
 export interface BaseUserProfile {
@@ -8,7 +8,7 @@ export interface BaseUserProfile {
   email: string;
   phone: string;
   photoURL?: string;
-  role: UserRole;
+  role: currentProfileType;
 
   // Address
   cep?: string;
@@ -43,13 +43,13 @@ export interface ClientSpecifications {
 
 /** Full professional profile */
 export interface ProfessionalProfile extends BaseUserProfile {
-  role: "professional";
+  role: "caregiver";
   professionalSpecifications?: ProfessionalSpecifications;
 }
 
 /** Full client profile */
 export interface ClientProfile extends BaseUserProfile {
-  role: "client";
+  role: "patient";
   clientSpecifications?: ClientSpecifications;
 }
 

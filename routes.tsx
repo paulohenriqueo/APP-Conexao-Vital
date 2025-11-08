@@ -10,7 +10,6 @@ import Terms from "./src/screens/legal/Terms";
 import PrivacyPolicy from "./src/screens/legal/PrivacyPolicy";
 import Home from "./src/screens/home/Home";
 import PatientForms from "./src/screens/onboarding/patient/PatientForms";
-import Specializations from "./src/screens/home/Specializations";
 import PatientCondition from "./src/screens/onboarding/patient/PatientCondition";
 import CaregiverForms from "./src/screens/onboarding/caregiver/CaregiverForms";
 import CaregiverSpecifications from "./src/screens/onboarding/caregiver/CaregiverSpecifications";
@@ -31,7 +30,6 @@ export default function Routes() {
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="PatientForms" component={PatientForms} />
-        <Stack.Screen name="Specializations" component={Specializations} />
         <Stack.Screen name ="PatientCondition" component={PatientCondition} />
         <Stack.Screen name="CaregiverForms" component={CaregiverForms} />
         <Stack.Screen name="CaregiverSpecifications" component={CaregiverSpecifications} />
