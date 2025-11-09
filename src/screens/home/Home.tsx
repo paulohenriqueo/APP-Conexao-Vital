@@ -136,15 +136,15 @@ export default function Home() {
 
   // Dados para teste de lista
   const historyData = [
-    { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-genbccd101bd8dbac5f8bb60897e38ab2be.jpg", especialization: "Cuidado Domiciliar" },
-    { id: "2", name: "João Souza", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen6b3b5faef405b1681627466f154dd5bf.jpg", especialization: "Enfermeiro" },
-    { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gend4affcf39479b0e32a6b292ee316cc18.jpg", especialization: "Cuidado Domiciliar" },
+    { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-genbccd101bd8dbac5f8bb60897e38ab2be.jpg", careCategory: "Cuidado Domiciliar" },
+    { id: "2", name: "João Souza", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen6b3b5faef405b1681627466f154dd5bf.jpg", careCategory: "Enfermeiro" },
+    { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gend4affcf39479b0e32a6b292ee316cc18.jpg", careCategory: "Cuidado Domiciliar" },
   ];
 
   const searchData = [
-    { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3de81692a53179ab914d9ff7d102fee1.jpg", especialization: "Cuidado Domiciliar" },
-    { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen80b45514e179756196f7b7682ba17bb0.jpg", especialization: "Enfermeiro" },
-    { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen63cb16d668b8c7c84a755fc3a4450b7b.jpg", especialization: "Acompanhante" },
+    { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3de81692a53179ab914d9ff7d102fee1.jpg", careCategory: "Cuidado Domiciliar" },
+    { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen80b45514e179756196f7b7682ba17bb0.jpg", careCategory: "Enfermeiro" },
+    { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen63cb16d668b8c7c84a755fc3a4450b7b.jpg", careCategory: "Acompanhante" },
   ];
 
   // Função para renderizar conteúdo dependendo da aba selecionada

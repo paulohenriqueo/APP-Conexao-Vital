@@ -27,6 +27,7 @@ import { PhotoPicker } from "../../../components/PhotoPicker";
 import { Avatar } from "../../../components/Avatar";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { maskCEP, maskPhone } from "../../../../utils/validationUtils";
 
 export default function EditProfile() {
   const navigation = useNavigation<any>();
@@ -103,13 +104,11 @@ export default function EditProfile() {
             value={photo}
             onChange={(uri) => {
               setPhoto(uri);
-              // console.log(uri);
-              // setTimeout(()=>{console.log(photo)}, 1000)
             }}
           />
 
-          <Input placeholder="Telefone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-          <Input placeholder="CEP" value={cep} onChangeText={setCep} onBlur={() => fetchAddress(cep)} keyboardType="numeric" />
+          <Input placeholder="Telefone" value={phone} onChangeText={(text) => setPhone(maskPhone(text))} keyboardType="phone-pad" />
+          <Input placeholder="CEP" value={cep} onChangeText={(text) => setCep(maskCEP(text))} onBlur={() => fetchAddress(cep)} keyboardType="numeric" />
           <Input placeholder="Rua" value={street} onChangeText={(text) => (setStreet(capitalizeFirstLetter(text)))} />
           <Input placeholder="Bairro" value={neighborhood} onChangeText={(text) => (setNeighborhood(capitalizeFirstLetter(text)))} />
           <Input placeholder="Cidade" value={city} onChangeText={(text) => (setCity(capitalizeFirstLetter(text)))} />

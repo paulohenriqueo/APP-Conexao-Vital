@@ -10,18 +10,18 @@ type SearchResultItemProps = {
   name: string;
   rating: number;
   tags: string[];
-  especialization: string;
+  careCategory: string;
   imageUrl?: string;
   onPress: () => void;
 };
 
-export function SearchResultItem({ name, especialization, rating, tags, imageUrl, onPress }: SearchResultItemProps) {
+export function SearchResultItem({ name, careCategory, rating, tags, imageUrl, onPress }: SearchResultItemProps) {
   return (
     <View style={resultStyles.container}>
       <Avatar name={name} imageUrl={imageUrl}/>
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={resultStyles.name}>{name}
-          <Text style={resultStyles.especialization}>  {especialization}</Text>
+          <Text style={resultStyles.careCategory}>  {careCategory}</Text>
         </Text>
         <View style={{ ...styles.ratingContainer }}>
           {Array.from({ length: 5 }).map((_, i) => (

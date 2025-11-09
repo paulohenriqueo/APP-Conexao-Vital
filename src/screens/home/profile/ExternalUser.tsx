@@ -1,21 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
-import { MaterialIcons, Feather } from "@expo/vector-icons";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { colors } from "../../../../styles/colors";
 import { typography } from "../../../../styles/typography";
 import { useNavigation, NavigationProp, useRoute } from "@react-navigation/native";
-import ProfileItem from "../../../components/ProfileItem";
-import { CaretLeft, SignOut, WhatsappLogo } from "phosphor-react-native";
+import { CaretLeft, WhatsappLogo } from "phosphor-react-native";
 import { Avatar } from "../../../components/Avatar";
-import { styles } from "../../../../styles/styles";
 import { Ionicons } from "@expo/vector-icons";
 import CaregiverProfileInfo from "./CaregiverProfileInfo";
 import { OutlinedButton, PrimaryButton } from "../../../components/Button";
 import PatientProfileInfo from "./PatientProfileInfo";
 import { openWhatsApp } from "../../../../utils/openWhatsApp";
-import Home from "../Home";
+import { TopBar } from "../../../components/TopBar";
 
 interface User {
     //Dados necessários para exibir perfil de outros usuários
@@ -28,13 +25,11 @@ interface User {
 }
 
 export default function ExternalUser() {
-    const [activeTab, setActiveTab] = useState<"info" | "qualifications">("info");
     const [userName, setUserName] = useState("");
-    const [userEmail, setUserEmail] = useState("");
     const [contactRequested, setContactRequested] = useState(false); // Estado para controlar se o contato foi solicitado
     const [showStars, setShowStars] = useState(false); // Estado para controlar se entrou em contato
     const [rating, setRating] = useState(0);
-    
+
     const navigation = useNavigation<NavigationProp<any>>();
     const route: any = useRoute();
 
@@ -64,31 +59,31 @@ export default function ExternalUser() {
                 }
                 const data = userSnap.data();
                 console.log("ExternalUser: user document data:", data); // debug
-                 const role =
-                     data?.profileType ??
-                     (data?.caregiverSpecifications || data?.caregiverProfile ? "caregiver" : data?.patientProfile ? "patient" : "undefined");
-                 setRemoteUser({
-                     id: userSnap.id,
-                     name: data?.name ?? data?.displayName ?? "",
-                     email: data?.email ?? null,
-                     role,
-                     // procura phone em vários lugares (root, profiles)
-                     phone:
-                         data?.phone ??
-                         data?.contact ??
-                         data?.patientProfile?.phone ??
-                         data?.caregiverProfile?.phone ??
-                         null,
-                     rating: data?.rating ?? 0,
-                     imageUrl: data?.photoUrl ?? data?.avatar ?? null,
-                     caregiverSpecifications: data?.caregiverSpecifications ?? data?.caregiverProfile ?? null,
-                     // merge entre patientProfile (dados pessoais) e condition (dados médicos)
-                     patientProfile: {
-                         ...(data?.patientProfile ?? {}),
-                         ...(data?.condition ?? {}),
-                     },
-                     bio: data?.bio ?? data?.description ?? "",
-                 });
+                const role =
+                    data?.profileType ??
+                    (data?.caregiverSpecifications || data?.caregiverProfile ? "caregiver" : data?.patientProfile ? "patient" : "undefined");
+                setRemoteUser({
+                    id: userSnap.id,
+                    name: data?.name ?? data?.displayName ?? "",
+                    email: data?.email ?? null,
+                    role,
+                    // procura phone em vários lugares (root, profiles)
+                    phone:
+                        data?.phone ??
+                        data?.contact ??
+                        data?.patientProfile?.phone ??
+                        data?.caregiverProfile?.phone ??
+                        null,
+                    rating: data?.rating ?? 0,
+                    imageUrl: data?.photoUrl ?? data?.avatar ?? null,
+                    caregiverSpecifications: data?.caregiverSpecifications ?? data?.caregiverProfile ?? null,
+                    // merge entre patientProfile (dados pessoais) e condition (dados médicos)
+                    patientProfile: {
+                        ...(data?.patientProfile ?? {}),
+                        ...(data?.condition ?? {}),
+                    },
+                    bio: data?.bio ?? data?.description ?? "",
+                });
             } catch (err) {
                 console.warn("Erro ao buscar ExternalUser:", err);
             } finally {
@@ -103,11 +98,9 @@ export default function ExternalUser() {
             ? { caregiverData: remoteUser?.caregiverSpecifications ?? {} }
             : { patientData: remoteUser?.patientProfile ?? {} };
 
-    // nome e email agora vêm de remoteUser (carregado acima)
     useEffect(() => {
         if (remoteUser) {
             setUserName(remoteUser.name || "");
-            setUserEmail(remoteUser.email || "");
             setRating(remoteUser.rating ?? 0);
         }
     }, [remoteUser]);
@@ -153,13 +146,16 @@ export default function ExternalUser() {
                 width: "100%"
             }}
         >
+            <View style={{ position: "absolute", zIndex: 2, width: "100%", top: 0, left: 0 }}>
+                <TopBar title="" />
+            </View>
             {/* Foto de perfil, nome e estrelas - estilo atualizado para card centralizado */}
-            <View style={{ marginHorizontal: 16, marginTop: 46, marginBottom: 12 }}>
+            <View style={{ marginHorizontal: 16, marginTop: 90, marginBottom: 12 }}>
                 <View
                     style={{
                         backgroundColor: colors.whiteFBFE,
                         borderRadius: 12,
-                        paddingTop: 80,
+                        paddingTop: 60,
                         paddingVertical: 35,
                         alignItems: "center",
                         shadowColor: "#000",
@@ -187,7 +183,7 @@ export default function ExternalUser() {
                         {remoteUser?.role === "caregiver" ? profileProps.caregiverData?.especialization : profileProps.patientData?.careType}
                     </Text>
                     <View style={{ marginTop: 8 }}>
-                        {Array.from({ length: Number(remoteUser?.rating ?? 0) }).map((_, i) => (
+                        {Array.from({ length: Number(remoteUser?.rating || 0) }).map((_, i) => (
                             <Ionicons key={i} name={i < (remoteUser?.rating ?? 0) ? "star" : "star-outline"} size={20} color={colors.ambar400} />
                         ))}
                     </View>
@@ -203,7 +199,11 @@ export default function ExternalUser() {
                             onPress={() => {
                                 setContactRequested(false);
                                 setShowStars(true);
-                                if (remoteUser?.phone) openWhatsApp(String(remoteUser.phone), "Olá! Vi seu perfil e gostaria de conversar.");
+                                if (remoteUser?.phone) {
+                                    const firstName = remoteUser.name?.split(" ")[0] || "";
+                                    const message = `Olá ${firstName}! Vi seu perfil no Conexão Vital e me interessei pelos seus serviços. Gostaria de saber mais e conversar com você.`;
+                                    openWhatsApp(String(remoteUser.phone), message);
+                                }
                             }}
                             icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
                         />
@@ -217,6 +217,50 @@ export default function ExternalUser() {
                             icon={<WhatsappLogo size={20} color={colors.green382} />}
                         />
                     )}
+                    {showStars ? (
+                        <View
+                            style={{
+                                flexDirection: "column",
+                                alignContent: "center",
+                                justifyContent: "center",
+                                gap: 12,
+                                backgroundColor: colors.grayEF1,
+                                paddingVertical: 16,
+                                paddingHorizontal: 12,
+                                borderRadius: 12,
+                                marginTop: 16
+                            }}
+                        >
+                            <Text style={{ textAlign: "center", ...typography.M01R1214 }}>
+                                Gostaria de avaliar esse perfil?
+                            </Text>
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignContent: "center",
+                                    justifyContent: "center",
+                                    gap: 8,
+                                }}
+                            >
+                                {[1, 2, 3, 4, 5].map((starNumber) => renderStar(starNumber))}
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    submitRating
+                                    setShowStars(false)
+                                }}
+                                disabled={rating === 0}
+                                style={{
+                                    paddingVertical: 4,
+                                    opacity: rating === 0 ? 0.6 : 1,
+                                }}
+                            >
+                                <Text style={{ ...typography.M01R1214, color: colors.green85F, textAlign: "center", fontWeight: "600", textDecorationLine: "underline" }}>
+                                    Enviar avaliação
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : null}
                 </View>
             </View>
 
@@ -230,14 +274,13 @@ export default function ExternalUser() {
                 </ScrollView>
             </View> */}
 
-            {/* Abas */}
             <View
                 style={{
                     flexDirection: "row",
                     justifyContent: "center",
                     display: "flex",
                     alignItems: "center",
-                    width: "87%",
+                    width: "92%",
                     marginHorizontal: "4%",
                     borderBottomWidth: 1,
                     borderBottomColor: colors.grayE8,
@@ -249,25 +292,19 @@ export default function ExternalUser() {
                         flex: 1,
                         alignItems: "center",
                         paddingVertical: 8,
-                        borderBottomWidth: activeTab === "info" ? 2 : 0,
+                        borderBottomWidth: 2,
                         borderBottomColor: colors.green382,
-                    }}
-                    onPress={() => setActiveTab("info")}
-                >
+                    }}>
                     <Text
-                        style={{
-                            ...typography.M01B1624,
-                            color: activeTab === "info" ? colors.green382 : colors.gray75,
-                        }}
-                    >
+                        style={{ ...typography.M01B1624, color: colors.green382 }}>
                         Informações {/* gerais */}
                     </Text>
                 </TouchableOpacity>
             </View>
 
-            {/* Conteúdo da aba */}
-            {activeTab === "info" &&
-                (ProfileInfoComponent ? <ProfileInfoComponent {...(profileProps as any)} /> : <Text style={{ color: colors.gray75 }}>Informações não disponíveis</Text>)}
+            {/* Conteúdo */}
+            {(ProfileInfoComponent ? <ProfileInfoComponent {...(profileProps as any)} />
+                : <Text style={{ color: colors.gray75 }}>Informações não disponíveis</Text>)}
         </ScrollView>
     );
 }

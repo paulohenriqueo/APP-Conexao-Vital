@@ -38,7 +38,6 @@ interface SectionItem {
 }
 
 export default function Profile() {
-  const [activeTab, setActiveTab] = useState<"info" | "qualifications">("info");
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
@@ -157,7 +156,7 @@ export default function Profile() {
 
   // Cria um array único com todas as seções e itens
   const items: SectionItem[] = [
-    // { section: "Históricos", title: "Avaliações realizadas", onPress: () => console.log("Completed Reviews") },
+    { section: "Históricos", title: "Avaliações realizadas", onPress: () => console.log("Completed Reviews") },
     { section: "Históricos", title: "Compra de créditos", onPress: () => console.log("Purchase Credits") },
     { section: "Ajuda e Suporte", title: "Termos de Uso", onPress: () => navigation.navigate("Terms") },
     { section: "Ajuda e Suporte", title: "Política de Privacidade", onPress: () => navigation.navigate("PrivacyPolicy") },
@@ -298,14 +297,14 @@ export default function Profile() {
             flex: 1,
             alignItems: "center",
             paddingVertical: 8,
-            borderBottomWidth: activeTab === "info" ? 2 : 0,
+            borderBottomWidth: 2,
             borderBottomColor: colors.green382,
           }}>
           <Text style={{ ...typography.M01B1624, color: colors.green382 }}>Informações</Text>
         </View>
       </View>
 
-      {/* Conteúdo da aba */}
+      {/* Conteúdo */}
       {currentProfileType && ProfileInfoComponent ? (
           // renderiza apenas se o componente não for undefined
           <ProfileInfoComponent {...(profileProps as any)} />

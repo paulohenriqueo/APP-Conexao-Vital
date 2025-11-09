@@ -32,6 +32,8 @@ declare module "phosphor-react-native" {
   export const Camera: React.FC<IconProps>;
   export const Images: React.FC<IconProps>;
   export const Trash: React.FC<IconProps>;
+  export const EnvelopeOpen: React.FC<IconProps>;
+  export const Envelope: React.FC<IconProps>;
 
   export const PhosphorIcon: React.FC<IconProps>;
 }
