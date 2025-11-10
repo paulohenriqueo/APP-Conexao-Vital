@@ -27,8 +27,8 @@ export function HistoryItem({
   city,
   date,
   imageUrl,
-  currentProfileType,
-  requestStatus,
+  currentProfileType = "caregiver",
+  requestStatus = "pendente",
   onPress,
 }: HistoryItemProps) {
 
@@ -89,8 +89,8 @@ export function HistoryItem({
         {currentProfileType === "caregiver" && requestStatus === "pendente" ? (
           // botões para aceitar ou recusar
           <View style={{ marginRight: 12, gap: 6 }}>
-            <CircleButton type="aceitar" onPress={handleAccept} icon={<Check size={20} color={colors.greenAccept}></Check>}></CircleButton>
-            <CircleButton type="recusar" onPress={handleDecline} icon={<X size={20} color={colors.redc00}></X>}></CircleButton>
+            <CircleButton type="aceitar" onPress={handleAccept} icon={<Check size={20} color={colors.greenAccept} weight="bold"></Check>}></CircleButton>
+            <CircleButton type="recusar" onPress={handleDecline} icon={<X size={20} color={colors.redc00} weight="bold"></X>}></CircleButton>
           </View>
         ) : (
           // tag com requestStatus
