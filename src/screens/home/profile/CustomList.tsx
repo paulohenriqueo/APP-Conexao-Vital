@@ -10,7 +10,7 @@ type HistoryData = {
   name: string;
   rating: number;
   date: string;
-  especialization: string;
+  careCategory: string;
   imageUrl?: string;
 };
 
@@ -19,7 +19,7 @@ type SearchData = {
   name: string;
   rating: number;
   tags: string[];
-  especialization: string;
+  careCategory: string;
   imageUrl?: string;
 };
 
@@ -46,7 +46,7 @@ export function CustomList({ type, data }: CustomListProps) {
                 name={(item as HistoryData).name}
                 rating={(item as HistoryData).rating}
                 date={(item as HistoryData).date}
-                especialization={(item as HistoryData).especialization}
+                careCategory={(item as HistoryData).careCategory}
                 imageUrl={(item as HistoryData).imageUrl || ""}
                 onPress={handlePress}
               />
@@ -55,7 +55,7 @@ export function CustomList({ type, data }: CustomListProps) {
                 name={(item as SearchData).name}
                 rating={(item as SearchData).rating}
                 tags={(item as SearchData).tags}
-                especialization={(item as SearchData).especialization}
+                careCategory={(item as SearchData).careCategory}
                 imageUrl={(item as SearchData).imageUrl || ""}
                 onPress={handlePress}
               />

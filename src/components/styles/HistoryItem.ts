@@ -19,10 +19,26 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: "#555",
   },
-  especialization: {
+  careCategory: {
     fontSize: 13,
     lineHeight: 14,
     fontWeight: "600",
     color: colors.gray75,
+  },
+  requestStatus: {
+    flexDirection: "column",
+    alignContent: "flex-end",
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    gap: 8,
+  },
+  requestStatusTag: {
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  requestStatusText: {
+    fontSize: 14,
+    fontWeight: 600,
   }
 });

@@ -34,8 +34,41 @@ export default function Register() {
     return strongPasswordRegex.test(password);
   };
 
+  const handleRegisterPress = () => {
+    if (!nome || !email || !password || !confirmPassword) {
+      Alert.alert("Campos obrigatórios", "Preencha todos os campos .");
+      return;
+    }
+
+    if (!isEmailValid) {
+      Alert.alert("Email inválido", "Por favor, insira um email válido.");
+      return;
+    }
+
+    if (!isStrongPassword(password)) {
+      Alert.alert(
+        "Senha fraca",
+        "A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas, números e símbolos."
+      );
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Senhas distintas", "As senhas não coincidem. Por favor, tente novamente.");
+      return;
+    }
+
+    if (!termsAccepted) {
+      setShowTermsModal(true);
+      return;
+    }
+
+    // Se já aceitou os termos, cria direto
+    signUp();
+  };
+
   // SignUp com Firebase Authentication
-  const signUp = async () => {
+  const signUp = async (accepted?: boolean) => {
     setLoading(true);
 
     if (password !== confirmPassword) {
@@ -44,11 +77,11 @@ export default function Register() {
       return;
     }
 
-    // if (!termsAccepted) {
-    //   setShowTermsModal(true);
-    //   setLoading(false);
-    //   return;
-    // }
+    if (!accepted && !termsAccepted) {
+      setLoading(false);
+      setShowTermsModal(true);
+      return;
+    }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -87,24 +120,22 @@ export default function Register() {
   }
 
   const handleAcceptTerms = () => {
-    // setTermsAccepted(true);
+    setTermsAccepted(true);
     setShowTermsModal(false);
-    // setTimeout(() => {
-    //   signUp(); // espera o estado atualizar antes de chamar
-    // }, 100);
+    signUp(true); // passa explicitamente que os termos foram aceitos
   };
 
-  const handleRegisterGoogle = () => {
-    console.log("Cadastro com Google pressionado");
-    Alert.alert("Cadastro com Google concluído com sucesso!");
-    navigation.navigate("Login"); // simulação
-  }
+  // const handleRegisterGoogle = () => {
+  //   console.log("Cadastro com Google pressionado");
+  //   Alert.alert("Cadastro com Google concluído com sucesso!");
+  //   navigation.navigate("Login"); // simulação
+  // }
 
   return (
     <View style={styles.container}>
       <KeyboardAwareScrollView
-        style={{ flex: 1, width: "100%" }}
-        contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
+        style={{ width: "100%" }}
+        contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}
         horizontal={false}
         showsVerticalScrollIndicator={true}
         enableOnAndroid={true}
@@ -127,13 +158,8 @@ export default function Register() {
             A senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas, números e símbolos.*
           </Text>
           <InputPassword placeholder="Repita a senha" value={confirmPassword} onChangeText={setConfirmPassword} showForgotPassword={false} />
-          {/* <Text style={{ ...typography.M01R1014, color: colors.gray75 }}>
-            Ao cadastrar, você aceita os{" "}
-            <Text style={{ color: colors.green382 }} onPress={() => navigation.navigate("Terms")}>Termos de Uso</Text> e a{" "}
-            <Text style={{ color: colors.green382 }} onPress={() => navigation.navigate("PrivacyPolicy")}>Política de Privacidade</Text>.
-          </Text> */}
 
-          <PrimaryButton title="Criar conta" onPress={signUp} />
+          <PrimaryButton title="Criar conta" onPress={handleRegisterPress} />
 
           {/* <View style={styles.dividerContainer}>
             <View style={styles.line} />
@@ -160,7 +186,7 @@ export default function Register() {
       <TermsModal
         visible={showTermsModal}
         onClose={() => setShowTermsModal(false)}
-        onAccept={() => { handleAcceptTerms(), setTimeout(() => { signUp(), 100 }), console.log("Termos aceitos") }}
+        onAccept={() => { handleAcceptTerms() }}
       />
     </View>
   );

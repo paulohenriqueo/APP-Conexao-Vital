@@ -8,7 +8,7 @@ interface ProfileItemProps {
   title: string;
   onPress?: () => void;
   showDivider?: boolean;
-  icon?: React.ReactNode; // ícone opcional
+  icon?: React.ReactNode;
 }
 
 const ProfileItem: React.FC<ProfileItemProps> = ({ title, onPress, showDivider = true, icon }) => {

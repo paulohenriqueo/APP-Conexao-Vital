@@ -12,16 +12,19 @@ import { Avatar } from "../../../components/Avatar";
 import { styles } from "../../../../styles/styles";
 import { Ionicons } from "@expo/vector-icons";
 import CaregiverProfileInfo from "./CaregiverProfileInfo";
-import { PrimaryButton } from "../../../components/Button";
+import { PrimaryButton, SecondaryButton } from "../../../components/Button";
 import { PatientProfileInfo } from "./PatientProfileInfo";
 import { Trash } from "phosphor-react-native";
+import { getCurrentUserType } from "../../../services/userService";
+import PopUpFormsModel from "../../model/PopUpFormsModel";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface User {
   //Dados necessários para exibir perfil de outros usuários
   userContact?: number;
   careCategory?: string;
   bio?: string;
-  role?: "caregiver" | "client";
+  role?: string | null;
   qualifications?: string[];
   rating?: number;
   imageUrl?: string;
@@ -35,18 +38,18 @@ interface SectionItem {
 }
 
 export default function Profile() {
-  const [activeTab, setActiveTab] = useState<"info" | "qualifications">("info");
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [currentProfileType, setCurrentProfileType] = useState<string | null>(null);
+  const [showSelect, setShowSelect] = useState(false);
 
   const navigation = useNavigation<NavigationProp<any>>();
 
   // Dados provisórios do usuário
   const user: User = {
-    bio: "Cuidador experiente com foco em idosos.",
-    role: "caregiver",
+    role: currentProfileType,
     rating: 5, //Avaliação a ser exibida - já incluío na exibição de estrelas
-    imageUrl: "https://this-person-does-not-exist.com/img/avatar-gene3d99a090940ff2f92c3cd980b5e61d3.jpg", // Exemplo de URL de imagem
     careCategory: "Cuidados Domiciliares",
   };
 
@@ -55,13 +58,12 @@ export default function Profile() {
 
   const profileProps =
     user.role === "caregiver"
-      // user.role === "client" //teste de exibição de dados de paciente
       ? {
         caregiverData: (user as any)?.caregiverSpecifications ?? {
           experiencia: [],
           qualificacoes: [],
           dispoDia: [],
-          periodo: [],
+          period: [],
           publicoAtendido: [],
           observacoes: "",
         },
@@ -76,7 +78,7 @@ export default function Profile() {
         },
       };
 
-  // Buscar email e nome do usuário
+  // Buscar email, nome e foto
   useEffect(() => {
     const auth = getAuth();
     const currentUser = auth.currentUser;
@@ -95,6 +97,32 @@ export default function Profile() {
       }
     };
     fetchUserName();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserPhoto = async () => {
+      const auth = getAuth();
+      const db = getFirestore();
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const userDocRef = doc(db, "Users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) setPhoto(userDoc.data().photo || "");
+      }
+    };
+    fetchUserPhoto();
+  }, []);
+
+  useEffect(() => {
+    // carrega tipo do usuário e dados do perfil
+    (async () => {
+      try {
+        const type = await getCurrentUserType();
+        setCurrentProfileType(type);
+      } catch (e) {
+        console.warn(e);
+      }
+    })();
   }, []);
 
   // Logout
@@ -132,7 +160,6 @@ export default function Profile() {
     { section: "Históricos", title: "Compra de créditos", onPress: () => console.log("Purchase Credits") },
     { section: "Ajuda e Suporte", title: "Termos de Uso", onPress: () => navigation.navigate("Terms") },
     { section: "Ajuda e Suporte", title: "Política de Privacidade", onPress: () => navigation.navigate("PrivacyPolicy") },
-    // { section: "Ajuda e Suporte", title: "Solicitar especializações", onPress: () => navigation.navigate("Specializations") },
     { section: "Ajuda e Suporte", title: "Alterar senha", onPress: () => navigation.navigate("NewPassword") },
     { section: "Conta", title: "Sair", onPress: handleLogout, icon: <SignOut size={22} color={colors.gray75} weight="bold" />, },
     { section: "Conta", title: "Deletar", onPress: handleDeleteAccount, icon: <Trash size={22} color={colors.orange360} weight="bold" />, }, //Criar função deletar conta
@@ -141,6 +168,30 @@ export default function Profile() {
 
   // Cria um array único com todas as seções
   const sections = Array.from(new Set(items.map(item => item.section)));
+
+  // limpa a flag de primeira execução (apenas para teste)
+  const clearOnboardingFlag = async () => {
+    try {
+      await AsyncStorage.removeItem("hasSeenCompleteProfileModal");
+      console.log("DEBUG: removed hasSeenCompleteProfileModal");
+      setShowSelect(true); // opcional: reabre o modal após limpar
+      console.log("show select true")
+    } catch (e) {
+      console.warn("DEBUG: failed to remove onboarding flag", e);
+    }
+  };
+
+  const handleSelectPatient = async () => {
+    setCurrentProfileType("patient");
+    setShowSelect(false);
+    navigation.navigate("PatientForms");
+  };
+
+  const handleSelectCaregiver = async () => {
+    setCurrentProfileType("caregiver");
+    setShowSelect(false);
+    navigation.navigate("CaregiverForms");
+  };
 
   return (
     <ScrollView
@@ -168,7 +219,7 @@ export default function Profile() {
         <Avatar
           size={84}
           name={userName}
-          imageUrl={user.imageUrl} // exibe a foto, se houver
+          imageUrl={photo}
         />
         <Text
           style={{
@@ -222,7 +273,11 @@ export default function Profile() {
       >
         <PrimaryButton
           title="Editar perfil"
-          onPress={() => navigation.navigate("EditProfile", { userRole: user.role })}
+          onPress={() => {
+            currentProfileType
+              ? navigation.navigate("EditProfile", { currentProfileType })
+              : Alert.alert("Ops!", "Parece que seu perfil ainda não está completo. Complete-o para poder editar suas informações.")
+          }}
           icon={<Feather name="edit-2" size={20} color={colors.whiteFBFE} />}
         />
       </View>
@@ -237,41 +292,30 @@ export default function Profile() {
           marginBottom: 8,
         }}
       >
-        <TouchableOpacity
+        <View
           style={{
             flex: 1,
             alignItems: "center",
             paddingVertical: 8,
-            borderBottomWidth: activeTab === "info" ? 2 : 0,
+            borderBottomWidth: 2,
             borderBottomColor: colors.green382,
-          }}
-          onPress={() => setActiveTab("info")}
-        >
-          <Text
-            style={{
-              ...typography.M01B1624,
-              color: activeTab === "info" ? colors.green382 : colors.gray75,
-            }}
-          >
-            Informações {/* gerais */}
-          </Text>
-        </TouchableOpacity>
+          }}>
+          <Text style={{ ...typography.M01B1624, color: colors.green382 }}>Informações</Text>
+        </View>
       </View>
 
-      {/* Conteúdo da aba */}
-      {activeTab === "info" && (
-        ProfileInfoComponent ? (
+      {/* Conteúdo */}
+      {currentProfileType && ProfileInfoComponent ? (
           // renderiza apenas se o componente não for undefined
           <ProfileInfoComponent {...(profileProps as any)} />
         ) : (
-          // fallback e log para debugar
-          <View>
-            <Text style={{ color: colors.gray75 }}>Profile component not available</Text>
-            console.warn("Profile component is undefined for role:", user.role);
+          <View style={{ paddingHorizontal: 16, paddingVertical: 32, alignItems: "center", gap: 32 }}>
+            <Text style={{ color: colors.gray75, textAlign: "center" }}>
+              Escolha seu tipo de conta para seguir com o cadastro e personalizar sua experiência no app.
+            </Text>
+            <SecondaryButton title="Selecionar tipo de conta" onPress={clearOnboardingFlag} />
           </View>
-        )
-      )}
-      {/* {activeTab === "qualifications" && <Qualifications user={user} />} */}
+        )}
 
       {/* Seções */}
       {sections.map(section => {
@@ -300,6 +344,13 @@ export default function Profile() {
           </View>
         );
       })}
+
+      <PopUpFormsModel
+        visible={showSelect}
+        onClose={() => setShowSelect(false)}
+        onSelectPatient={handleSelectPatient}
+        onSelectCaregiver={handleSelectCaregiver}
+      />
     </ScrollView>
   );
 }

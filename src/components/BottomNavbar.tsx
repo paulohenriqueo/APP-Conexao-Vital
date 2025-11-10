@@ -1,4 +1,4 @@
-import { House, User, Clock } from "phosphor-react-native";
+import { House, User, Envelope, EnvelopeOpen } from "phosphor-react-native";
 import { View, TouchableOpacity, Text } from "react-native";
 import { colors } from "../../styles/colors";
 import { styles } from "./styles/BottomNavbar";
@@ -12,7 +12,7 @@ export const BottomNavBar = ({ selected, onSelect }: BottomNavBarProps) => {
   return (
     <View style={styles.bottomNav}>
       {[
-        { key: "history", label: "Histórico", icon: Clock },
+        { key: "history", label: "Solicitações", icon: selected === "history" ? EnvelopeOpen : Envelope },
         { key: "home", label: "Início", icon: House },
         { key: "profile", label: "Perfil", icon: User },
       ].map((item) => {

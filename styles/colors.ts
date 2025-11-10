@@ -16,7 +16,11 @@ export const colors = {
     whiteFBFE: "#FBFBFE",
     blackShadow: "#0000007D",
     greenShadow: "#00A382",
+    greenAccept: "#008F28FF",
+    greenAcceptBg: "#00C93921",
     orange360: "#CC3600",
     orange0EB: "#FFF0EB",
     ambar400: "#FFB900",
+    redc0019: "#CC00000C",
+    redc00: "#cc0000",
 };

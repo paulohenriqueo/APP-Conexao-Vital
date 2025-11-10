@@ -9,7 +9,6 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { colors, styles, typography } from "../../../../styles/styles";
 import { Input } from "../../../components/Input";
 import { savePatientCondition } from "../../../services/patientService";
@@ -196,36 +195,6 @@ export default function PatientCondition({ navigation }: any) {
             })}
           </View>
 
-          {/* <TouchableOpacity onPress={() => setShowInicioPicker(true)} activeOpacity={0.9}>
-            <Input placeholder="Início do período" value={inicioPeriodo} editable={false} pointerEvents="none" style={{ marginBottom: 12 }} />
-          </TouchableOpacity>
-          {showInicioPicker && (
-            <DateTimePicker
-              value={inicioPeriodoObj || new Date()}
-              mode="date"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={handleInicioChange}
-              maximumDate={new Date(2100, 0, 1)}
-            />
-          )} */}
-
-          <Text style={{ color: colors.gray73, marginBottom: 6 }}>Observações</Text>
-          <TextInput
-            value={observacoes}
-            onChangeText={(text) => (setObservacoes(capitalizeFirstLetter(text)))}
-            placeholder="Anotações, restrições, orientações..."
-            placeholderTextColor={colors.gray75}
-            style={{
-              backgroundColor: colors.gray7FD,
-              borderRadius: 8,
-              height: 100,
-              textAlignVertical: "top",
-              padding: 12,
-              marginBottom: 12,
-            }}
-            multiline
-          />
-
           {/* Alergias */}
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Alergias</Text>
           <View style={{ flexDirection: "row", marginBottom: 8 }}>
@@ -328,6 +297,23 @@ export default function PatientCondition({ navigation }: any) {
               </View>
             )}
             style={{ marginBottom: 12 }}
+          />
+
+          <Text style={{ color: colors.gray73, marginBottom: 6 }}>Observações</Text>
+          <TextInput
+            value={observacoes}
+            onChangeText={(text) => (setObservacoes(capitalizeFirstLetter(text)))}
+            placeholder="Anotações, restrições, orientações..."
+            placeholderTextColor={colors.gray75}
+            style={{
+              backgroundColor: colors.gray7FD,
+              borderRadius: 8,
+              height: 100,
+              textAlignVertical: "top",
+              padding: 12,
+              marginBottom: 12,
+            }}
+            multiline
           />
 
           <TouchableOpacity

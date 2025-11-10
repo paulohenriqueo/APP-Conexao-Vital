@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  especialization: {
+  careCategory: {
     fontSize: 13,
     lineHeight: 14,
     fontWeight: "600",
