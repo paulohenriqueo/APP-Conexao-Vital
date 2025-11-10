@@ -61,3 +61,38 @@ export async function getProfilesByType(type: string): Promise<PublicProfile[]> 
     return [];
   }
 }
+
+// nova função: busca por tipo + filtra por nome (client-side)
+export async function searchProfilesByName(type: string, nameQuery: string): Promise<PublicProfile[]> {
+  try {
+    const col = collection(FIRESTORE_DB, "Users");
+    const q = query(col, where("profileType", "==", type));
+    const snaps = await getDocs(q);
+    const term = (nameQuery || "").trim().toLowerCase();
+    const list: PublicProfile[] = snaps.docs
+      .map((d: any) => {
+        const data: any = d.data();
+        const name =
+          data?.patientProfile?.nome ||
+          data?.caregiverProfile?.nome ||
+          data?.displayName ||
+          data?.name ||
+          "";
+        return {
+          id: d.id,
+          name,
+          rating: data?.rating ?? 0,
+          tags: data?.tags ?? data?.especializacoes ?? [],
+          imageUrl: data?.photoUrl ?? data?.avatar ?? null,
+          especialization: data?.especialization ?? data?.especializacoes?.[0] ?? type,
+          profileType: data?.profileType ?? null,
+        } as PublicProfile;
+      })
+      // tipa explicitamente o parâmetro para evitar 'implicitly has any' e garantir retorno booleano
+      .filter((p: PublicProfile) => (p.name ? p.name.toLowerCase().includes(term) : false));
+    return list;
+  } catch (err) {
+    console.error("searchProfilesByName error:", err);
+    return [];
+  }
+}

@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import PopUpFormsModel from "../model/PopUpFormsModel";
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import ExternalUser from "./profile/ExternalUser";
-import { getCurrentUserType, getProfilesByType, PublicProfile } from "../../services/userService";
+import { getCurrentUserType, getProfilesByType, searchProfilesByName, PublicProfile } from "../../services/userService";
 import EditProfile from "./profile/EditProfile";
 import { SecondaryButton } from "../../components/Button";
 
@@ -27,34 +27,56 @@ export default function Home() {
   const [currentProfileType, setCurrentProfileType] = useState<string | null>(null);
   const [profilesList, setProfilesList] = useState<PublicProfile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(false);
+  const searchTimeoutRef = React.useRef<any>(null);
 
   useEffect(() => {
-    // carrega tipo do usuário e lista de perfis opostos
+    // carrega tipo do usuário inicialmente e a lista padrão (sem filtro)
     (async () => {
       try {
         const type = await getCurrentUserType();
         setCurrentProfileType(type);
-        // se não houver tipagem, não mostra perfis
-        if (!type) {
-          setProfilesList([]);
-          return;
-        }
-        // se usuário for caregiver -> buscar patients; se for patient -> buscar caregivers
-        const targetType = type === "caregiver" ? "patient" : type === "patient" ? "caregiver" : null;
-        if (!targetType) {
-          setProfilesList([]);
-          return;
-        }
-        setLoadingProfiles(true);
-        const items = await getProfilesByType(targetType);
-        setProfilesList(items);
       } catch (e) {
-        console.warn("Erro carregando perfis:", e);
-      } finally {
-        setLoadingProfiles(false);
+        console.warn("Erro carregando tipo do usuário:", e);
       }
     })();
   }, []);
+
+  // Reage a mudanças no search e currentProfileType: debounce e busca no Firestore
+  useEffect(() => {
+    if (!currentProfileType) return;
+    const targetType = currentProfileType === "caregiver" ? "patient" : currentProfileType === "patient" ? "caregiver" : null;
+    if (!targetType) {
+      setProfilesList([]);
+      return;
+    }
+
+    // debounce
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(async () => {
+      setLoadingProfiles(true);
+      try {
+        const term = search?.trim() ?? "";
+        if (term === "") {
+          const items = await getProfilesByType(targetType);
+          setProfilesList(items);
+        } else {
+          const items = await searchProfilesByName(targetType, term);
+          setProfilesList(items);
+        }
+      } catch (e) {
+        console.warn("Erro buscando perfis:", e);
+      } finally {
+        setLoadingProfiles(false);
+      }
+    }, 450);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
+      }
+    };
+  }, [search, currentProfileType]);
 
   useEffect(() => {
     const backAction = () => {
