@@ -24,8 +24,8 @@ export default function CaregiverSpecifications({ navigation }: any) {
   const [qualInput, setQualInput] = useState("");
   const [qualificacoes, setQualificacoes] = useState<string[]>([]);
 
-  const [dispoDiaInput, setDispoDiaInput] = useState("");
-  const [dispoDia, setDispoDia] = useState<string[]>([]);
+  // const [dispoDiaInput, setDispoDiaInput] = useState("");
+  // const [dispoDia, setDispoDia] = useState<string[]>([]);
 
   // disponibilidade por dias — opções fixas e seleção múltipla (checkbox)
   const dayOptions = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
@@ -40,6 +40,8 @@ export default function CaregiverSpecifications({ navigation }: any) {
     "Idosos",
   ];
   const [selectedPublico, setSelectedPublico] = useState<string[]>([]);
+   const [idiomaInput, setIdiomaInput] = useState("");
+  const [idiomasPreferidos, setIdiomasPreferidos] = useState<string[]>([]);
   const [observacoes, setObservacoes] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -77,11 +79,13 @@ export default function CaregiverSpecifications({ navigation }: any) {
     }
 
     const payload = {
-      experiencia: experiencias,
+      careCategory,
+      experiencias: experiencias,
       qualificacoes,
-      dispoDia: selectedDays, // agora usa os dias selecionados (array)
-      dispoHora,
+      dayOptions: selectedDays, // agora usa os dias selecionados (array)
+      periodos: selectedPeriods, // agora usa os períodos selecionados (array)
       publicoAtendido: selectedPublico, // agora é array
+      idiomasPreferidos,
       observacoes,
     };
 
@@ -384,6 +388,30 @@ export default function CaregiverSpecifications({ navigation }: any) {
               );
             })}
           </View>
+
+          {/* Idiomas preferidos */}
+                    <Text style={{ color: colors.gray73, marginBottom: 6 }}>Idiomas preferidos</Text>
+                    <View style={{ flexDirection: "row", marginBottom: 8 }}>
+                      <Input placeholder="Adicionar idioma" value={idiomaInput} onChangeText={(text) => (setIdiomaInput(capitalizeFirstLetter(text)))} style={{ flex: 1 }} />
+                      <TouchableOpacity onPress={() => addToList(idiomaInput, setIdiomasPreferidos, idiomasPreferidos, setIdiomaInput)} style={{ marginLeft: 8, alignSelf: "center", paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
+                        <Text style={{ color: "#fff" }}>Adicionar</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <FlatList
+                      data={idiomasPreferidos}
+                      horizontal
+                      keyExtractor={(_, i) => String(i)}
+                      showsHorizontalScrollIndicator={false}
+                      renderItem={({ item, index }) => (
+                        <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.grayE8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, marginRight: 8 }}>
+                          <Text style={{ color: colors.gray23 }}>{item}</Text>
+                          <TouchableOpacity onPress={() => removeFromList(index, setIdiomasPreferidos, idiomasPreferidos)} style={{ marginLeft: 8 }}>
+                            <Text style={{ color: colors.orange360 }}>✕</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                      style={{ marginBottom: 12 }}
+                    />
 
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Observações</Text>
           <TextInput

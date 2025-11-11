@@ -93,43 +93,35 @@ export async function searchProfilesByName(
 
         // tenta extrair cidade/estado por vários caminhos possíveis no documento
         const profileCity =
-          data?.address?.city ||
-          data?.address?.localidade ||
-          data?.city ||
-          data?.localidade ||
-          data?.patientProfile?.cidade ||
-          data?.patientProfile?.address?.city ||
-          data?.caregiverProfile?.cidade ||
-          data?.caregiverProfile?.address?.city ||
+          data?.patientProfile?.city ||
+          data?.caregiverProfile?.city ||
           "";
 
         const profileState =
-          data?.address?.state ||
-          data?.address?.uf ||
-          data?.state ||
-          data?.estado ||
-          data?.patientProfile?.estado ||
-          data?.patientProfile?.address?.state ||
-          data?.patientProfile?.address?.uf ||
-          data?.caregiverProfile?.estado ||
-          data?.caregiverProfile?.address?.state ||
-          data?.caregiverProfile?.address?.uf ||
+          data?.patientProfile?.state ||
+          data?.caregiverProfile?.state ||
           "";
 
         const profilePeriod =
-          data?.availability?.periodo ||
-          data?.periodo ||
-          data?.preferredPeriod ||
-          data?.availability ||
+          data?.condition?.periodos ||
+          data?.caregiverSpecifications?.periodOptions||
           "";
 
         let profileLanguages: string[] = [];
-        if (Array.isArray(data?.languages)) profileLanguages = data.languages;
-        else if (Array.isArray(data?.idiomas)) profileLanguages = data.idiomas;
-        else if (typeof data?.languages === "string") profileLanguages = data.languages.split(",").map((x: string) => x.trim());
-        else if (typeof data?.idiomas === "string") profileLanguages = data.idiomas.split(",").map((x: string) => x.trim());
-        else if (Array.isArray(data?.spokenLanguages)) profileLanguages = data.spokenLanguages;
-
+        if (Array.isArray(data?.condition?.idiomasPreferidos)) {
+          profileLanguages = data.condition.idiomasPreferidos;
+        } else if (typeof data?.condition?.idiomasPreferidos === "string") {
+            profileLanguages = data.condition.idiomasPreferidos
+            .split(",")
+            .map((x: string) => x.trim());
+        }
+        if (Array.isArray(data?.caregiverSpecifications?.idiomasPreferidos)) {
+          profileLanguages = data.caregiverSpecifications.idiomasPreferidos;
+        } else if (typeof data?.caregiverSpecifications?.idiomasPreferidos === "string") {
+            profileLanguages = data.caregiverSpecifications.idiomasPreferidos
+            .split(",")
+            .map((x: string) => x.trim());
+        }
         return {
           id: d.id,
           name,
@@ -157,45 +149,48 @@ export async function searchProfilesByName(
 
         if (!filters) return true;
 
-        // cidade: includes mais tolerante
+        // cidade
         if (filters.city && filters.city.trim() !== "") {
-          if (!meta.city || !normalize(meta.city).includes(normalize(filters.city))) {
-            // rejeitado por cidade
-            return false;
-          }
+          const cityMatch =
+          meta.city && normalize(meta.city).includes(normalize(filters.city));
+          if (!cityMatch) return false;
         }
 
-        // estado: se filtro for UF (2 chars) comparar igualdade após normalizar,
-        // caso contrário comparar includes no nome
+        // estado
         if (filters.state && filters.state.trim() !== "") {
           const metaState = normalize(meta.state);
           const want = normalize(filters.state);
-          if (want.length <= 2) {
-            if (metaState !== want) {
-              return false;
-            }
-          } else {
-            if (!metaState.includes(want)) return false;
-          }
+          const stateMatch =
+          want.length <= 2 ? metaState === want : metaState.includes(want);
+          if (!stateMatch) return false;
         }
 
-        // periodo: includes (meta pode ser array/obj/string)
+        // período (string ou array)
         if (filters.period && filters.period.trim() !== "") {
-          const metaPeriod = Array.isArray(meta.period) ? meta.period.join(" ") : String(meta.period || "");
-          if (!normalize(metaPeriod).includes(normalize(filters.period))) return false;
+          const metaPeriod = Array.isArray(meta.period)
+          ? meta.period.join(" ")
+          : String(meta.period || "");
+          const periodMatch = normalize(metaPeriod).includes(normalize(filters.period));
+          if (!periodMatch) return false;
         }
 
-        // idiomas: any match (trata string/array)
+        // idiomas
         if (filters.languages && filters.languages.length > 0) {
-          const profileLangs = (meta.languages || []).map((l: any) => normalize(l));
-          const required = filters.languages.map((l) => normalize(l));
-          (pl: string) => normalize(pl);
-          const anyMatch = required.some((r) => profileLangs.some((pl: any) => pl.includes(r)));
-          if (!anyMatch) return false;
-        }
+          const profileLangs: string[] = (meta.languages || []).map((l: any) =>
+          normalize(l)
+        );
+        const required: string[] = filters.languages.map((l) => normalize(l));
 
-        return true;
-      });
+        // verifica se pelo menos um idioma filtrado bate com os idiomas do perfil
+        const anyMatch = required.some((r) =>
+        profileLangs.some((pl: string) => pl.includes(r))
+      );
+
+      if (!anyMatch) return false;
+  }
+
+  return true;
+});
 
     // debug: quando não encontra nada, logar alguns metadados para inspeção
     if (list.length === 0) {
@@ -205,7 +200,8 @@ export async function searchProfilesByName(
         console.debug("docId:", d.id, {
           patientProfile: data?.patientProfile,
           caregiverProfile: data?.caregiverProfile,
-          address: data?.address,
+          neighborhood: data?.neighborhood,
+          street: data?.street,
           city: data?.city,
           state: data?.state,
           idiomas: data?.idiomas,

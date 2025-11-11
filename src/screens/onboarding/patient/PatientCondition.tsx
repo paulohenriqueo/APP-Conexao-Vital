@@ -68,21 +68,21 @@ export default function PatientCondition({ navigation }: any) {
     );
   };
 
-  const handleInicioChange = (event: any, selectedDate?: Date) => {
-    setShowInicioPicker(false);
-    if (selectedDate) {
-      setInicioPeriodoObj(selectedDate);
-      const d = String(selectedDate.getDate()).padStart(2, "0");
-      const m = String(selectedDate.getMonth() + 1).padStart(2, "0");
-      const y = selectedDate.getFullYear();
-      setInicioPeriodo(`${d}/${m}/${y}`);
-    }
-  };
+  // const handleInicioChange = (event: any, selectedDate?: Date) => {
+  //   setShowInicioPicker(false);
+  //   if (selectedDate) {
+  //     setInicioPeriodoObj(selectedDate);
+  //     const d = String(selectedDate.getDate()).padStart(2, "0");
+  //     const m = String(selectedDate.getMonth() + 1).padStart(2, "0");
+  //     const y = selectedDate.getFullYear();
+  //     setInicioPeriodo(`${d}/${m}/${y}`);
+  //   }
+  // };
 
   const handleSave = async () => {
     const payload = {
       periodos: selectedPeriods, // agora utiliza selectedPeriods
-      inicioPeriodo,
+      careCategory,
       observacoes,
       alergias,
       medicamentos,

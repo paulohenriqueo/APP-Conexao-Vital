@@ -44,7 +44,7 @@ export default function Home() {
     { uf: "RO", name: "Rondônia" }, { uf: "RR", name: "Roraima" }, { uf: "SC", name: "Santa Catarina" },
     { uf: "SP", name: "São Paulo" }, { uf: "SE", name: "Sergipe" }, { uf: "TO", name: "Tocantins" },
   ];
-  const PERIODS = ["", "Manhã", "Tarde", "Noite"];
+  const PERIODS = ["", "matutino", "vespertino", "noturno"];
   const LANGUAGES = ["Português", "Inglês", "Espanhol"];
 
   // cidades carregadas dinamicamente ao selecionar estado
