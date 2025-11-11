@@ -24,8 +24,8 @@ export default function CaregiverSpecifications({ navigation }: any) {
   const [qualInput, setQualInput] = useState("");
   const [qualificacoes, setQualificacoes] = useState<string[]>([]);
 
-  const [dispoDiaInput, setDispoDiaInput] = useState("");
-  const [dispoDia, setDispoDia] = useState<string[]>([]);
+  // const [dispoDiaInput, setDispoDiaInput] = useState("");
+  // const [dispoDia, setDispoDia] = useState<string[]>([]);
 
   // disponibilidade por dias — opções fixas e seleção múltipla (checkbox)
   const dayOptions = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
@@ -77,10 +77,10 @@ export default function CaregiverSpecifications({ navigation }: any) {
     }
 
     const payload = {
-      experiencia: experiencias,
+      careCategory,
+      experiencias: experiencias,
       qualificacoes,
-      dispoDia: selectedDays, // agora usa os dias selecionados (array)
-      dispoHora,
+      dayOptions: selectedDays, // agora usa os dias selecionados (array)
       publicoAtendido: selectedPublico, // agora é array
       observacoes,
     };
