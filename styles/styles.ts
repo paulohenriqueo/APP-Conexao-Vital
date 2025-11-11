@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, useColorScheme } from "react-native";
 import { colors } from "./colors";
 import { typography } from "./typography";
 import { scale } from 'react-native-size-matters';
@@ -125,6 +125,35 @@ export const styles = StyleSheet.create({
     tagText: {
         color: "#00796b",
         fontSize: 12,
+    },
+    professionalHomeBox: {
+        width: "100%",
+        borderRadius: 16,
+        paddingVertical: 24,
+        paddingHorizontal: 16,
+        color: colors.gray14,
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column", 
+    
+        backgroundColor: colors.gray7FD,
+        // shadowColor: colors.blackShadow,
+        // shadowOpacity: 0.16,
+        // shadowRadius: 8,
+        // shadowOffset: { width: 0, height: 4 },
+        // elevation: 4,
+    },
+    professionalHomeBoxRow: {
+        width: "100%",
+        flexDirection: "row", 
+        paddingVertical: 0, 
+        paddingHorizontal: 24,
+        gap: 24,
+        alignItems: "center", 
+        justifyContent: "center", 
+    },
+    professionalHomeText: {
+        color: colors.gray14,
     },
 });
 export { typography, colors };

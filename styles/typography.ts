@@ -131,6 +131,11 @@ export const typography: Record<string, TextStyle> = {
         fontSize: 20,
         lineHeight: 24,
     },
+    M01SB2428: {
+        ...baseTypography.montserratSemiBold,
+        fontSize: 24,
+        lineHeight: 28,
+    },
 
     // ===== Medium =====
     M01M1012: {
