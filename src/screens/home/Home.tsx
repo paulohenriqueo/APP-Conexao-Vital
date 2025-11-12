@@ -14,8 +14,9 @@ import FlashMessage, { showMessage } from 'react-native-flash-message';
 import ExternalUser from "./profile/ExternalUser";
 import { getCurrentUserType, getProfilesByType, searchProfilesByName, PublicProfile } from "../../services/userService";
 import EditProfile from "./profile/EditProfile";
-import { SecondaryButton } from "../../components/Button";
+import { ActionButton, SecondaryButton } from "../../components/Button";
 import { Picker } from "@react-native-picker/picker";
+import { Check, X } from "phosphor-react-native";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -207,6 +208,21 @@ export default function Home() {
             {currentProfileType === "caregiver" ? (
               // Home do profissional
               <View style={{ flex: 1, width: "100%", padding: 0, gap: 16 }}>
+                
+                                    <View style={{flexDirection: "row", gap: 16}}>
+                                        <ActionButton
+                                            title="Aceitar"
+                                            icon={<Check size={20} color={colors.greenAccept} weight="bold" />}
+                                            type="aceitar"
+                                            onPress={() => console.log("Aceito")}
+                                        />
+                                        <ActionButton
+                                            title="Recusar"
+                                            icon={<X size={20} color={colors.redc00} weight="bold" />}
+                                            type="recusar"
+                                            onPress={() => console.log("Recusado")}
+                                        />
+                                    </View>
                 <View style={{ ...styles.professionalHomeBox }}>
                   <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações pendentes</Text>
                   <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{5}</Text>

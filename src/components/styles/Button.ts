@@ -47,14 +47,16 @@ export const styles = StyleSheet.create({
         marginTop: 0,
         color: colors.green382,
     },
-
+    actionButtonText: {
+        ...typography.M01SB1624,
+        marginTop: 0,
+    },
     circleButton: {
         padding: 8,
         borderRadius: 60,
         alignItems: "center",
         justifyContent: "center",
     },
-
     googleButton: {
         flexDirection: "row",
         gap: 12,

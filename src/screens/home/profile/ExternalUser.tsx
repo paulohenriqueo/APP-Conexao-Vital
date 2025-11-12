@@ -5,11 +5,11 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { colors } from "../../../../styles/colors";
 import { typography } from "../../../../styles/typography";
 import { useNavigation, NavigationProp, useRoute } from "@react-navigation/native";
-import { CaretLeft, WhatsappLogo } from "phosphor-react-native";
+import { CaretLeft, Check, WhatsappLogo, X } from "phosphor-react-native";
 import { Avatar } from "../../../components/Avatar";
 import { Ionicons } from "@expo/vector-icons";
 import CaregiverProfileInfo from "./CaregiverProfileInfo";
-import { OutlinedButton, PrimaryButton } from "../../../components/Button";
+import { ActionButton, OutlinedButton, PrimaryButton } from "../../../components/Button";
 import PatientProfileInfo from "./PatientProfileInfo";
 import { openWhatsApp } from "../../../../utils/openWhatsApp";
 import { TopBar } from "../../../components/TopBar";
@@ -27,6 +27,7 @@ interface User {
 export default function ExternalUser() {
     const [userName, setUserName] = useState("");
     const [contactRequested, setContactRequested] = useState(false); // Estado para controlar se o contato foi solicitado
+    const [acceptedContact, setAcceptedContact] = useState(false);
     const [showStars, setShowStars] = useState(false); // Estado para controlar se entrou em contato
     const [rating, setRating] = useState(0);
 
@@ -193,74 +194,187 @@ export default function ExternalUser() {
             {/* Botão centralizado full-width */}
             <View style={{ width: "100%", alignItems: "center", marginTop: 12, marginBottom: 12 }}>
                 <View style={{ width: "92%" }}>
-                    {contactRequested ? (
-                        <PrimaryButton
-                            title="Entrar em contato"
-                            onPress={() => {
-                                setContactRequested(false);
-                                setShowStars(true);
-                                if (remoteUser?.phone) {
-                                    const firstName = remoteUser.name?.split(" ")[0] || "";
-                                    const message = `Olá ${firstName}! Vi seu perfil no Conexão Vital e me interessei pelos seus serviços. Gostaria de saber mais e conversar com você.`;
-                                    openWhatsApp(String(remoteUser.phone), message);
-                                }
-                            }}
-                            icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
+                    <>
+                        <ActionButton
+                            title="Aceitar"
+                            icon={<Check size={20} color={colors.greenAccept} />}
+                            type="aceitar"
+                            onPress={() => setAcceptedContact(true)}
                         />
+                        <ActionButton
+                            title="Recusar"
+                            icon={<X size={20} color={colors.redc00} />}
+                            type="recusar"
+                            onPress={() => setAcceptedContact(false)}
+                        />
+                    </>
+                    {remoteUser.role === "caregiver" ? (
+                        <>
+                            {acceptedContact ? ( //solicitação aceita
+                                <PrimaryButton
+                                    title="Entrar em contato"
+                                    onPress={() => {
+                                        setContactRequested(false);
+                                        setShowStars(true);
+                                        if (remoteUser?.phone) {
+                                            const firstName = remoteUser.name?.split(" ")[0] || "";
+                                            const initialMessage =
+                                                remoteUser.role === "patient"
+                                                    ? "Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital."
+                                                    : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`;
+                                            openWhatsApp(String(remoteUser.phone), initialMessage);
+                                        }
+                                    }}
+                                    icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
+                                />
+                            ) : (
+                                <>
+                                    <ActionButton
+                                        title="Aceitar"
+                                        icon={<Check size={20} color={colors.greenAccept} />}
+                                        type="aceitar"
+                                        onPress={() => {
+                                            setAcceptedContact(true)
+                                            Alert.alert(
+                                                "Conexão feita!",
+                                                "Você aceitou a solicitação e agora pode entrar em contato com o cliente para alinhar os detalhes."
+                                            );
+                                        }}
+                                    />
+                                    <ActionButton
+                                        title="Recusar"
+                                        icon={<X size={20} color={colors.redc00} />}
+                                        type="recusar"
+                                        onPress={() => {
+                                            setAcceptedContact(true)
+                                            Alert.alert(
+                                                "Solicitação recusada",
+                                                "A solicitação foi encerrada e o contato não será liberado para este cliente."
+                                            );
+                                        }}
+                                    />
+                                </>
+                            )}
+                            {showStars ? (
+                                <View
+                                    style={{
+                                        flexDirection: "column",
+                                        alignContent: "center",
+                                        justifyContent: "center",
+                                        gap: 12,
+                                        backgroundColor: colors.grayEF1,
+                                        paddingVertical: 16,
+                                        paddingHorizontal: 12,
+                                        borderRadius: 12,
+                                        marginTop: 16
+                                    }}
+                                >
+                                    <Text style={{ textAlign: "center", ...typography.M01R1214 }}>
+                                        Gostaria de avaliar esse perfil?
+                                    </Text>
+                                    <View
+                                        style={{
+                                            flexDirection: "row",
+                                            alignContent: "center",
+                                            justifyContent: "center",
+                                            gap: 8,
+                                        }}
+                                    >
+                                        {[1, 2, 3, 4, 5].map((starNumber) => renderStar(starNumber))}
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            submitRating
+                                            setShowStars(false)
+                                        }}
+                                        disabled={rating === 0}
+                                        style={{
+                                            paddingVertical: 4,
+                                            opacity: rating === 0 ? 0.6 : 1,
+                                        }}
+                                    >
+                                        <Text style={{ ...typography.M01R1214, color: colors.green85F, textAlign: "center", fontWeight: "600", textDecorationLine: "underline" }}>
+                                            Enviar avaliação
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ) : null}
+                        </>
                     ) : (
-                        <OutlinedButton
-                            title="Solicitar contato"
-                            onPress={() => {
-                                setContactRequested(true);
-                                Alert.alert("Contato solicitado", "Sua solicitação de contato foi enviada com sucesso!", [{ text: "OK" }]);
-                            }}
-                            icon={<WhatsappLogo size={20} color={colors.green382} />}
-                        />
+                        <>
+                            {contactRequested ? (
+                                <PrimaryButton
+                                    title="Entrar em contato"
+                                    onPress={() => {
+                                        setContactRequested(false);
+                                        setShowStars(true);
+                                        if (remoteUser?.phone) {
+                                            const firstName = remoteUser.name?.split(" ")[0] || "";
+                                            const initialMessage =
+                                                remoteUser.role === "patient"
+                                                    ? "Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital."
+                                                    : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`;
+                                            openWhatsApp(String(remoteUser.phone), initialMessage);
+                                        }
+                                    }}
+                                    icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
+                                />
+                            ) : (
+                                <OutlinedButton
+                                    title="Solicitar contato"
+                                    onPress={() => {
+                                        setContactRequested(true);
+                                        Alert.alert("Contato solicitado", "Sua solicitação de contato foi enviada com sucesso!", [{ text: "OK" }]);
+                                    }}
+                                    icon={<WhatsappLogo size={20} color={colors.green382} />}
+                                />
+                            )}
+                            {showStars ? (
+                                <View
+                                    style={{
+                                        flexDirection: "column",
+                                        alignContent: "center",
+                                        justifyContent: "center",
+                                        gap: 12,
+                                        backgroundColor: colors.grayEF1,
+                                        paddingVertical: 16,
+                                        paddingHorizontal: 12,
+                                        borderRadius: 12,
+                                        marginTop: 16
+                                    }}
+                                >
+                                    <Text style={{ textAlign: "center", ...typography.M01R1214 }}>
+                                        Gostaria de avaliar esse perfil?
+                                    </Text>
+                                    <View
+                                        style={{
+                                            flexDirection: "row",
+                                            alignContent: "center",
+                                            justifyContent: "center",
+                                            gap: 8,
+                                        }}
+                                    >
+                                        {[1, 2, 3, 4, 5].map((starNumber) => renderStar(starNumber))}
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            submitRating
+                                            setShowStars(false)
+                                        }}
+                                        disabled={rating === 0}
+                                        style={{
+                                            paddingVertical: 4,
+                                            opacity: rating === 0 ? 0.6 : 1,
+                                        }}
+                                    >
+                                        <Text style={{ ...typography.M01R1214, color: colors.green85F, textAlign: "center", fontWeight: "600", textDecorationLine: "underline" }}>
+                                            Enviar avaliação
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ) : null}
+                        </>
                     )}
-                    {showStars ? (
-                        <View
-                            style={{
-                                flexDirection: "column",
-                                alignContent: "center",
-                                justifyContent: "center",
-                                gap: 12,
-                                backgroundColor: colors.grayEF1,
-                                paddingVertical: 16,
-                                paddingHorizontal: 12,
-                                borderRadius: 12,
-                                marginTop: 16
-                            }}
-                        >
-                            <Text style={{ textAlign: "center", ...typography.M01R1214 }}>
-                                Gostaria de avaliar esse perfil?
-                            </Text>
-                            <View
-                                style={{
-                                    flexDirection: "row",
-                                    alignContent: "center",
-                                    justifyContent: "center",
-                                    gap: 8,
-                                }}
-                            >
-                                {[1, 2, 3, 4, 5].map((starNumber) => renderStar(starNumber))}
-                            </View>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    submitRating
-                                    setShowStars(false)
-                                }}
-                                disabled={rating === 0}
-                                style={{
-                                    paddingVertical: 4,
-                                    opacity: rating === 0 ? 0.6 : 1,
-                                }}
-                            >
-                                <Text style={{ ...typography.M01R1214, color: colors.green85F, textAlign: "center", fontWeight: "600", textDecorationLine: "underline" }}>
-                                    Enviar avaliação
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    ) : null}
                 </View>
             </View>
 
