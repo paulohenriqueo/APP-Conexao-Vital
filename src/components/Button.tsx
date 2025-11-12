@@ -47,7 +47,7 @@ export function OutlinedButton({ title, onPress, icon }: ButtonProps) {
 
 export function ActionButton({ title, onPress, icon, disabled, type }: ButtonProps) {
     return (
-        <TouchableOpacity style={[styles.button, {backgroundColor: type === "aceitar" ? colors.greenAcceptBg : colors.redc0019}, disabled && { opacity: 0.5 }]} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity style={[styles.actionButton, {backgroundColor: type === "aceitar" ? colors.greenAcceptBg : colors.redc0019}, disabled && { opacity: 0.5 }]} onPress={onPress} activeOpacity={0.7}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
                 {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
                 <Text style={[styles.actionButtonText, {color: type === "aceitar" ? colors.greenAccept : colors.redc00}]}>{title}</Text>

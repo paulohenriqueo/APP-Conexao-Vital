@@ -202,17 +202,17 @@ export default function Home() {
   };
 
   // Dados para teste de lista
-  // const historyData = [
-  //   { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-genbccd101bd8dbac5f8bb60897e38ab2be.jpg", careCategory: "Cuidado Domiciliar" },
-  //   { id: "2", name: "João Souza", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen6b3b5faef405b1681627466f154dd5bf.jpg", careCategory: "Enfermeiro" },
-  //   { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gend4affcf39479b0e32a6b292ee316cc18.jpg", careCategory: "Cuidado Domiciliar" },
-  // ];
+  const historyData = [
+    { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-genbccd101bd8dbac5f8bb60897e38ab2be.jpg", careCategory: "Cuidado Domiciliar" },
+    { id: "2", name: "João Souza", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen6b3b5faef405b1681627466f154dd5bf.jpg", careCategory: "Enfermeiro" },
+    { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gend4affcf39479b0e32a6b292ee316cc18.jpg", careCategory: "Cuidado Domiciliar" },
+  ];
 
-  // const searchData = [
-  //   { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3de81692a53179ab914d9ff7d102fee1.jpg", careCategory: "Cuidado Domiciliar" },
-  //   { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen80b45514e179756196f7b7682ba17bb0.jpg", careCategory: "Enfermeiro" },
-  //   { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen63cb16d668b8c7c84a755fc3a4450b7b.jpg", careCategory: "Acompanhante" },
-  // ];
+  const searchData = [
+    { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3de81692a53179ab914d9ff7d102fee1.jpg", careCategory: "Cuidado Domiciliar" },
+    { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen80b45514e179756196f7b7682ba17bb0.jpg", careCategory: "Enfermeiro" },
+    { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen63cb16d668b8c7c84a755fc3a4450b7b.jpg", careCategory: "Acompanhante" },
+  ];
 
   // Função para renderizar conteúdo dependendo da aba selecionada
   const renderContent = () => {
@@ -224,36 +224,37 @@ export default function Home() {
               // Home do profissional
               <View style={{ flex: 1, width: "100%", padding: 0, gap: 16 }}>
                 <View style={{ ...styles.professionalHomeBox }}>
-                  <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações pendentes</Text>
-                  <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{pendingRequests}</Text>
+                  <Text style={{ ...typography.M01R1824, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações pendentes</Text>
+                  <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{pendingRequests}</Text>
                 </View>
 
                 <View style={{ ...styles.professionalHomeBox }}>
-                  <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações</Text>
+                  <Text style={{ ...typography.M01R1824, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações</Text>
                   <View style={{ ...styles.professionalHomeBoxRow }}>
                     <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
                       <Text style={{ ...typography.M01R1624, ...styles.professionalHomeText }}>Recebidas</Text>
-                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{receivedRequests}</Text>
+                      <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{receivedRequests}</Text>
                     </View>
                     <View style={{ width: 0.5, height: "100%", backgroundColor: colors.blackShadow, marginTop: 8 }}>
                     </View>
                     <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
                       <Text style={{ ...typography.M01R1624, ...styles.professionalHomeText }}>Aceitas</Text>
-                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{acceptedRequests}</Text>
+                      <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{acceptedRequests}</Text>
                     </View>
                   </View>
                 </View>
 
                 <View style={{ ...styles.professionalHomeBox }}>
-                  <View style={{ ...styles.professionalHomeBoxRow }}>
-                    <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
-                      <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Total de avaliações</Text>
-                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{totalRatings}</Text>
-                    </View>
-                    <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
-                      <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Média de avaliações</Text>
-                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{averageRating.toFixed(1)}</Text>
-                    </View>
+                  <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
+                    <Text style={{ ...typography.M01R1824, ...styles.professionalHomeText, marginBottom: 5 }}>Média de avaliações</Text>
+                    <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{averageRating.toFixed(1)}</Text>
+                  </View>
+                </View>
+
+                <View style={{ ...styles.professionalHomeBox }}>
+                  <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
+                    <Text style={{ ...typography.M01R1824, ...styles.professionalHomeText, marginBottom: 5 }}>Total de avaliações</Text>
+                    <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{totalRatings}</Text>
                   </View>
                 </View>
               </View>

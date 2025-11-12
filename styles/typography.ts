@@ -99,6 +99,12 @@ export const typography: Record<string, TextStyle> = {
         lineHeight: 24,
         color: colors.gray14,
     },
+    M01R2024: {
+        ...baseTypography.montserratRegular,
+        fontSize: 20,
+        lineHeight: 24,
+        color: colors.gray14,
+    },
 
     // ===== Bold =====
     M01B1418: {
@@ -153,6 +159,12 @@ export const typography: Record<string, TextStyle> = {
     M01M1824: {
         ...baseTypography.montserratMedium,
         fontSize: 18,
+        lineHeight: 24,
+        color: colors.gray14,
+    },
+    M01M2024: {
+        ...baseTypography.montserratMedium,
+        fontSize: 20,
         lineHeight: 24,
         color: colors.gray14,
     },
