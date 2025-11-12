@@ -1,10 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles as historyStyles } from "./styles/HistoryItem";
 import { colors } from "../../styles/colors";
 import { styles, typography } from "../../styles/styles";
 import { Avatar } from "./Avatar";
+import { CircleButton } from "./Button";
+import { Check, X } from "phosphor-react-native";
 
 type HistoryItemProps = {
   name: string;
@@ -25,8 +27,8 @@ export function HistoryItem({
   city,
   date,
   imageUrl,
-  currentProfileType,
-  requestStatus = "recusada",
+  currentProfileType = "caregiver",
+  requestStatus = "pendente",
   onPress,
 }: HistoryItemProps) {
 
@@ -54,6 +56,14 @@ export function HistoryItem({
       break;
   }
 
+  function handleAccept() {
+    Alert.alert("Solicitação de contato aceita")
+  }
+
+  function handleDecline() {
+    Alert.alert("Solicitação de contato recusada")
+  }
+
   return (
     <View style={historyStyles.container}>
       <Avatar name={name} imageUrl={imageUrl} />
@@ -75,19 +85,18 @@ export function HistoryItem({
         <Text style={historyStyles.date}>{date}</Text>
       </View>
 
-      <View style={[historyStyles.requestStatus, { marginRight: 6, alignSelf: "stretch" }]}>
-        <View style={[historyStyles.requestStatusTag, { backgroundColor: bgColor }]}>
-          <Text style={[ historyStyles.requestStatusText ,{ color: textColor }]}>{label}</Text>
-        </View>
-
+      <View style={[historyStyles.requestStatus, { marginRight: 6, alignSelf: "stretch", gap: 8 }]}>
         {currentProfileType === "caregiver" && requestStatus === "pendente" ? (
           // botões para aceitar ou recusar
-          <></>
-        ) : currentProfileType === "patient" && requestStatus === "pendente" ? (
-          // tag com requestStatus
-          <View style={historyStyles.requestStatusTag}></View>
+          <View style={{ marginRight: 12, gap: 6 }}>
+            <CircleButton type="aceitar" onPress={handleAccept} icon={<Check size={20} color={colors.greenAccept} weight="bold"></Check>}></CircleButton>
+            <CircleButton type="recusar" onPress={handleDecline} icon={<X size={20} color={colors.redc00} weight="bold"></X>}></CircleButton>
+          </View>
         ) : (
-          <></>
+          // tag com requestStatus
+          <View style={[historyStyles.requestStatusTag, { backgroundColor: bgColor }]}>
+            <Text style={[historyStyles.requestStatusText, { color: textColor }]}>{label}</Text>
+          </View>
         )}
       </View>
 

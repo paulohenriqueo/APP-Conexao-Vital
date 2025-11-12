@@ -3,7 +3,7 @@ import { View, Text, Alert, BackHandler, StyleSheet, Modal, Button, TouchableOpa
 import { useNavigation } from "@react-navigation/native";
 import { TopBar } from "../../components/TopBar";
 import { BottomNavBar } from "../../components/BottomNavbar";
-import { colors, styles } from "../../../styles/styles";
+import { colors, styles, typography } from "../../../styles/styles";
 import { CompleteProfileModal } from "../../components/Modal";
 import { SearchBar } from "../../components/SearchBar";
 import Profile from "./profile/Profile";
@@ -14,8 +14,9 @@ import FlashMessage, { showMessage } from 'react-native-flash-message';
 import ExternalUser from "./profile/ExternalUser";
 import { getCurrentUserType, getProfilesByType, searchProfilesByName, PublicProfile } from "../../services/userService";
 import EditProfile from "./profile/EditProfile";
-import { SecondaryButton } from "../../components/Button";
+import { ActionButton, SecondaryButton } from "../../components/Button";
 import { Picker } from "@react-native-picker/picker";
+import { Check, X } from "phosphor-react-native";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -44,12 +45,27 @@ export default function Home() {
     { uf: "RO", name: "Rondônia" }, { uf: "RR", name: "Roraima" }, { uf: "SC", name: "Santa Catarina" },
     { uf: "SP", name: "São Paulo" }, { uf: "SE", name: "Sergipe" }, { uf: "TO", name: "Tocantins" },
   ];
-  const PERIODS = ["", "matutino", "vespertino", "noturno"];
+  const PERIODS = ["", "Manhã", "Tarde", "Noite"];
   const LANGUAGES = ["Português", "Inglês", "Espanhol"];
 
   // cidades carregadas dinamicamente ao selecionar estado
   const [citiesList, setCitiesList] = useState<string[]>([]);
   const [citiesLoading, setCitiesLoading] = useState(false);
+
+  const [pendingRequests, setPendingRequests] = useState(0);
+  const [receivedRequests, setReceivedRequests] = useState(0);
+  const [acceptedRequests, setAcceptedRequests] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
+
+  useEffect(() => {
+    // Exemplo de mock de dados — depois você pode trocar por fetch do Firestore
+    setPendingRequests(3);
+    setReceivedRequests(10);
+    setAcceptedRequests(7);
+    setTotalRatings(12);
+    setAverageRating(4.8);
+  }, []);
 
   useEffect(() => {
     // carrega tipo do usuário inicialmente e a lista padrão (sem filtro)
@@ -186,135 +202,183 @@ export default function Home() {
   };
 
   // Dados para teste de lista
-  const historyData = [
-    { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-genbccd101bd8dbac5f8bb60897e38ab2be.jpg", careCategory: "Cuidado Domiciliar" },
-    { id: "2", name: "João Souza", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen6b3b5faef405b1681627466f154dd5bf.jpg", careCategory: "Enfermeiro" },
-    { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gend4affcf39479b0e32a6b292ee316cc18.jpg", careCategory: "Cuidado Domiciliar" },
-  ];
+  // const historyData = [
+  //   { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-genbccd101bd8dbac5f8bb60897e38ab2be.jpg", careCategory: "Cuidado Domiciliar" },
+  //   { id: "2", name: "João Souza", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen6b3b5faef405b1681627466f154dd5bf.jpg", careCategory: "Enfermeiro" },
+  //   { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gend4affcf39479b0e32a6b292ee316cc18.jpg", careCategory: "Cuidado Domiciliar" },
+  // ];
 
-  const searchData = [
-    { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3de81692a53179ab914d9ff7d102fee1.jpg", careCategory: "Cuidado Domiciliar" },
-    { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen80b45514e179756196f7b7682ba17bb0.jpg", careCategory: "Enfermeiro" },
-    { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen63cb16d668b8c7c84a755fc3a4450b7b.jpg", careCategory: "Acompanhante" },
-  ];
+  // const searchData = [
+  //   { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3de81692a53179ab914d9ff7d102fee1.jpg", careCategory: "Cuidado Domiciliar" },
+  //   { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen80b45514e179756196f7b7682ba17bb0.jpg", careCategory: "Enfermeiro" },
+  //   { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen63cb16d668b8c7c84a755fc3a4450b7b.jpg", careCategory: "Acompanhante" },
+  // ];
 
   // Função para renderizar conteúdo dependendo da aba selecionada
   const renderContent = () => {
     switch (selectedTab) {
       case "home":
         return (
-          <View style={{ flex: 1, width: "100%", padding: 0 }}>
-            <SearchBar
-              value={search}
-              onChangeText={setSearch}
-              onPressFilter={() => setFilterVisible(v => !v)}
-              placeholder="Pesquisar..."
-            />
-
-            {/* filtros ativos: chips removíveis */}
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, paddingHorizontal: 16, marginTop: 8 }}>
-              {filterCity ? (
-                <TouchableOpacity onPress={() => setFilterCity("")} style={{ backgroundColor: "#eee", padding: 8, borderRadius: 16, marginRight: 8 }}>
-                  <Text>{filterCity} ✕</Text>
-                </TouchableOpacity>
-              ) : null}
-              {filterState ? (
-                <TouchableOpacity onPress={() => setFilterState("")} style={{ backgroundColor: "#eee", padding: 8, borderRadius: 16, marginRight: 8 }}>
-                  <Text>{filterState} ✕</Text>
-                </TouchableOpacity>
-              ) : null}
-              {filterPeriod ? (
-                <TouchableOpacity onPress={() => setFilterPeriod("")} style={{ backgroundColor: "#eee", padding: 8, borderRadius: 16, marginRight: 8 }}>
-                  <Text>{filterPeriod} ✕</Text>
-                </TouchableOpacity>
-              ) : null}
-              {filterLanguages.map((l) => (
-                <TouchableOpacity key={l} onPress={() => setFilterLanguages(prev => prev.filter(x => x !== l))} style={{ backgroundColor: "#eee", padding: 8, borderRadius: 16, marginRight: 8 }}>
-                  <Text>{l} ✕</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* painel de filtros (pequeno) */}
-            {filterVisible && (
-              <View style={{ backgroundColor: "#fff", padding: 12, marginHorizontal: 16, borderRadius: 8, marginTop: 12, elevation: 2 }}>
-                <Text style={{ marginBottom: 6 }}>Estado</Text>
-                <View style={{ borderWidth: 1, borderColor: "#eee", borderRadius: 6, overflow: "hidden", marginBottom: 8 }}>
-                  <Picker selectedValue={filterState} onValueChange={(v) => { setFilterState(String(v)); setFilterCity(""); }}>
-                    <Picker.Item key={""} label={"Qualquer"} value={""} />
-                    {BRAZIL_STATES.map((s) => (<Picker.Item key={s.uf} label={`${s.name} (${s.uf})`} value={s.uf} />))}
-                  </Picker>
+          <>
+            {currentProfileType === "caregiver" ? (
+              // Home do profissional
+              <View style={{ flex: 1, width: "100%", padding: 0, gap: 16 }}>
+                <View style={{ ...styles.professionalHomeBox }}>
+                  <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações pendentes</Text>
+                  <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{pendingRequests}</Text>
                 </View>
 
-                <Text style={{ marginBottom: 6 }}>Cidade</Text>
-                <View style={{ borderWidth: 1, borderColor: "#eee", borderRadius: 6, overflow: "hidden", marginBottom: 8, minHeight: 48, justifyContent: "center" }}>
-                  {citiesLoading ? (
-                    <View style={{ paddingVertical: 8, alignItems: "center" }}>
-                      <ActivityIndicator size="small" />
+                <View style={{ ...styles.professionalHomeBox }}>
+                  <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações</Text>
+                  <View style={{ ...styles.professionalHomeBoxRow }}>
+                    <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
+                      <Text style={{ ...typography.M01R1624, ...styles.professionalHomeText }}>Recebidas</Text>
+                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{receivedRequests}</Text>
                     </View>
-                  ) : (
-                    <Picker selectedValue={filterCity} onValueChange={(v) => setFilterCity(String(v))}>
-                      {citiesList.length === 0 ? (
-                        <Picker.Item key={""} label={"Qualquer"} value={""} />
-                      ) : (
-                        citiesList.map((c) => (<Picker.Item key={c} label={c === "" ? "Qualquer" : c} value={c} />))
-                      )}
-                    </Picker>
-                  )}
+                    <View style={{ width: 0.5, height: "100%", backgroundColor: colors.blackShadow, marginTop: 8 }}>
+                    </View>
+                    <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
+                      <Text style={{ ...typography.M01R1624, ...styles.professionalHomeText }}>Aceitas</Text>
+                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{acceptedRequests}</Text>
+                    </View>
+                  </View>
                 </View>
 
-                <Text style={{ marginBottom: 6 }}>Período</Text>
-                <View style={{ borderWidth: 1, borderColor: "#eee", borderRadius: 6, overflow: "hidden", marginBottom: 8 }}>
-                  <Picker selectedValue={filterPeriod} onValueChange={(v) => setFilterPeriod(String(v))}>
-                    {PERIODS.map((p) => (<Picker.Item key={p} label={p === "" ? "Qualquer" : p} value={p} />))}
-                  </Picker>
-                </View>
-
-                <Text style={{ marginBottom: 6 }}>Idiomas</Text>
-                <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 8 }}>
-                  {LANGUAGES.map((lang) => {
-                    const active = filterLanguages.includes(lang);
-                    return (
-                      <TouchableOpacity
-                        key={lang}
-                        onPress={() => setFilterLanguages(prev => active ? prev.filter(x => x !== lang) : [...prev, lang])}
-                        style={{ backgroundColor: active ? "#cfe" : "#f4f4f4", padding: 8, borderRadius: 16, marginRight: 8, marginBottom: 8 }}
-                      >
-                        <Text>{lang}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-
-                <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 8 }}>
-                  <TouchableOpacity onPress={() => { setFilterCity(""); setFilterState(""); setFilterPeriod(""); setFilterLanguages([]); }} style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
-                    <Text>Limpar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setFilterVisible(false)} style={{ paddingHorizontal: 12, paddingVertical: 8, backgroundColor: "#007aff", borderRadius: 6 }}>
-                    <Text style={{ color: "#fff" }}>Aplicar</Text>
-                  </TouchableOpacity>
+                <View style={{ ...styles.professionalHomeBox }}>
+                  <View style={{ ...styles.professionalHomeBoxRow }}>
+                    <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
+                      <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Total de avaliações</Text>
+                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{totalRatings}</Text>
+                    </View>
+                    <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
+                      <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Média de avaliações</Text>
+                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{averageRating.toFixed(1)}</Text>
+                    </View>
+                  </View>
                 </View>
               </View>
-            )}
-
-            <Text style={{ ...styles.subtitleText, textAlign: "left", paddingVertical: 16 }}>
-              {/* Melhores avaliados */} Novos usuários
-            </Text>
-
-            {currentProfileType ? (
-              <CustomList
-                type="search"
-                data={profilesList as any} // cast para evitar conflito de tipos com HistoryData/SearchData
-              />
             ) : (
-              <View style={{ paddingHorizontal: 16, paddingVertical: 32, alignItems: "center", gap: 32 }}>
-                <Text style={{ color: colors.gray75, textAlign: "center" }}>
-                  Selecione seu tipo de conta e tenha acesso às conexões certas para o seu perfil.
+              // Home do cliente ou sem usuário definido
+              <View style={{ flex: 1, width: "100%", padding: 0 }}>
+                <SearchBar
+                  value={search}
+                  onChangeText={setSearch}
+                  onPressFilter={() => setFilterVisible(v => !v)}
+                  placeholder="Pesquisar..."
+                />
+
+                {/* filtros ativos: chips removíveis */}
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, paddingHorizontal: 16, marginTop: 8 }}>
+                  {filterCity ? (
+                    <TouchableOpacity onPress={() => setFilterCity("")} style={{ backgroundColor: "#eee", padding: 8, borderRadius: 16, marginRight: 8 }}>
+                      <Text>{filterCity} ✕</Text>
+                    </TouchableOpacity>
+                  ) : null}
+                  {filterState ? (
+                    <TouchableOpacity onPress={() => setFilterState("")} style={{ backgroundColor: "#eee", padding: 8, borderRadius: 16, marginRight: 8 }}>
+                      <Text>{filterState} ✕</Text>
+                    </TouchableOpacity>
+                  ) : null}
+                  {filterPeriod ? (
+                    <TouchableOpacity onPress={() => setFilterPeriod("")} style={{ backgroundColor: "#eee", padding: 8, borderRadius: 16, marginRight: 8 }}>
+                      <Text>{filterPeriod} ✕</Text>
+                    </TouchableOpacity>
+                  ) : null}
+                  {filterLanguages.map((l) => (
+                    <TouchableOpacity key={l} onPress={() => setFilterLanguages(prev => prev.filter(x => x !== l))} style={{ backgroundColor: "#eee", padding: 8, borderRadius: 16, marginRight: 8 }}>
+                      <Text>{l} ✕</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* painel de filtros (pequeno) */}
+                {filterVisible && (
+                  <View style={{ backgroundColor: "#fff", padding: 12, marginHorizontal: 16, borderRadius: 8, marginTop: 12, elevation: 2 }}>
+                    <Text style={{ marginBottom: 6 }}>Estado</Text>
+                    <View style={{ borderWidth: 1, borderColor: "#eee", borderRadius: 6, overflow: "hidden", marginBottom: 8 }}>
+                      <Picker selectedValue={filterState} onValueChange={(v) => { setFilterState(String(v)); setFilterCity(""); }}>
+                        <Picker.Item key={""} label={"Qualquer"} value={""} />
+                        {BRAZIL_STATES.map((s) => (<Picker.Item key={s.uf} label={`${s.name} (${s.uf})`} value={s.uf} />))}
+                      </Picker>
+                    </View>
+
+                    <Text style={{ marginBottom: 6 }}>Cidade</Text>
+                    <View style={{ borderWidth: 1, borderColor: "#eee", borderRadius: 6, overflow: "hidden", marginBottom: 8, minHeight: 48, justifyContent: "center" }}>
+                      {citiesLoading ? (
+                        <View style={{ paddingVertical: 8, alignItems: "center" }}>
+                          <ActivityIndicator size="small" />
+                        </View>
+                      ) : (
+                        <Picker selectedValue={filterCity} onValueChange={(v) => setFilterCity(String(v))}>
+                          {citiesList.length === 0 ? (
+                            <Picker.Item key={""} label={"Qualquer"} value={""} />
+                          ) : (
+                            citiesList.map((c) => (<Picker.Item key={c} label={c === "" ? "Qualquer" : c} value={c} />))
+                          )}
+                        </Picker>
+                      )}
+                    </View>
+
+                    <Text style={{ marginBottom: 6 }}>Período</Text>
+                    <View style={{ borderWidth: 1, borderColor: "#eee", borderRadius: 6, overflow: "hidden", marginBottom: 8 }}>
+                      <Picker selectedValue={filterPeriod} onValueChange={(v) => setFilterPeriod(String(v))}>
+                        {PERIODS.map((p) => (<Picker.Item key={p} label={p === "" ? "Qualquer" : p} value={p} />))}
+                      </Picker>
+                    </View>
+
+                    <Text style={{ marginBottom: 6 }}>Idiomas</Text>
+                    <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 8 }}>
+                      {LANGUAGES.map((lang) => {
+                        const active = filterLanguages.includes(lang);
+                        return (
+                          <TouchableOpacity
+                            key={lang}
+                            onPress={() => setFilterLanguages(prev => active ? prev.filter(x => x !== lang) : [...prev, lang])}
+                            style={{ backgroundColor: active ? "#cfe" : "#f4f4f4", padding: 8, borderRadius: 16, marginRight: 8, marginBottom: 8 }}
+                          >
+                            <Text>{lang}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+
+                    <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 8 }}>
+                      <TouchableOpacity onPress={() => { setFilterCity(""); setFilterState(""); setFilterPeriod(""); setFilterLanguages([]); }} style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
+                        <Text>Limpar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setFilterVisible(false);
+                          // Força nova busca imediatamente
+                          setSearch((prev) => prev + ""); // apenas dispara o useEffect de busca
+                        }}
+                        style={{ paddingHorizontal: 12, paddingVertical: 8, backgroundColor: "#007aff", borderRadius: 6 }}>
+                        <Text style={{ color: "#fff" }}>Aplicar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+                <Text style={{ ...styles.subtitleText, textAlign: "left", paddingVertical: 16 }}>
+                  {/* Melhores avaliados */} Novos usuários
                 </Text>
-                <SecondaryButton title="Selecionar tipo de conta" onPress={clearOnboardingFlag} />
+
+                {currentProfileType ? (
+                  <CustomList
+                    type="search"
+                    data={profilesList as any} // cast para evitar conflito de tipos com HistoryData/SearchData
+                  />
+                ) : (
+                  <View style={{ paddingHorizontal: 16, paddingVertical: 32, alignItems: "center", gap: 32 }}>
+                    <Text style={{ color: colors.gray75, textAlign: "center" }}>
+                      Selecione seu tipo de conta e tenha acesso às conexões certas para o seu perfil.
+                    </Text>
+                    <SecondaryButton title="Selecionar tipo de conta" onPress={clearOnboardingFlag} />
+                  </View>
+                )}
               </View>
             )}
-          </View>
+          </>
         );
 
       // adicionar forma de exibir a pesquisa
