@@ -43,6 +43,7 @@ export default function Profile() {
   const [photo, setPhoto] = useState<string | null>(null);
   const [currentProfileType, setCurrentProfileType] = useState<string | null>(null);
   const [showSelect, setShowSelect] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
 
   const navigation = useNavigation<NavigationProp<any>>();
 
@@ -54,12 +55,12 @@ export default function Profile() {
   };
 
   // Definir o componente de informações do perfil com base na função do usuário
-  const ProfileInfoComponent = user.role === "caregiver" ? PatientProfileInfo : CaregiverProfileInfo;
+  const ProfileInfoComponent = user.role === "caregiver" ? CaregiverProfileInfo : PatientProfileInfo;
 
   const profileProps =
-    user.role === "caregiver"
+    currentProfileType?.toLowerCase() === "caregiver"
       ? {
-        caregiverData: (user as any)?.caregiverSpecifications ?? {
+        caregiverData: userData?.caregiverSpecifications ?? {
           experiencia: [],
           qualificacoes: [],
           dispoDia: [],
@@ -69,12 +70,12 @@ export default function Profile() {
         },
       }
       : {
-        patientData: (user as any)?.patientSpecifications ?? {
-          allergies: ["Pólen", "Amendoim"],
-          medications: ["Paracetamol", "Ibuprofeno"],
-          conditions: ["Diabetes", "Hipertensão"],
-          preferredLanguages: ["Português", "Inglês"],
-          observations: "Paciente em tratamento contínuo.",
+        patientData: userData?.condition ?? {
+          alergias: [],
+          medicamentos: [],
+          condicoes: [],
+          idiomasPreferidos: [],
+          observacoes: "",
         },
       };
 
@@ -124,6 +125,28 @@ export default function Profile() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+  const fetchUserData = async () => {
+    const auth = getAuth();
+    const db = getFirestore();
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    const ref = doc(db, "Users", currentUser.uid);
+    const snap = await getDoc(ref);
+
+    if (snap.exists()) {
+      setUserData(snap.data());
+      console.log("Dados do usuário carregados:", snap.data());
+    } else {
+      console.warn("Documento de usuário não encontrado.");
+    }
+  };
+
+  fetchUserData();
+}, []);
+
 
   // Logout
   const handleLogout = async () => {
@@ -355,6 +378,8 @@ export default function Profile() {
           <SecondaryButton title="Selecionar tipo de conta" onPress={handleOpenSelectModal} />
         </View>
       )}
+
+      
 
       {/* Seções */}
       {sections.map(section => {

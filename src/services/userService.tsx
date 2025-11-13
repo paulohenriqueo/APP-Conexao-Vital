@@ -20,7 +20,7 @@ export async function getCurrentUserType(): Promise<string | null> {
     if (!snap.exists()) return null;
     const data = snap.data();
     // ajuste aqui conforme o campo real no documento (profileType / type / role)
-    return data?.profileType ?? data?.type ?? data?.role ?? null;
+    return data?.profileType;
   } catch (err) {
     console.error("getCurrentUserType error:", err);
     return null;
@@ -61,7 +61,7 @@ export async function getProfilesByType(type: string): Promise<PublicProfile[]> 
     return [];
   }
 }
-
+            // FILTRO
 // nova função: busca por tipo + filtra por nome (client-side)
 export async function searchProfilesByName(
   type: string,
