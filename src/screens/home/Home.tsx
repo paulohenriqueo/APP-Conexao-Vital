@@ -13,10 +13,10 @@ import PopUpFormsModel from "../model/PopUpFormsModel";
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import ExternalUser from "./profile/ExternalUser";
 import { getCurrentUserType, getProfilesByType, searchProfilesByName, PublicProfile } from "../../services/userService";
-import EditProfile from "./profile/EditProfile";
-import { ActionButton, SecondaryButton } from "../../components/Button";
+import { SecondaryButton } from "../../components/Button";
 import { Picker } from "@react-native-picker/picker";
-import { Check, X } from "phosphor-react-native";
+import { getPendingRequestsColors, getAverageRatingColors } from "../../../utils/getColors";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -57,6 +57,11 @@ export default function Home() {
   const [acceptedRequests, setAcceptedRequests] = useState(0);
   const [totalRatings, setTotalRatings] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
+
+  const { gradient: pendingGradient, textColor: pendingText } = getPendingRequestsColors(pendingRequests);
+  const { gradient: ratingGradient, textColor: ratingText } = getAverageRatingColors(averageRating);
+  const neutralGradient = [colors.gray7FD, colors.grayF5, colors.grayE8] as const;
+
 
   useEffect(() => {
     // Exemplo de mock de dados — depois você pode trocar por fetch do Firestore
@@ -230,12 +235,34 @@ export default function Home() {
             {currentProfileType === "caregiver" ? (
               // Home do profissional
               <View style={{ flex: 1, width: "100%", padding: 0, gap: 16 }}>
-                <View style={{ ...styles.professionalHomeBox }}>
-                  <Text style={{ ...typography.M01R1824, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações pendentes</Text>
-                  <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{pendingRequests}</Text>
-                </View>
+                {/* Solicitações pendentes */}
+                <LinearGradient
+                  colors={pendingGradient}
+                  start={{ x: 1, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={{ ...styles.professionalHomeBox }}
+                >
+                  <Text
+                    style={{
+                      ...typography.M01R1824,
+                      ...styles.professionalHomeText,
+                      marginBottom: 5,
+                      color: pendingText,
+                    }}>Solicitações pendentes</Text>
+                  < Text
+                    style={{
+                      ...typography.M01M2024,
+                      ...styles.professionalHomeText,
+                      color: pendingText,
+                    }}>{pendingRequests}</Text>
+                </LinearGradient>
 
-                <View style={{ ...styles.professionalHomeBox }}>
+                <LinearGradient
+                  colors={neutralGradient}
+                  start={{ x: 1, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={{ ...styles.professionalHomeBox }}
+                >
                   <Text style={{ ...typography.M01R1824, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações</Text>
                   <View style={{ ...styles.professionalHomeBoxRow }}>
                     <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
@@ -249,22 +276,40 @@ export default function Home() {
                       <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{acceptedRequests}</Text>
                     </View>
                   </View>
-                </View>
+                </LinearGradient>
 
-                <View style={{ ...styles.professionalHomeBox }}>
-                  <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
-                    <Text style={{ ...typography.M01R1824, ...styles.professionalHomeText, marginBottom: 5 }}>Média de avaliações</Text>
-                    <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{averageRating.toFixed(1)}</Text>
-                  </View>
-                </View>
+                {/* Média de avaliações */}
+                <LinearGradient
+                  colors={ratingGradient}
+                  start={{ x: 1, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={{ ...styles.professionalHomeBox }}
+                >
+                  <Text style={{
+                    ...typography.M01R1824,
+                    ...styles.professionalHomeText,
+                    marginBottom: 5,
+                    color: ratingText,
+                  }}>Média de avaliações</Text>
+                  <Text style={{
+                    ...typography.M01M2024,
+                    ...styles.professionalHomeText,
+                    color: ratingText,
+                  }}>{averageRating.toFixed(1)}</Text>
+                </LinearGradient>
 
-                <View style={{ ...styles.professionalHomeBox }}>
+                <LinearGradient
+                  colors={neutralGradient}
+                  start={{ x: 1, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={{ ...styles.professionalHomeBox }}
+                >
                   <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
                     <Text style={{ ...typography.M01R1824, ...styles.professionalHomeText, marginBottom: 5 }}>Total de avaliações</Text>
                     <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{totalRatings}</Text>
                   </View>
-                </View>
-              </View>
+                </LinearGradient>
+              </View >
             ) : (
               // Home do cliente ou sem usuário definido
               <View style={{ flex: 1, width: "100%", padding: 0 }}>
@@ -385,7 +430,8 @@ export default function Home() {
                   </View>
                 )}
               </View>
-            )}
+            )
+            }
           </>
         );
 
@@ -477,6 +523,14 @@ export default function Home() {
       <TopBar title="" />
 
       <View style={styles.contentArea}>{renderContent()}</View>
+      {/* Botões para testar troca de cores */}
+      {/* <TouchableOpacity onPress={() => { setPendingRequests(7) }}>Pending Requests = 7</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setPendingRequests(3) }}>Pending Requests = 3</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setPendingRequests(0) }}>Pending Requests = 0</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setAverageRating(0) }}>Average Rating = 0</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setAverageRating(2) }}>Average Rating = 2</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setAverageRating(3) }}>Average Rating = 3</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setAverageRating(4) }}>Average Rating = 4</TouchableOpacity> */}
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />
 
       <PopUpFormsModel
@@ -485,6 +539,6 @@ export default function Home() {
         onSelectPatient={handleSelectPatient}
         onSelectCaregiver={handleSelectCaregiver}
       />
-    </View>
+    </View >
   );
 }
