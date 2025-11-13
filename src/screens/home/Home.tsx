@@ -157,14 +157,21 @@ export default function Home() {
     (async () => {
       try {
         const seen = await AsyncStorage.getItem("hasSeenCompleteProfileModal");
-        console.log("DEBUG: hasSeenCompleteProfileModal =", seen, "profileCompleted =", profileCompleted);
+        console.log(
+          "DEBUG:",
+          "\nTipo de usuário =", currentProfileType,
+          "\nhasSeenCompleteProfileModal =", seen,
+          "\nprofileCompleted =", profileCompleted
+          //perfil não está sendo completo
+        );
         // só mostra se ainda não viu e perfil não completo
         if (!seen && !profileCompleted) {
           setShowModal(true);
-        } else if (__DEV__) {
-          // durante desenvolvimento, forçar a modal aparecer para testar
-          console.log("DEBUG: forcing modal visible in __DEV__");
-          setTimeout(() => setShowModal(true), 300);
+          // ⚠️ para testar manualmente, descomente abaixo
+          // } else if (__DEV__) {
+          //   // durante desenvolvimento, forçar a modal aparecer para testar
+          //   console.log("DEBUG: forcing modal visible in __DEV__");
+          //   setTimeout(() => setShowModal(true), 300);
         }
       } catch (e) {
         console.warn("AsyncStorage error", e);
@@ -374,7 +381,7 @@ export default function Home() {
                     <Text style={{ color: colors.gray75, textAlign: "center" }}>
                       Selecione seu tipo de conta e tenha acesso às conexões certas para o seu perfil.
                     </Text>
-                    <SecondaryButton title="Selecionar tipo de conta" onPress={clearOnboardingFlag} />
+                    <SecondaryButton title="Selecionar tipo de conta" onPress={handleOpenSelectModal} />
                   </View>
                 )}
               </View>
@@ -428,15 +435,8 @@ export default function Home() {
     }
   };
 
-  // limpa a flag de primeira execução (apenas para teste)
-  const clearOnboardingFlag = async () => {
-    try {
-      await AsyncStorage.removeItem("hasSeenCompleteProfileModal");
-      console.log("DEBUG: removed hasSeenCompleteProfileModal");
-      setShowModal(true); // opcional: reabre o modal após limpar
-    } catch (e) {
-      console.warn("DEBUG: failed to remove onboarding flag", e);
-    }
+  const handleOpenSelectModal = async () => {
+    setShowModal(true);
   };
 
   // ao trocar o estado, busca cidades via API do IBGE

@@ -17,7 +17,6 @@ import { PatientProfileInfo } from "./PatientProfileInfo";
 import { Trash } from "phosphor-react-native";
 import { getCurrentUserType } from "../../../services/userService";
 import PopUpFormsModel from "../../model/PopUpFormsModel";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface User {
   //Dados necessários para exibir perfil de outros usuários
@@ -169,16 +168,8 @@ export default function Profile() {
   // Cria um array único com todas as seções
   const sections = Array.from(new Set(items.map(item => item.section)));
 
-  // limpa a flag de primeira execução (apenas para teste)
-  const clearOnboardingFlag = async () => {
-    try {
-      await AsyncStorage.removeItem("hasSeenCompleteProfileModal");
-      console.log("DEBUG: removed hasSeenCompleteProfileModal");
-      setShowSelect(true); // opcional: reabre o modal após limpar
-      console.log("show select true")
-    } catch (e) {
-      console.warn("DEBUG: failed to remove onboarding flag", e);
-    }
+  const handleOpenSelectModal = () => {
+    setShowSelect(true);
   };
 
   const handleSelectPatient = async () => {
@@ -282,7 +273,7 @@ export default function Profile() {
         />
       </View>
 
-      {/* Abas */}
+      {/* Aba de informações do perfil */}
       <View
         style={{
           flexDirection: "row",
@@ -306,16 +297,16 @@ export default function Profile() {
 
       {/* Conteúdo */}
       {currentProfileType && ProfileInfoComponent ? (
-          // renderiza apenas se o componente não for undefined
-          <ProfileInfoComponent {...(profileProps as any)} />
-        ) : (
-          <View style={{ paddingHorizontal: 16, paddingVertical: 32, alignItems: "center", gap: 32 }}>
-            <Text style={{ color: colors.gray75, textAlign: "center" }}>
-              Escolha seu tipo de conta para seguir com o cadastro e personalizar sua experiência no app.
-            </Text>
-            <SecondaryButton title="Selecionar tipo de conta" onPress={clearOnboardingFlag} />
-          </View>
-        )}
+        // renderiza apenas se o componente não for undefined
+        <ProfileInfoComponent {...(profileProps as any)} />
+      ) : (
+        <View style={{ paddingHorizontal: 16, paddingVertical: 32, alignItems: "center", gap: 32 }}>
+          <Text style={{ color: colors.gray75, textAlign: "center" }}>
+            Escolha seu tipo de conta para seguir com o cadastro e personalizar sua experiência no app.
+          </Text>
+          <SecondaryButton title="Selecionar tipo de conta" onPress={handleOpenSelectModal} />
+        </View>
+      )}
 
       {/* Seções */}
       {sections.map(section => {
