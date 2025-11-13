@@ -39,34 +39,62 @@ export default function Login() {
     // SignIn com Firebase Authentication
     const singIn = async () => {
         if (email === "" || password === "") {
-            alert("Por favor, preencha todos os campos.");
+            Alert.alert("Campos obrigatórios", "Por favor, preencha e-mail e senha para continuar.");
+            console.warn("DEBUG: tentativa de login com campos vazios");
             return;
         }
+
         setLoading(true);
+        console.log("DEBUG: iniciando login com email:", email);
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            console.log("DEBUG: login bem-sucedido:", {
+                uid: userCredential.user.uid,
+                email: userCredential.user.email,
+                metadata: userCredential.user.metadata,
+            });
             navigation.navigate("Home");
         } catch (error: any) {
-            console.error("Erro no login:", error);
-            // Tratamento de erros específicos do Firebase
-            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-                Alert.alert("Credenciais inválidas", "Senha incorreta.");
-            } else if (error.code === 'auth/invalid-email') {
-                Alert.alert("Usuário Não Cadastrado", "Este email não está cadastrado em nosso sistema.");
-            }
-            else if (error.code === 'auth/user-disabled') {
-                Alert.alert("Usuário Bloqueado", "Sua conta foi bloqueada.");
-            } else if (error.code === 'auth/too-many-requests') {
-                Alert.alert("Muitas tentativas", "Acesso temporariamente bloqueado. Tente novamente mais tarde.");
-            } else {
-                Alert.alert("Erro", "Ocorreu um erro durante o login. Tente novamente.");
-            }
+            console.error("DEBUG: erro no login ->", error);
 
+            switch (error.code) {
+                case "auth/invalid-email":
+                    Alert.alert("E-mail inválido", "Verifique se o endereço de e-mail está correto.");
+                    console.warn("DEBUG: formato de e-mail incorreto:", email);
+                    break;
+
+                case "auth/user-not-found":
+                case "auth/invalid-credential":
+                    Alert.alert("Conta não encontrada", "Nenhum usuário foi encontrado com esse e-mail. Verifique se a conta ainda existe ou crie uma nova.");
+                    console.warn("DEBUG: conta não encontrada para o e-mail:", email);
+                    break;
+
+                case "auth/wrong-password":
+                    Alert.alert("Senha incorreta", "A senha informada está incorreta. Tente novamente.");
+                    console.warn("DEBUG: senha incorreta para o e-mail:", email);
+                    break;
+
+                case "auth/user-disabled":
+                    Alert.alert("Conta desativada", "Esta conta foi desativada. Entre em contato com o suporte para mais informações.");
+                    console.warn("DEBUG: usuário desativado:", email);
+                    break;
+
+                case "auth/too-many-requests":
+                    Alert.alert("Muitas tentativas", "A conta foi temporariamente bloqueada devido a várias tentativas malsucedidas. Tente novamente mais tarde.");
+                    console.warn("DEBUG: bloqueio temporário de login para:", email);
+                    break;
+
+                default:
+                    Alert.alert("Erro inesperado", "Não foi possível fazer login. Tente novamente mais tarde.");
+                    console.warn("DEBUG: erro não tratado:", error.code, error.message);
+                    break;
+            }
         } finally {
             setLoading(false);
+            console.log("DEBUG: finalizando tentativa de login");
         }
-    }
+    };
 
     // useEffect(() => {
     //     const signInWithGoogle = async () => {

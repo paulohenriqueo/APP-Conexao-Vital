@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
-import { MaterialIcons, Feather } from "@expo/vector-icons";
-import { getAuth, signOut } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { Feather } from "@expo/vector-icons";
+import { deleteUser, getAuth, signOut } from "firebase/auth";
+import { deleteDoc, getFirestore, doc, getDoc } from "firebase/firestore";
 import { colors } from "../../../../styles/colors";
 import { typography } from "../../../../styles/typography";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
@@ -17,6 +17,7 @@ import { PatientProfileInfo } from "./PatientProfileInfo";
 import { Trash } from "phosphor-react-native";
 import { getCurrentUserType } from "../../../services/userService";
 import PopUpFormsModel from "../../model/PopUpFormsModel";
+
 
 interface User {
   //Dados necessários para exibir perfil de outros usuários
@@ -149,9 +150,56 @@ export default function Profile() {
     );
   };
 
-  function performDeleteAccount(): void {
-    throw new Error("Function not implemented.");
-  }
+  const performDeleteAccount = async () => {
+    try {
+      const auth = getAuth();
+      const db = getFirestore();
+      const currentUser = auth.currentUser;
+
+      if (!currentUser) {
+        Alert.alert("Erro", "Nenhum usuário encontrado.");
+        console.warn("DEBUG: tentativa de exclusão sem usuário autenticado");
+        return;
+      }
+
+      console.log("DEBUG: iniciando exclusão de conta para o usuário:", {
+        uid: currentUser.uid,
+        email: currentUser.email,
+      });
+
+      // Deleta o documento do Firestore
+      await deleteDoc(doc(db, "Users", currentUser.uid));
+      console.log("DEBUG: documento do Firestore excluído com sucesso:", currentUser.uid);
+
+      // Deleta o usuário do Authentication
+      await deleteUser(currentUser);
+      console.log("DEBUG: usuário removido do Firebase Authentication:", {
+        uid: currentUser.uid,
+        email: currentUser.email,
+      });
+
+      Alert.alert("Conta excluída", "Sua conta foi removida com sucesso.");
+      console.log("DEBUG: exclusão de conta concluída e alerta exibido.");
+
+      // Redireciona para tela de login
+      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+      console.log("DEBUG: redirecionado para a tela de login.");
+
+    } catch (error: any) {
+      console.error("Erro ao excluir conta:", error);
+
+      if (error.code === "auth/requires-recent-login") {
+        Alert.alert(
+          "Sessão expirada",
+          "Por segurança, é necessário fazer login novamente antes de excluir a conta.",
+          [{ text: "OK", onPress: () => navigation.navigate("Login") }]
+        );
+        console.warn("DEBUG: erro auth/requires-recent-login — redirecionando para login.");
+      } else {
+        Alert.alert("Erro", "Não foi possível excluir a conta. Tente novamente mais tarde.");
+      }
+    }
+  };
 
   // Cria um array único com todas as seções e itens
   const items: SectionItem[] = [
