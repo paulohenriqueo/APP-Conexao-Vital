@@ -54,7 +54,7 @@ export default function Profile() {
   };
 
   // Definir o componente de informações do perfil com base na função do usuário
-  const ProfileInfoComponent = user.role === "caregiver" ? PatientProfileInfo : CaregiverProfileInfo;
+  const ProfileInfoComponent = user.role === "caregiver" ? CaregiverProfileInfo : PatientProfileInfo;
 
   const profileProps =
     user.role === "caregiver"
@@ -70,11 +70,11 @@ export default function Profile() {
       }
       : {
         patientData: (user as any)?.patientSpecifications ?? {
-          allergies: ["Pólen", "Amendoim"],
-          medications: ["Paracetamol", "Ibuprofeno"],
-          conditions: ["Diabetes", "Hipertensão"],
-          preferredLanguages: ["Português", "Inglês"],
-          observations: "Paciente em tratamento contínuo.",
+          allergies: [],
+          medications: [],
+          conditions: [],
+          preferredLanguages: [],
+          observations: "",
         },
       };
 
