@@ -13,10 +13,10 @@ import PopUpFormsModel from "../model/PopUpFormsModel";
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import ExternalUser from "./profile/ExternalUser";
 import { getCurrentUserType, getProfilesByType, searchProfilesByName, PublicProfile } from "../../services/userService";
-import EditProfile from "./profile/EditProfile";
-import { ActionButton, SecondaryButton } from "../../components/Button";
+import { SecondaryButton } from "../../components/Button";
 import { Picker } from "@react-native-picker/picker";
-import { Check, X } from "phosphor-react-native";
+import { getPendingRequestsColors, getAverageRatingColors } from "../../../utils/getColors";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -57,6 +57,11 @@ export default function Home() {
   const [acceptedRequests, setAcceptedRequests] = useState(0);
   const [totalRatings, setTotalRatings] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
+
+  const { gradient: pendingGradient, textColor: pendingText } = getPendingRequestsColors(pendingRequests);
+  const { gradient: ratingGradient, textColor: ratingText } = getAverageRatingColors(averageRating);
+  const neutralGradient = [colors.gray7FD, colors.grayF5, colors.grayE8] as const;
+
 
   useEffect(() => {
     // Exemplo de mock de dados — depois você pode trocar por fetch do Firestore
@@ -157,14 +162,21 @@ export default function Home() {
     (async () => {
       try {
         const seen = await AsyncStorage.getItem("hasSeenCompleteProfileModal");
-        console.log("DEBUG: hasSeenCompleteProfileModal =", seen, "profileCompleted =", profileCompleted);
+        console.log(
+          "DEBUG:",
+          "\nTipo de usuário =", currentProfileType,
+          "\nhasSeenCompleteProfileModal =", seen,
+          "\nprofileCompleted =", profileCompleted
+          //perfil não está sendo completo
+        );
         // só mostra se ainda não viu e perfil não completo
         if (!seen && !profileCompleted) {
           setShowModal(true);
-        } else if (__DEV__) {
-          // durante desenvolvimento, forçar a modal aparecer para testar
-          console.log("DEBUG: forcing modal visible in __DEV__");
-          setTimeout(() => setShowModal(true), 300);
+          // ⚠️ para testar manualmente, descomente abaixo
+          // } else if (__DEV__) {
+          //   // durante desenvolvimento, forçar a modal aparecer para testar
+          //   console.log("DEBUG: forcing modal visible in __DEV__");
+          //   setTimeout(() => setShowModal(true), 300);
         }
       } catch (e) {
         console.warn("AsyncStorage error", e);
@@ -202,17 +214,17 @@ export default function Home() {
   };
 
   // Dados para teste de lista
-  // const historyData = [
-  //   { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-genbccd101bd8dbac5f8bb60897e38ab2be.jpg", careCategory: "Cuidado Domiciliar" },
-  //   { id: "2", name: "João Souza", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen6b3b5faef405b1681627466f154dd5bf.jpg", careCategory: "Enfermeiro" },
-  //   { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gend4affcf39479b0e32a6b292ee316cc18.jpg", careCategory: "Cuidado Domiciliar" },
-  // ];
+  const historyData = [
+    { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-genbccd101bd8dbac5f8bb60897e38ab2be.jpg", careCategory: "Cuidado Domiciliar" },
+    { id: "2", name: "João Souza", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen6b3b5faef405b1681627466f154dd5bf.jpg", careCategory: "Enfermeiro" },
+    { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gend4affcf39479b0e32a6b292ee316cc18.jpg", careCategory: "Cuidado Domiciliar" },
+  ];
 
-  // const searchData = [
-  //   { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3de81692a53179ab914d9ff7d102fee1.jpg", careCategory: "Cuidado Domiciliar" },
-  //   { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen80b45514e179756196f7b7682ba17bb0.jpg", careCategory: "Enfermeiro" },
-  //   { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen63cb16d668b8c7c84a755fc3a4450b7b.jpg", careCategory: "Acompanhante" },
-  // ];
+  const searchData = [
+    { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3de81692a53179ab914d9ff7d102fee1.jpg", careCategory: "Cuidado Domiciliar" },
+    { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen80b45514e179756196f7b7682ba17bb0.jpg", careCategory: "Enfermeiro" },
+    { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen63cb16d668b8c7c84a755fc3a4450b7b.jpg", careCategory: "Acompanhante" },
+  ];
 
   // Função para renderizar conteúdo dependendo da aba selecionada
   const renderContent = () => {
@@ -223,40 +235,81 @@ export default function Home() {
             {currentProfileType === "caregiver" ? (
               // Home do profissional
               <View style={{ flex: 1, width: "100%", padding: 0, gap: 16 }}>
-                <View style={{ ...styles.professionalHomeBox }}>
-                  <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações pendentes</Text>
-                  <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{pendingRequests}</Text>
-                </View>
+                {/* Solicitações pendentes */}
+                <LinearGradient
+                  colors={pendingGradient}
+                  start={{ x: 1, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={{ ...styles.professionalHomeBox }}
+                >
+                  <Text
+                    style={{
+                      ...typography.M01R1824,
+                      ...styles.professionalHomeText,
+                      marginBottom: 5,
+                      color: pendingText,
+                    }}>Solicitações pendentes</Text>
+                  < Text
+                    style={{
+                      ...typography.M01M2024,
+                      ...styles.professionalHomeText,
+                      color: pendingText,
+                    }}>{pendingRequests}</Text>
+                </LinearGradient>
 
-                <View style={{ ...styles.professionalHomeBox }}>
-                  <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações</Text>
+                <LinearGradient
+                  colors={neutralGradient}
+                  start={{ x: 1, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={{ ...styles.professionalHomeBox }}
+                >
+                  <Text style={{ ...typography.M01R1824, ...styles.professionalHomeText, marginBottom: 5 }}>Solicitações</Text>
                   <View style={{ ...styles.professionalHomeBoxRow }}>
                     <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
                       <Text style={{ ...typography.M01R1624, ...styles.professionalHomeText }}>Recebidas</Text>
-                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{receivedRequests}</Text>
+                      <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{receivedRequests}</Text>
                     </View>
                     <View style={{ width: 0.5, height: "100%", backgroundColor: colors.blackShadow, marginTop: 8 }}>
                     </View>
                     <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
                       <Text style={{ ...typography.M01R1624, ...styles.professionalHomeText }}>Aceitas</Text>
-                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{acceptedRequests}</Text>
+                      <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{acceptedRequests}</Text>
                     </View>
                   </View>
-                </View>
+                </LinearGradient>
 
-                <View style={{ ...styles.professionalHomeBox }}>
-                  <View style={{ ...styles.professionalHomeBoxRow }}>
-                    <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
-                      <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Total de avaliações</Text>
-                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{totalRatings}</Text>
-                    </View>
-                    <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
-                      <Text style={{ ...typography.M01SB2024, ...styles.professionalHomeText, marginBottom: 5 }}>Média de avaliações</Text>
-                      <Text style={{ ...typography.M01SB2428, ...styles.professionalHomeText }}>{averageRating.toFixed(1)}</Text>
-                    </View>
+                {/* Média de avaliações */}
+                <LinearGradient
+                  colors={ratingGradient}
+                  start={{ x: 1, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={{ ...styles.professionalHomeBox }}
+                >
+                  <Text style={{
+                    ...typography.M01R1824,
+                    ...styles.professionalHomeText,
+                    marginBottom: 5,
+                    color: ratingText,
+                  }}>Média de avaliações</Text>
+                  <Text style={{
+                    ...typography.M01M2024,
+                    ...styles.professionalHomeText,
+                    color: ratingText,
+                  }}>{averageRating.toFixed(1)}</Text>
+                </LinearGradient>
+
+                <LinearGradient
+                  colors={neutralGradient}
+                  start={{ x: 1, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={{ ...styles.professionalHomeBox }}
+                >
+                  <View style={{ flexDirection: "column", alignItems: "center", justifyContent: "center", }}>
+                    <Text style={{ ...typography.M01R1824, ...styles.professionalHomeText, marginBottom: 5 }}>Total de avaliações</Text>
+                    <Text style={{ ...typography.M01M2024, ...styles.professionalHomeText }}>{totalRatings}</Text>
                   </View>
-                </View>
-              </View>
+                </LinearGradient>
+              </View >
             ) : (
               // Home do cliente ou sem usuário definido
               <View style={{ flex: 1, width: "100%", padding: 0 }}>
@@ -373,11 +426,12 @@ export default function Home() {
                     <Text style={{ color: colors.gray75, textAlign: "center" }}>
                       Selecione seu tipo de conta e tenha acesso às conexões certas para o seu perfil.
                     </Text>
-                    <SecondaryButton title="Selecionar tipo de conta" onPress={clearOnboardingFlag} />
+                    <SecondaryButton title="Selecionar tipo de conta" onPress={handleOpenSelectModal} />
                   </View>
                 )}
               </View>
-            )}
+            )
+            }
           </>
         );
 
@@ -427,15 +481,8 @@ export default function Home() {
     }
   };
 
-  // limpa a flag de primeira execução (apenas para teste)
-  const clearOnboardingFlag = async () => {
-    try {
-      await AsyncStorage.removeItem("hasSeenCompleteProfileModal");
-      console.log("DEBUG: removed hasSeenCompleteProfileModal");
-      setShowModal(true); // opcional: reabre o modal após limpar
-    } catch (e) {
-      console.warn("DEBUG: failed to remove onboarding flag", e);
-    }
+  const handleOpenSelectModal = async () => {
+    setShowModal(true);
   };
 
   // ao trocar o estado, busca cidades via API do IBGE
@@ -476,6 +523,14 @@ export default function Home() {
       <TopBar title="" />
 
       <View style={styles.contentArea}>{renderContent()}</View>
+      {/* Botões para testar troca de cores */}
+      {/* <TouchableOpacity onPress={() => { setPendingRequests(7) }}>Pending Requests = 7</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setPendingRequests(3) }}>Pending Requests = 3</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setPendingRequests(0) }}>Pending Requests = 0</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setAverageRating(0) }}>Average Rating = 0</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setAverageRating(2) }}>Average Rating = 2</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setAverageRating(3) }}>Average Rating = 3</TouchableOpacity>
+      <TouchableOpacity onPress={() => { setAverageRating(4) }}>Average Rating = 4</TouchableOpacity> */}
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />
 
       <PopUpFormsModel
@@ -484,6 +539,6 @@ export default function Home() {
         onSelectPatient={handleSelectPatient}
         onSelectCaregiver={handleSelectCaregiver}
       />
-    </View>
+    </View >
   );
 }

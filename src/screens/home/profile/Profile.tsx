@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
-import { MaterialIcons, Feather } from "@expo/vector-icons";
-import { getAuth, signOut } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { Feather } from "@expo/vector-icons";
+import { deleteUser, getAuth, signOut } from "firebase/auth";
+import { deleteDoc, getFirestore, doc, getDoc } from "firebase/firestore";
 import { colors } from "../../../../styles/colors";
 import { typography } from "../../../../styles/typography";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
@@ -17,7 +17,7 @@ import { PatientProfileInfo } from "./PatientProfileInfo";
 import { Trash } from "phosphor-react-native";
 import { getCurrentUserType } from "../../../services/userService";
 import PopUpFormsModel from "../../model/PopUpFormsModel";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 interface User {
   //Dados necessários para exibir perfil de outros usuários
@@ -150,9 +150,56 @@ export default function Profile() {
     );
   };
 
-  function performDeleteAccount(): void {
-    throw new Error("Function not implemented.");
-  }
+  const performDeleteAccount = async () => {
+    try {
+      const auth = getAuth();
+      const db = getFirestore();
+      const currentUser = auth.currentUser;
+
+      if (!currentUser) {
+        Alert.alert("Erro", "Nenhum usuário encontrado.");
+        console.warn("DEBUG: tentativa de exclusão sem usuário autenticado");
+        return;
+      }
+
+      console.log("DEBUG: iniciando exclusão de conta para o usuário:", {
+        uid: currentUser.uid,
+        email: currentUser.email,
+      });
+
+      // Deleta o documento do Firestore
+      await deleteDoc(doc(db, "Users", currentUser.uid));
+      console.log("DEBUG: documento do Firestore excluído com sucesso:", currentUser.uid);
+
+      // Deleta o usuário do Authentication
+      await deleteUser(currentUser);
+      console.log("DEBUG: usuário removido do Firebase Authentication:", {
+        uid: currentUser.uid,
+        email: currentUser.email,
+      });
+
+      Alert.alert("Conta excluída", "Sua conta foi removida com sucesso.");
+      console.log("DEBUG: exclusão de conta concluída e alerta exibido.");
+
+      // Redireciona para tela de login
+      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+      console.log("DEBUG: redirecionado para a tela de login.");
+
+    } catch (error: any) {
+      console.error("Erro ao excluir conta:", error);
+
+      if (error.code === "auth/requires-recent-login") {
+        Alert.alert(
+          "Sessão expirada",
+          "Por segurança, é necessário fazer login novamente antes de excluir a conta.",
+          [{ text: "OK", onPress: () => navigation.navigate("Login") }]
+        );
+        console.warn("DEBUG: erro auth/requires-recent-login — redirecionando para login.");
+      } else {
+        Alert.alert("Erro", "Não foi possível excluir a conta. Tente novamente mais tarde.");
+      }
+    }
+  };
 
   // Cria um array único com todas as seções e itens
   const items: SectionItem[] = [
@@ -162,23 +209,15 @@ export default function Profile() {
     { section: "Ajuda e Suporte", title: "Política de Privacidade", onPress: () => navigation.navigate("PrivacyPolicy") },
     { section: "Ajuda e Suporte", title: "Alterar senha", onPress: () => navigation.navigate("NewPassword") },
     { section: "Conta", title: "Sair", onPress: handleLogout, icon: <SignOut size={22} color={colors.gray75} weight="bold" />, },
-    { section: "Conta", title: "Deletar", onPress: handleDeleteAccount, icon: <Trash size={22} color={colors.orange360} weight="bold" />, }, //Criar função deletar conta
+    { section: "Conta", title: "Deletar", onPress: handleDeleteAccount, icon: <Trash size={22} color={colors.orange360} weight="bold" />, },
 
   ].filter(Boolean); // remove itens falsos
 
   // Cria um array único com todas as seções
   const sections = Array.from(new Set(items.map(item => item.section)));
 
-  // limpa a flag de primeira execução (apenas para teste)
-  const clearOnboardingFlag = async () => {
-    try {
-      await AsyncStorage.removeItem("hasSeenCompleteProfileModal");
-      console.log("DEBUG: removed hasSeenCompleteProfileModal");
-      setShowSelect(true); // opcional: reabre o modal após limpar
-      console.log("show select true")
-    } catch (e) {
-      console.warn("DEBUG: failed to remove onboarding flag", e);
-    }
+  const handleOpenSelectModal = () => {
+    setShowSelect(true);
   };
 
   const handleSelectPatient = async () => {
@@ -282,7 +321,7 @@ export default function Profile() {
         />
       </View>
 
-      {/* Abas */}
+      {/* Aba de informações do perfil */}
       <View
         style={{
           flexDirection: "row",
@@ -306,16 +345,16 @@ export default function Profile() {
 
       {/* Conteúdo */}
       {currentProfileType && ProfileInfoComponent ? (
-          // renderiza apenas se o componente não for undefined
-          <ProfileInfoComponent {...(profileProps as any)} />
-        ) : (
-          <View style={{ paddingHorizontal: 16, paddingVertical: 32, alignItems: "center", gap: 32 }}>
-            <Text style={{ color: colors.gray75, textAlign: "center" }}>
-              Escolha seu tipo de conta para seguir com o cadastro e personalizar sua experiência no app.
-            </Text>
-            <SecondaryButton title="Selecionar tipo de conta" onPress={clearOnboardingFlag} />
-          </View>
-        )}
+        // renderiza apenas se o componente não for undefined
+        <ProfileInfoComponent {...(profileProps as any)} />
+      ) : (
+        <View style={{ paddingHorizontal: 16, paddingVertical: 32, alignItems: "center", gap: 32 }}>
+          <Text style={{ color: colors.gray75, textAlign: "center" }}>
+            Escolha seu tipo de conta para seguir com o cadastro e personalizar sua experiência no app.
+          </Text>
+          <SecondaryButton title="Selecionar tipo de conta" onPress={handleOpenSelectModal} />
+        </View>
+      )}
 
       {/* Seções */}
       {sections.map(section => {

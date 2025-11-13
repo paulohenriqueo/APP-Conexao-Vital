@@ -47,6 +47,15 @@ export const styles = StyleSheet.create({
         marginTop: 0,
         color: colors.green382,
     },
+    actionButton: {
+        backgroundColor: colors.green382,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        alignItems: "center",
+        justifyContent: "center",
+        flex: 1,
+    },
     actionButtonText: {
         ...typography.M01SB1624,
         marginTop: 0,
