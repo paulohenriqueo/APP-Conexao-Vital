@@ -66,7 +66,7 @@ export default function Login() {
 
                 case "auth/user-not-found":
                 case "auth/invalid-credential":
-                    Alert.alert("Conta não encontrada", "Nenhum usuário foi encontrado com esse e-mail. Verifique se a conta ainda existe ou crie uma nova.");
+                    Alert.alert("Conta não encontrada", "O e-mail informado pode estar incorreto ou a conta pode ter sido excluída. Verifique as informações ou crie uma nova conta.");
                     console.warn("DEBUG: conta não encontrada para o e-mail:", email);
                     break;
 
