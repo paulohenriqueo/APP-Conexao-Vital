@@ -1,4 +1,4 @@
-//Usado em: EditProfile.tsx
+// useEditProfile.ts — versão corrigida
 
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
@@ -8,10 +8,8 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { capitalizeFirstLetter } from "../utils/formatUtils";
 
-// Tipo do usuário (profissional ou cliente)
 export type currentProfileType = "caregiver" | "patient";
 
-// Tipagem da rota para garantir o acesso seguro aos parâmetros
 type RouteParams = {
   EditProfile: { currentProfileType: currentProfileType };
 };
@@ -24,7 +22,11 @@ export const useEditProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Dados pessoais
+  const currentUser = FIREBASE_AUTH.currentUser;
+
+  // -----------------------------
+  // STATES
+  // -----------------------------
   const [phone, setPhone] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
   const [cep, setCep] = useState("");
@@ -33,137 +35,109 @@ export const useEditProfile = () => {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
 
-  // Dados específicos comuns
+  // ESPECÍFICOS
   const [careCategory, setCareCategory] = useState("");
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
-  const [languageInput, setLanguageInput] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
+  const [languageInput, setLanguageInput] = useState("");
   const [observations, setObservations] = useState("");
 
-  // Dados específicos do profissional
-  const [qualificationInput, setQualificationInput] = useState("");
+  // CUIDADOR
   const [qualifications, setQualifications] = useState<string[]>([]);
-  const [experienceInput, setExperienceInput] = useState("");
+  const [qualificationInput, setQualificationInput] = useState("");
   const [experiences, setExperiences] = useState<string[]>([]);
+  const [experienceInput, setExperienceInput] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [selectedAudience, setSelectedAudience] = useState<string[]>([]);
 
-  // Dados específicos do cliente
-  const [conditionInput, setConditionInput] = useState("");
+  // PACIENTE
   const [conditions, setConditions] = useState<string[]>([]);
-  const [allergyInput, setAllergyInput] = useState("");
+  const [conditionInput, setConditionInput] = useState("");
   const [allergies, setAllergies] = useState<string[]>([]);
-  const [medicationInput, setMedicationInput] = useState("");
+  const [allergyInput, setAllergyInput] = useState("");
   const [medications, setMedications] = useState<string[]>([]);
+  const [medicationInput, setMedicationInput] = useState("");
 
-  const currentUser = FIREBASE_AUTH.currentUser;
-
-  // Opções fixas
   const periodOptions = ["Matutino", "Vespertino", "Noturno"];
-  const weekDays = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
-  const audienceOptions = ["Crianças", "Adultos", "Idosos"];
 
-  // --- Funções utilitárias ---
-  const toggleItem = (list: string[], item: string, setter: (val: string[]) => void) => {
-    setter(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
+  // -----------------------------
+  // UTILITÁRIAS
+  // -----------------------------
+  const toggleItem = (list: string[], item: string, setter: (v: string[]) => void) => {
+    setter(list.includes(item) ? list.filter(i => i !== item) : [...list, item]);
   };
 
-  const addToList = (
-    value: string,
-    setter: (v: string[]) => void,
-    list: string[],
-    clear: (v: string) => void
-  ) => {
+  const addToList = (value: string, setter: any, list: string[], clear: any) => {
     const trimmed = value.trim();
     if (!trimmed) return;
     setter([...list, capitalizeFirstLetter(trimmed)]);
     clear("");
   };
 
-  const removeFromList = (index: number, setter: (v: string[]) => void, list: string[]) => {
-    const copy = [...list];
-    copy.splice(index, 1);
-    setter(copy);
+  const removeFromList = (index: number, setter: any, list: string[]) => {
+    const arr = [...list];
+    arr.splice(index, 1);
+    setter(arr);
   };
 
-  const fetchAddress = async (cepValue: string) => {
-    const cleanCep = cepValue.replace(/\D/g, "");
-    if (cleanCep.length !== 8) return;
-
-    try {
-      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
-      const data = await response.json();
-      if (data.erro) {
-        Alert.alert("Erro", "CEP não encontrado.");
-        return;
-      }
-      setStreet(data.logradouro);
-      setNeighborhood(data.bairro);
-      setCity(data.localidade);
-      setState(data.uf);
-    } catch (error) {
-      Alert.alert("Erro", "Erro ao buscar CEP.");
-      console.error(error);
-    }
-  };
-
-  const handleSelectPhoto = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Permissão necessária", "É necessário permitir o acesso às fotos.");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    });
-
-    if (!result.canceled) setPhoto(result.assets[0].uri);
-  };
-
-  // --- Carregar dados do usuário ---
+  // -----------------------------
+  // FETCH USER
+  // -----------------------------
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const ref = doc(FIRESTORE_DB, "Users", currentUser?.uid || "");
         const snap = await getDoc(ref);
 
-        if (snap.exists()) {
-          const data = snap.data();
+        if (!snap.exists()) return;
+        const data = snap.data();
 
-          // Dados pessoais
-          setPhone(data.phone || "");
-          setCep(data.cep || "");
-          setStreet(data.street || "");
-          setNeighborhood(data.neighborhood || "");
-          setCity(data.city || "");
-          setState(data.state || "");
-          setPhoto(data.photo || null);
+        // -----------------------
+        // DADOS PESSOAIS
+        // -----------------------
+        const baseProfile = currentProfileType === "caregiver"
+          ? data.caregiverProfile
+          : data.patientProfile;
 
-          // Dados específicos comuns
-          setCareCategory(data.careCategorie || "");
-          setLanguages(data.preferredLanguages || []);
-          setObservations(data.observations || []);
-          setSelectedPeriods(data.periodo || []);
-
-          // Dados específicos por tipo
-          if (currentProfileType === "caregiver") {
-            setQualifications(data.qualifications || []);
-            setExperiences(data.experiences || []);
-            setSelectedDays(data.dispoDia || []);
-            setSelectedAudience(data.publicoAtendido || []);
-          } else {
-            setConditions(data.conditions || []);
-            setAllergies(data.allergies || []);
-            setMedications(data.medications || []);
-          }
+        if (baseProfile) {
+          setPhone(baseProfile.phone ?? "");
+          setCep(baseProfile.cep ?? "");
+          setStreet(baseProfile.street ?? "");
+          setNeighborhood(baseProfile.neighborhood ?? "");
+          setCity(baseProfile.city ?? "");
+          setState(baseProfile.state ?? "");
+          setPhoto(baseProfile.photo ?? null);
         }
+
+        // ----------------------------------
+        // ESPECÍFICOS — PACIENTE OU CUIDADOR
+        // ----------------------------------
+        if (currentProfileType === "patient") {
+          const c = data.condition ?? {};
+          setCareCategory(c.careCategory ?? "");
+          setConditions(c.condicoes ?? []);
+          setAllergies(c.alergias ?? []);
+          setMedications(c.medicamentos ?? []);
+          setLanguages(c.idiomasPreferidos ?? []);
+          setObservations(c.observacoes ?? "");
+          setSelectedPeriods(c.periodos ?? []);
+        }
+
+        if (currentProfileType === "caregiver") {
+          const s = data.caregiverSpecifications ?? {};
+          setCareCategory(s.careCategory ?? "");
+          setLanguages(s.idiomasPreferidos ?? []);
+          setQualifications(s.qualificacoes ?? []);
+          setExperiences(s.experiencias ?? []);
+          setSelectedDays(s.dayOptions ?? []);
+          setSelectedPeriods(s.periodOptions ?? []);
+          setSelectedAudience(s.publicoAtendido ?? []);
+          setObservations(s.observacoes ?? "");
+        }
+
       } catch (err) {
         console.error(err);
-        Alert.alert("Erro", "Falha ao carregar dados do usuário.");
+        Alert.alert("Erro ao carregar dados do usuário.");
       } finally {
         setLoading(false);
       }
@@ -172,72 +146,113 @@ export const useEditProfile = () => {
     fetchUser();
   }, []);
 
-  // --- Salvar dados pessoais ---
+  // -----------------------------
+  // SAVE PERSONAL
+  // -----------------------------
   const handleSavePersonal = async () => {
     setSaving(true);
     try {
       const ref = doc(FIRESTORE_DB, "Users", currentUser?.uid || "");
+      const profilePath = currentProfileType === "caregiver" ? "caregiverProfile" : "patientProfile";
+
       await updateDoc(ref, {
-        phone,
-        cep,
-        street,
-        neighborhood,
-        city,
-        state,
-        photo,
+        [`${profilePath}.phone`]: phone,
+        [`${profilePath}.cep`]: cep,
+        [`${profilePath}.street`]: street,
+        [`${profilePath}.city`]: city,
+        [`${profilePath}.state`]: state,
+        [`${profilePath}.neighborhood`]: neighborhood,
+        [`${profilePath}.photo`]: photo
       });
+
       Alert.alert("Sucesso", "Informações pessoais atualizadas!");
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Não foi possível atualizar as informações pessoais.");
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Erro ao atualizar as informações.");
     } finally {
       setSaving(false);
     }
   };
 
-  // --- Salvar dados específicos ---
+  // -----------------------------
+  // SAVE SPECIFIC
+  // -----------------------------
   const handleSaveSpecific = async () => {
     setSaving(true);
     try {
       const ref = doc(FIRESTORE_DB, "Users", currentUser?.uid || "");
-      const baseData = {
-        careCategorie: careCategory,
-        periodo: selectedPeriods,
-        preferredLanguages: languages,
-        observations,
-      };
+
+      if (currentProfileType === "patient") {
+        await updateDoc(ref, {
+          "condition.careCategory": careCategory,
+          "condition.condicoes": conditions,
+          "condition.alergias": allergies,
+          "condition.medicamentos": medications,
+          "condition.idiomasPreferidos": languages,
+          "condition.observacoes": observations,
+          "condition.periodos": selectedPeriods,
+        });
+      }
 
       if (currentProfileType === "caregiver") {
         await updateDoc(ref, {
-          ...baseData,
-          qualifications,
-          experiences,
-          dispoDia: selectedDays,
-          publicoAtendido: selectedAudience,
-        });
-      } else {
-        await updateDoc(ref, {
-          ...baseData,
-          conditions,
-          allergies,
-          medications,
+          "caregiverSpecifications.careCategory": careCategory,
+          "caregiverSpecifications.qualificacoes": qualifications,
+          "caregiverSpecifications.experiencias": experiences,
+          "caregiverSpecifications.dayOptions": selectedDays,
+          "caregiverSpecifications.periodOptions": selectedPeriods,
+          "caregiverSpecifications.publicoAtendido": selectedAudience,
+          "caregiverSpecifications.idiomasPreferidos": languages,
+          "caregiverSpecifications.observacoes": observations,
         });
       }
 
       Alert.alert("Sucesso", "Informações específicas atualizadas!");
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Não foi possível atualizar as informações específicas.");
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Erro ao salvar informações específicas.");
     } finally {
       setSaving(false);
     }
   };
 
-  // --- Retorno do Hook ---
+  async function fetchAddress(cep: string) {
+  try {
+    const cleanCep = cep.replace(/\D/g, "");
+    if (cleanCep.length !== 8) return; // só chama API se tiver 8 dígitos
+
+    const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+    if (!response.ok) {
+      console.error("Erro ao consultar ViaCEP");
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.erro) {
+      console.warn("CEP não encontrado");
+      return;
+    }
+
+    // Preenche automaticamente os campos
+    setStreet(data.logradouro || "");
+    setNeighborhood(data.bairro || "");
+    setCity(data.localidade || "");
+    setState(data.uf || "");
+
+  } catch (error) {
+    console.error("Erro no fetchAddress:", error);
+  }
+}
+
+
+  // -----------------------------
+  // RETORNO
+  // -----------------------------
   return {
-    currentProfileType,
     loading,
     saving,
+    currentProfileType,
 
     // pessoais
     phone, setPhone,
@@ -248,7 +263,7 @@ export const useEditProfile = () => {
     city, setCity,
     state, setState,
 
-    // específicos
+    // comuns
     careCategory, setCareCategory,
     selectedPeriods, setSelectedPeriods,
     languages, setLanguages,
@@ -263,7 +278,7 @@ export const useEditProfile = () => {
     selectedDays, setSelectedDays,
     selectedAudience, setSelectedAudience,
 
-    // cliente
+    // paciente
     conditions, setConditions,
     conditionInput, setConditionInput,
     allergies, setAllergies,
@@ -271,16 +286,13 @@ export const useEditProfile = () => {
     medications, setMedications,
     medicationInput, setMedicationInput,
 
-    // funções utilitárias
-    handleSelectPhoto,
-    fetchAddress,
+    // outros
     handleSavePersonal,
     handleSaveSpecific,
+    fetchAddress,
     toggleItem,
     addToList,
     removeFromList,
     periodOptions,
-    weekDays,
-    audienceOptions,
   };
 };
