@@ -240,21 +240,58 @@ export default function Home() {
                   colors={pendingGradient}
                   start={{ x: 1, y: 0 }}
                   end={{ x: 0, y: 1 }}
-                  style={{ ...styles.professionalHomeBox }}
+                  style={styles.professionalHomeBox}
                 >
-                  <Text
-                    style={{
-                      ...typography.M01R1824,
-                      ...styles.professionalHomeText,
-                      marginBottom: 5,
-                      color: pendingText,
-                    }}>Solicitações pendentes</Text>
-                  < Text
-                    style={{
-                      ...typography.M01M2024,
-                      ...styles.professionalHomeText,
-                      color: pendingText,
-                    }}>{pendingRequests}</Text>
+                  {pendingRequests > 0 ? (
+                    <TouchableOpacity
+                      onPress={() => setSelectedTab("history")}
+                      style={{ justifyContent: "center", alignItems: "center", width: "100%" }}
+                    >
+                      <Text
+                        style={{
+                          ...typography.M01R1824,
+                          ...styles.professionalHomeText,
+                          marginBottom: 5,
+                          color: pendingText,
+                        }}
+                      >
+                        Solicitações pendentes
+                      </Text>
+
+                      <Text
+                        style={{
+                          ...typography.M01M2024,
+                          ...styles.professionalHomeText,
+                          color: pendingText,
+                        }}
+                      >
+                        {pendingRequests}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <>
+                      <Text
+                        style={{
+                          ...typography.M01R1824,
+                          ...styles.professionalHomeText,
+                          marginBottom: 5,
+                          color: pendingText,
+                        }}
+                      >
+                        Solicitações pendentes
+                      </Text>
+
+                      <Text
+                        style={{
+                          ...typography.M01M2024,
+                          ...styles.professionalHomeText,
+                          color: pendingText,
+                        }}
+                      >
+                        {pendingRequests}
+                      </Text>
+                    </>
+                  )}
                 </LinearGradient>
 
                 <LinearGradient

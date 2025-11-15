@@ -70,7 +70,7 @@ export function HistoryItem({
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={historyStyles.name}>{name}</Text>
         <Text style={historyStyles.careCategory}>
-          {careCategory} | {city}Cidade
+          {careCategory}
         </Text>
         <View style={styles.ratingContainer}>
           {Array.from({ length: 5 }).map((_, i) => (

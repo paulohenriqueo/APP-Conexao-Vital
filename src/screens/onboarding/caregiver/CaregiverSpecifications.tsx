@@ -39,8 +39,9 @@ export default function CaregiverSpecifications({ navigation }: any) {
     "Adultos",
     "Idosos",
   ];
+
   const [selectedPublico, setSelectedPublico] = useState<string[]>([]);
-   const [idiomaInput, setIdiomaInput] = useState("");
+  const [idiomaInput, setIdiomaInput] = useState("");
   const [idiomasPreferidos, setIdiomasPreferidos] = useState<string[]>([]);
   const [observacoes, setObservacoes] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -51,7 +52,6 @@ export default function CaregiverSpecifications({ navigation }: any) {
     { key: "vespertino", label: "Vespertino" },
     { key: "noturno", label: "Noturno" },
   ];
-
 
   const addToList = (value: string, setter: (v: string[]) => void, list: string[], clear: (v: string) => void) => {
     const trimmed = value.trim();
@@ -73,20 +73,32 @@ export default function CaregiverSpecifications({ navigation }: any) {
   };
 
   const handleSave = async () => {
-    if (!agreed) {
-      Alert.alert("Atenção", "É necessário declarar que as informações são verdadeiras.");
+    if (!careCategory || careCategory.trim() === "") {
+      Alert.alert(
+        "Categoria obrigatória",
+        "Por favor, selecione área de atuação antes de continuar."
+      );
       return;
     }
+
+
+  if (!agreed) {
+    Alert.alert(
+      "Confirmação necessária",
+      "Você precisa confirmar que as informações são verdadeiras."
+    );
+    return;
+  }
 
     const payload = {
       careCategory,
       experiencias: experiencias,
-      qualificacoes,
+      qualificacoes: qualificacoes,
       dayOptions: selectedDays, // agora usa os dias selecionados (array)
       periodos: selectedPeriods, // agora usa os períodos selecionados (array)
       publicoAtendido: selectedPublico, // agora é array
-      idiomasPreferidos,
-      observacoes,
+      idiomasPreferidos: idiomasPreferidos,
+      observacoes: observacoes,
     };
 
     setSaving(true);
@@ -390,28 +402,28 @@ export default function CaregiverSpecifications({ navigation }: any) {
           </View>
 
           {/* Idiomas preferidos */}
-                    <Text style={{ color: colors.gray73, marginBottom: 6 }}>Idiomas preferidos</Text>
-                    <View style={{ flexDirection: "row", marginBottom: 8 }}>
-                      <Input placeholder="Adicionar idioma" value={idiomaInput} onChangeText={(text) => (setIdiomaInput(capitalizeFirstLetter(text)))} style={{ flex: 1 }} />
-                      <TouchableOpacity onPress={() => addToList(idiomaInput, setIdiomasPreferidos, idiomasPreferidos, setIdiomaInput)} style={{ marginLeft: 8, alignSelf: "center", paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
-                        <Text style={{ color: "#fff" }}>Adicionar</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <FlatList
-                      data={idiomasPreferidos}
-                      horizontal
-                      keyExtractor={(_, i) => String(i)}
-                      showsHorizontalScrollIndicator={false}
-                      renderItem={({ item, index }) => (
-                        <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.grayE8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, marginRight: 8 }}>
-                          <Text style={{ color: colors.gray23 }}>{item}</Text>
-                          <TouchableOpacity onPress={() => removeFromList(index, setIdiomasPreferidos, idiomasPreferidos)} style={{ marginLeft: 8 }}>
-                            <Text style={{ color: colors.orange360 }}>✕</Text>
-                          </TouchableOpacity>
-                        </View>
-                      )}
-                      style={{ marginBottom: 12 }}
-                    />
+          <Text style={{ color: colors.gray73, marginBottom: 6 }}>Idiomas preferidos</Text>
+          <View style={{ flexDirection: "row", marginBottom: 8 }}>
+            <Input placeholder="Adicionar idioma" value={idiomaInput} onChangeText={(text) => (setIdiomaInput(capitalizeFirstLetter(text)))} style={{ flex: 1 }} />
+            <TouchableOpacity onPress={() => addToList(idiomaInput, setIdiomasPreferidos, idiomasPreferidos, setIdiomaInput)} style={{ marginLeft: 8, alignSelf: "center", paddingVertical: 12, paddingHorizontal: 14, backgroundColor: colors.green382, borderRadius: 8 }}>
+              <Text style={{ color: "#fff" }}>Adicionar</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={idiomasPreferidos}
+            horizontal
+            keyExtractor={(_, i) => String(i)}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item, index }) => (
+              <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.grayE8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, marginRight: 8 }}>
+                <Text style={{ color: colors.gray23 }}>{item}</Text>
+                <TouchableOpacity onPress={() => removeFromList(index, setIdiomasPreferidos, idiomasPreferidos)} style={{ marginLeft: 8 }}>
+                  <Text style={{ color: colors.orange360 }}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            style={{ marginBottom: 12 }}
+          />
 
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Observações</Text>
           <TextInput

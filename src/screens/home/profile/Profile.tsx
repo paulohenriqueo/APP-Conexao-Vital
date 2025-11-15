@@ -40,6 +40,7 @@ interface SectionItem {
 export default function Profile() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [userCareCategory, setUserCareCategory] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
   const [currentProfileType, setCurrentProfileType] = useState<string | null>(null);
   const [showSelect, setShowSelect] = useState(false);
@@ -50,7 +51,7 @@ export default function Profile() {
   const user: User = {
     role: currentProfileType,
     rating: 5, //Avaliação a ser exibida - já incluío na exibição de estrelas
-    careCategory: "Cuidados Domiciliares",
+    // careCategory: "Cuidados Domiciliares",
   };
 
   // Definir o componente de informações do perfil com base na função do usuário
@@ -97,6 +98,20 @@ export default function Profile() {
       }
     };
     fetchUserName();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserCareCategory = async () => {
+      const auth = getAuth();
+      const db = getFirestore();
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const userDocRef = doc(db, "Users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) setUserCareCategory(userDoc.data().careCategory || "");
+      }
+    };
+    fetchUserCareCategory();
   }, []);
 
   useEffect(() => {
@@ -287,7 +302,7 @@ export default function Profile() {
             textAlign: "center",
             fontWeight: "600",
           }}>
-          {user.careCategory}
+          {userCareCategory || "Categoria não informada"}
         </Text>
         <View style={{ ...styles.ratingContainer }}>
           {Array.from({ length: Number(user.rating) }).map((_, i) => (
