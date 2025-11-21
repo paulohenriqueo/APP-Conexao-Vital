@@ -27,7 +27,6 @@ const CaregiverProfileInfo: React.FC<Props> = ({ caregiverData = {} }) => {
   const experiencia = caregiverData.experiencia ?? caregiverData.experience ?? [];
   const qualificacoes = caregiverData.qualificacoes ?? caregiverData.qualifications ?? [];
   const dispoDia = caregiverData.dispoDia ?? caregiverData.dispoDia ?? [];
-  // const dispoHora = caregiverData.dispoHora ?? caregiverData.dispoHora ?? [];
   const periodo = caregiverData.periodo ?? caregiverData.periodos ?? [];
   const publicoAtendido = caregiverData.publicoAtendido ?? caregiverData.publicoAtendido ?? [];
   const observacoes = caregiverData.observacoes ?? caregiverData.notes ?? "";

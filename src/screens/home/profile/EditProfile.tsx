@@ -37,7 +37,6 @@ export default function EditProfile() {
 
     // Pessoais
     photo, setPhoto,
-    handleSelectPhoto,
     phone, setPhone,
     cep, setCep,
     street, setStreet,

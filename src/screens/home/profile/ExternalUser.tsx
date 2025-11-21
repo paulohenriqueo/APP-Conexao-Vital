@@ -70,8 +70,6 @@ export default function ExternalUser() {
                     role,
                     // procura phone em vários lugares (root, profiles)
                     phone:
-                        data?.phone ??
-                        data?.contact ??
                         data?.patientProfile?.phone ??
                         data?.caregiverProfile?.phone ??
                         null,
