@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { deleteUser, getAuth, signOut } from "firebase/auth";
 import { deleteDoc, getFirestore, doc, getDoc } from "firebase/firestore";
 import { colors } from "../../../../styles/colors";
 import { typography } from "../../../../styles/typography";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { useNavigation, NavigationProp, useFocusEffect } from "@react-navigation/native";
 import ProfileItem from "../../../components/ProfileItem";
 import { SignOut } from "phosphor-react-native";
 import { Avatar } from "../../../components/Avatar";
@@ -141,7 +141,6 @@ export default function Profile() {
     })();
   }, []);
 
-  useEffect(() => {
   const fetchUserData = async () => {
     const auth = getAuth();
     const db = getFirestore();
@@ -159,9 +158,15 @@ export default function Profile() {
     }
   };
 
-  fetchUserData();
-}, []);
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+    }, [])
+  );
 
   // Logout
   const handleLogout = async () => {
@@ -325,7 +330,7 @@ export default function Profile() {
             textAlign: "center",
             fontWeight: "600",
           }}>
-          {userCareCategory || "Categoria não informada"}
+          {userData?.condition?.careCategory || "Categoria não informada"}
         </Text>
         <View style={{ ...styles.ratingContainer }}>
           {Array.from({ length: Number(user.rating) }).map((_, i) => (
@@ -394,7 +399,7 @@ export default function Profile() {
         </View>
       )}
 
-      
+
 
       {/* Seções */}
       {sections.map(section => {
