@@ -80,14 +80,30 @@ export default function PatientCondition({ navigation }: any) {
   // };
 
   const handleSave = async () => {
+    if (!careCategory || careCategory.trim() === "") {
+      Alert.alert(
+        "Categoria obrigatória",
+        "Por favor, selecione o tipo de cuidado necessário antes de continuar."
+      );
+      return;
+    }
+
+    if (!agreed) {
+      Alert.alert(
+        "Confirmação necessária",
+        "Você precisa confirmar que as informações são verdadeiras."
+      );
+      return;
+    }
+
     const payload = {
       periodos: selectedPeriods, // agora utiliza selectedPeriods
       careCategory,
-      observacoes,
-      alergias,
-      medicamentos,
-      condicoes,
-      idiomasPreferidos,
+      observacoes: observacoes,
+      alergias: alergias,
+      medicamentos: medicamentos,
+      condicoes: condicoes,
+      idiomasPreferidos: idiomasPreferidos,
     };
     setSaving(true);
     const res = await savePatientCondition(payload);

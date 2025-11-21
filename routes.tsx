@@ -15,6 +15,7 @@ import CaregiverForms from "./src/screens/onboarding/caregiver/CaregiverForms";
 import CaregiverSpecifications from "./src/screens/onboarding/caregiver/CaregiverSpecifications";
 import ExternalUser from "./src/screens/home/profile/ExternalUser";
 import EditProfile from "./src/screens/home/profile/EditProfile";
+import Profile from "./src/screens/home/profile/Profile";
 
 const Stack = createStackNavigator();
 

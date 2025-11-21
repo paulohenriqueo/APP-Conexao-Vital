@@ -182,7 +182,7 @@ export default function ExternalUser() {
                                     fontSize: 14,
                                     lineHeight: 18,
                                     fontWeight: "600",
-                                    color: colors.gray75,
+                                    color: colors.gray7590,
                                     marginTop: 8,
                                 }}>Área de atuação não informada</Text>
                             ) : (
@@ -190,7 +190,7 @@ export default function ExternalUser() {
                                     fontSize: 14,
                                     lineHeight: 18,
                                     fontWeight: "600",
-                                    color: colors.gray75,
+                                    color: colors.gray7590,
                                     marginTop: 8,
                                 }}>Tipo de cuidado não informado</Text>
                             )}
@@ -200,7 +200,37 @@ export default function ExternalUser() {
                             {remoteUser?.role === "caregiver" ? profileProps.caregiverData?.especialization : profileProps.patientData?.careType}
                         </Text>
                     )}
-                    <View style={{ marginTop: 8, flexDirection: "row" }}>
+                    {/* Cidade (exibida se existir em qualquer lugar do usuário) */}
+                    {remoteUser?.city ||
+                        remoteUser?.address?.city ? (
+                        <Text
+                            style={{
+                                fontSize: 14,
+                                lineHeight: 18,
+                                fontWeight: "600",
+                                color: colors.gray75,
+                                marginTop: 6,
+                                textAlign: "center",
+                            }}
+                        >
+                            {remoteUser?.city ?? remoteUser?.address?.city ??
+                                "Cidade não informada"}
+                        </Text>
+                    ) : (
+                        <Text
+                            style={{
+                                fontSize: 14,
+                                lineHeight: 18,
+                                fontWeight: "600",
+                                color: colors.gray7590,
+                                marginTop: 2,
+                                textAlign: "center",
+                            }}
+                        >
+                            Cidade não informada
+                        </Text>
+                    )}
+                    <View style={{ marginTop: 6, flexDirection: "row" }}>
                         {Array.from({ length: 5 }).map((_, i) => (
                             <Ionicons key={i} name={i < (remoteUser?.rating ?? 0) ? "star" : "star-outline"} size={20} color={colors.ambar400} />
                         ))}
@@ -333,8 +363,25 @@ export default function ExternalUser() {
                             <OutlinedButton
                                 title="Solicitar contato"
                                 onPress={() => {
-                                    setContactRequested(true);
-                                    Alert.alert("Contato solicitado", "Sua solicitação de contato foi enviada com sucesso!", [{ text: "OK" }]);
+                                    Alert.alert(
+                                        "Atenção",
+                                        "Ao solicitar o contato, seu número também ficará visível para o outro usuário caso ele aceite sua solicitação. Deseja continuar?",
+                                        [
+                                            { text: "Cancelar", style: "cancel" },
+                                            {
+                                                text: "Continuar",
+                                                onPress: () => {
+                                                    setContactRequested(true);
+                                                    //Adicionar lógica para salvar solicitção
+                                                    Alert.alert(
+                                                        "Contato solicitado",
+                                                        "Sua solicitação de contato foi enviada com sucesso!",
+                                                        [{ text: "OK" }]
+                                                    );
+                                                },
+                                            },
+                                        ]
+                                    );
                                 }}
                                 icon={<WhatsappLogo size={20} color={colors.green382} />}
                             />

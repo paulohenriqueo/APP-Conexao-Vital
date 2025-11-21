@@ -81,6 +81,21 @@ export default function EditProfile() {
   const weekDays = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
   const audienceOptions = ["Crianças", "Adultos", "Idosos"];
 
+  function goBackProfile() {
+    // Tenta voltar na pilha atual
+    if (navigation.canGoBack && navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    // Se não há para onde voltar, navega para Home e passa params que instruem
+    // a Home a selecionar a aba 'profile' e recarregar dados.
+    navigation.navigate("Home", {
+      screen: "Home", // se Home for um screen dentro de um navigator aninhado, ajuste aqui
+      params: { selectTab: "profile", refreshProfile: true },
+    });
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.green382 }}>
       <KeyboardAwareScrollView
@@ -90,7 +105,7 @@ export default function EditProfile() {
       >
         {/* Header */}
         <View style={[styles.header, { paddingTop: 20, marginVertical: 8 }]}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 8 }}>
+          <TouchableOpacity onPress={() => goBackProfile()} style={{ padding: 8 }}>
             <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" />
           </TouchableOpacity>
           <Text style={[typography.M01SB2024, { color: colors.whiteFBFE }]}>Editar perfil</Text>
@@ -113,7 +128,12 @@ export default function EditProfile() {
           <Input placeholder="Cidade" value={city} onChangeText={(text) => (setCity(capitalizeFirstLetter(text)))} />
           <Input placeholder="Estado" value={state} onChangeText={(text) => (setState(capitalizeFirstLetter(text)))} />
 
-          <PrimaryButton title={saving ? "Salvando..." : "Salvar informações pessoais"} onPress={handleSavePersonal} />
+          <PrimaryButton
+            title={saving ? "Salvando..." : "Salvar informações pessoais"}
+            onPress={async () => {
+              await handleSavePersonal();  // salva
+              goBackProfile();         // volta
+            }} />
         </View>
 
         {/* Seção 2 — Informações específicas */}
@@ -369,7 +389,12 @@ export default function EditProfile() {
             multiline
           />
 
-          <PrimaryButton title={saving ? "Salvando..." : "Salvar informações específicas"} onPress={handleSaveSpecific} />
+          <PrimaryButton
+            title={saving ? "Salvando..." : "Salvar informações específicas"}
+            onPress={async () => {
+              await handleSaveSpecific();  // salva
+              goBackProfile();         // volta
+            }} />
         </View>
       </KeyboardAwareScrollView>
     </View>
