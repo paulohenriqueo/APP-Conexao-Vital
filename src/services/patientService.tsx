@@ -1,5 +1,6 @@
 import { doc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { FIRESTORE_DB, FIREBASE_AUTH } from "../../FirebaseConfig";
+import { arrayUnion } from "firebase/firestore";
 
 export type PatientFormPayload = {
   cpf?: string;
@@ -95,6 +96,35 @@ export async function updateUserFields(fields: Record<string, any>, uid?: string
     return { ok: true };
   } catch (error) {
     console.error("updateUserFields error:", error);
+    return { ok: false, error };
+  }
+}
+
+// ===============================================
+// 3) SALVAR SOLICITAÇÃO NO HISTÓRICO DO PACIENTE
+// ===============================================
+
+export async function savePatientContactRequest(caregiverId: string, caregiverName: string) {
+  const userId = FIREBASE_AUTH.currentUser?.uid;
+  if (!userId) return { ok: false, error: new Error("Usuário não autenticado") };
+
+  try {
+    const ref = doc(FIRESTORE_DB, "Users", userId);
+
+    const newRequest = {
+      caregiverId,
+      caregiverName,
+      status: "pending",
+    };
+
+    await updateDoc(ref, {
+      requests: arrayUnion(newRequest),
+      updatedAt: serverTimestamp(),
+    });
+
+    return { ok: true };
+  } catch (error) {
+    console.error("savePatientContactRequest error:", error);
     return { ok: false, error };
   }
 }
