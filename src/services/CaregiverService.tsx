@@ -1,6 +1,14 @@
 // caregiverService.tsx
 import { doc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { FIRESTORE_DB, FIREBASE_AUTH } from "../../FirebaseConfig";
+import { getDoc } from "firebase/firestore";
+import { 
+  collection, 
+  getDocs, 
+} from "firebase/firestore";
+
+
+
 
 export type CaregiverFormPayload = {
   cpf?: string;
@@ -94,3 +102,88 @@ export async function updateUserFields(fields: Record<string, any>, uid?: string
     return { ok: false, error };
   }
 }
+
+/**
+ * Atualiza o status de uma solicitação feita para o cuidador.
+ * (Versão correta — não duplicada)
+ */
+export async function updatePatientRequestStatus(
+  patientId: string,
+  caregiverId: string,
+  newStatus: "aceito" | "recusado"
+) {
+  try {
+    const ref = doc(FIRESTORE_DB, "Users", patientId);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+      return { ok: false, error: new Error("Paciente não encontrado") };
+    }
+
+    const data = snap.data();
+    const requests = Array.isArray(data?.requests) ? data.requests : [];
+
+    // Atualiza somente a solicitação deste cuidador
+    const updatedRequests = requests.map((req: any) => {
+      if (req.caregiverId === caregiverId) {
+        return {
+          ...req,
+          status: newStatus,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return req;
+    });
+
+    await updateDoc(ref, {
+      requests: updatedRequests,
+      updatedAt: serverTimestamp(),
+    });
+
+    return { ok: true };
+  } catch (error) {
+    console.error("updatePatientRequestStatus error:", error);
+    return { ok: false, error };
+  }
+}
+
+/**
+ * Busca todas as solicitações pendentes recebidas pelo cuidador atual.
+ */
+export async function getPendingRequestsForCaregiver() {
+  const caregiverId = FIREBASE_AUTH?.currentUser?.uid;
+
+  if (!caregiverId) return { ok: false, error: "Usuário não autenticado" };
+
+  try {
+    const usersRef = collection(FIRESTORE_DB, "Users");
+    const snapshot = await getDocs(usersRef);
+
+    const pendingList: any[] = [];
+
+    snapshot.forEach((docSnap: any) => {
+      const data = docSnap.data();
+
+      if (!data.requests || !Array.isArray(data.requests)) return;
+
+      data.requests.forEach((req: any) => {
+        if (req.caregiverId === caregiverId && req.status === "pendente") {
+          pendingList.push({
+            patientId: docSnap.id,
+            patientName: data.patientProfile?.name ?? "Paciente",
+            patientPhoto: data.patientProfile?.photoUrl ?? null,
+            requestStatus: req.status,
+            createdAt: req.createdAt,
+            caregiverId: req.caregiverId
+          });
+        }
+      });
+    });
+
+    return { ok: true, data: pendingList };
+  } catch (error) {
+    console.error("getPendingRequestsForCaregiver error:", error);
+    return { ok: false, error };
+  }
+}
+
