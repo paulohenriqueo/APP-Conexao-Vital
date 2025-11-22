@@ -57,46 +57,81 @@ export default function ExternalUser() {
         const db = getFirestore();
         const auth = getAuth();
         const uid = userIdParam ?? auth.currentUser?.uid;
+
         if (!uid) {
           setRemoteUser(null);
           return;
         }
+
         const userDocRef = doc(db, "Users", uid);
         const userSnap = await getDoc(userDocRef);
+
         if (!userSnap.exists()) {
           setRemoteUser(null);
           return;
         }
+
         const data = userSnap.data();
-        console.log("ExternalUser: user document data:", data); // debug
+        console.log("ExternalUser: user document data:", data);
+
+        // Identificação do tipo de perfil
         const role =
           data?.profileType ??
           (data?.caregiverSpecifications || data?.caregiverProfile
             ? "caregiver"
             : data?.patientProfile
-            ? "patient"
-            : "undefined");
+              ? "patient"
+              : "undefined");
+
+        // Localização (city + state)
+        const city =
+          data?.patientProfile?.city ??
+          data?.caregiverProfile?.city ??
+          "";
+        const state =
+          data?.patientProfile?.state ??
+          data?.caregiverProfile?.state ??
+          "";
+
+        let location = "";
+        if (city && state) location = `${city} | ${state}`;
+        else if (city) location = city;
+        else if (state) location = state;
+        else location = "Localização não informada";
+
+        // Set do usuário remoto
         setRemoteUser({
           id: userSnap.id,
           name: data?.name ?? data?.displayName ?? "",
           email: data?.email ?? null,
           role,
-          // procura phone em vários lugares (root, profiles)
+
           phone:
             data?.patientProfile?.phone ??
             data?.caregiverProfile?.phone ??
             null,
+
           rating: data?.rating ?? 0,
           imageUrl: data?.photoUrl ?? data?.avatar ?? null,
+
+          // Localização já tratada
+          city,
+          state,
+          location, // <-- já formatado
+
           caregiverSpecifications:
-            data?.caregiverSpecifications ?? data?.caregiverProfile ?? null,
-          // merge entre patientProfile (dados pessoais) e condition (dados médicos)
+            data?.caregiverSpecifications ??
+            data?.caregiverProfile ??
+            null,
+
           patientProfile: {
             ...(data?.patientProfile ?? {}),
             ...(data?.condition ?? {}),
           },
+
           bio: data?.bio ?? data?.description ?? "",
         });
+
       } catch (err) {
         console.warn("Erro ao buscar ExternalUser:", err);
       } finally {
@@ -259,35 +294,18 @@ export default function ExternalUser() {
             </Text>
           )}
           {/* Cidade (exibida se existir em qualquer lugar do usuário) */}
-          {remoteUser?.city || remoteUser?.address?.city ? (
-            <Text
-              style={{
-                fontSize: 14,
-                lineHeight: 18,
-                fontWeight: "600",
-                color: colors.gray75,
-                marginTop: 6,
-                textAlign: "center",
-              }}
-            >
-              {remoteUser?.city ??
-                remoteUser?.address?.city ??
-                "Cidade não informada"}
-            </Text>
-          ) : (
-            <Text
-              style={{
-                fontSize: 14,
-                lineHeight: 18,
-                fontWeight: "600",
-                color: colors.gray7590,
-                marginTop: 2,
-                textAlign: "center",
-              }}
-            >
-              Cidade não informada
-            </Text>
-          )}
+          <Text
+            style={{
+              fontSize: 14,
+              lineHeight: 18,
+              fontWeight: "600",
+              color: colors.gray75,
+              marginTop: 6,
+              textAlign: "center",
+            }}
+          >
+            {remoteUser?.location}
+          </Text>
           <View style={{ marginTop: 6, flexDirection: "row" }}>
             {Array.from({ length: 5 }).map((_, i) => (
               <Ionicons

@@ -11,7 +11,6 @@ import { Check, X } from "phosphor-react-native";
 type HistoryItemProps = {
   name: string;
   rating: number;
-  city: string;
   date: string;
   careCategory: string;
   imageUrl?: string;
@@ -24,7 +23,6 @@ export function HistoryItem({
   name,
   careCategory,
   rating,
-  city,
   date,
   imageUrl,
   currentProfileType = "caregiver",

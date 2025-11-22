@@ -7,9 +7,6 @@ import {
   getDocs, 
 } from "firebase/firestore";
 
-
-
-
 export type CaregiverFormPayload = {
   cpf?: string;
   birthDate?: string;
