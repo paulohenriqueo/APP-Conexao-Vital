@@ -50,7 +50,9 @@ export async function getProfilesByType(type: string): Promise<PublicProfile[]> 
         name,
         rating: data?.rating ?? 0,
         tags: data?.tags ?? data?.especializacoes ?? [],
-        imageUrl: data?.photoUrl ?? data?.avatar ?? null,
+        imageUrl: data?.caregiverProfile?.photo ||
+                  data?.patientProfile?.photo ||
+                  null,
         especialization: data?.especialization ?? data?.especializacoes?.[0] ?? type,
         profileType: data?.profileType ?? null,
       };
@@ -127,7 +129,9 @@ export async function searchProfilesByName(
           name,
           rating: data?.rating ?? 0,
           tags: data?.tags ?? data?.especializacoes ?? [],
-          imageUrl: data?.photoUrl ?? data?.avatar ?? null,
+          imageUrl: data?.caregiverProfile?.photo ||
+                    data?.patientProfile?.photo ||
+                    null,
           especialization: data?.especialization ?? data?.especializacoes?.[0] ?? type,
           profileType: data?.profileType ?? null,
           // meta para filtragem

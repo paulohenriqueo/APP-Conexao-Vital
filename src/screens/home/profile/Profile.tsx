@@ -116,18 +116,31 @@ export default function Profile() {
   }, []);
 
   useEffect(() => {
-    const fetchUserPhoto = async () => {
-      const auth = getAuth();
-      const db = getFirestore();
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        const userDocRef = doc(db, "Users", currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) setPhoto(userDoc.data().photo || "");
+  const fetchUserPhoto = async () => {
+    const auth = getAuth();
+    const db = getFirestore();
+    const currentUser = auth.currentUser;
+
+    if (currentUser) {
+      const userDocRef = doc(db, "Users", currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+
+        const photoURL =
+          data?.caregiverProfile?.photo ??
+          data?.patientProfile?.photo ??
+          null;
+
+        setPhoto(photoURL);
       }
-    };
-    fetchUserPhoto();
-  }, []);
+    }
+  };
+
+  fetchUserPhoto();
+}, []);
+
 
   useEffect(() => {
     // carrega tipo do usuário e dados do perfil
@@ -301,7 +314,7 @@ export default function Profile() {
         <Avatar
           size={84}
           name={userName}
-          imageUrl={photo}
+          photoURL={photo}
         />
         <Text
           style={{

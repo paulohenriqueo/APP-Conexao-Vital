@@ -7,6 +7,7 @@ import { FIREBASE_AUTH, FIRESTORE_DB } from "../FirebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { capitalizeFirstLetter } from "../utils/formatUtils";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export type currentProfileType = "caregiver" | "patient";
 
@@ -63,11 +64,22 @@ export const useEditProfile = () => {
   // -----------------------------
   // UTILITÁRIAS
   // -----------------------------
-  const toggleItem = (list: string[], item: string, setter: (v: string[]) => void) => {
-    setter(list.includes(item) ? list.filter(i => i !== item) : [...list, item]);
+  const toggleItem = (
+    list: string[],
+    item: string,
+    setter: (v: string[]) => void
+  ) => {
+    setter(
+      list.includes(item) ? list.filter((i) => i !== item) : [...list, item]
+    );
   };
 
-  const addToList = (value: string, setter: any, list: string[], clear: any) => {
+  const addToList = (
+    value: string,
+    setter: any,
+    list: string[],
+    clear: any
+  ) => {
     const trimmed = value.trim();
     if (!trimmed) return;
     setter([...list, capitalizeFirstLetter(trimmed)]);
@@ -79,6 +91,32 @@ export const useEditProfile = () => {
     arr.splice(index, 1);
     setter(arr);
   };
+
+  //-----------------------------
+  // IMAGE UPLOAD
+  //-----------------------------
+  async function uploadProfileImage(uri: string) {
+    if (!uri) return null;
+
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      const storage = getStorage();
+      const imageRef = ref(
+        storage,
+        `profilePhotos/${currentUser?.uid}_${Date.now()}.jpg`
+      );
+
+      await uploadBytes(imageRef, blob);
+
+      const downloadURL = await getDownloadURL(imageRef);
+      return downloadURL;
+    } catch (error) {
+      console.error("Erro ao fazer upload da imagem:", error);
+      return null;
+    }
+  }
 
   // -----------------------------
   // FETCH USER
@@ -95,9 +133,10 @@ export const useEditProfile = () => {
         // -----------------------
         // DADOS PESSOAIS
         // -----------------------
-        const baseProfile = currentProfileType === "caregiver"
-          ? data.caregiverProfile
-          : data.patientProfile;
+        const baseProfile =
+          currentProfileType === "caregiver"
+            ? data.caregiverProfile
+            : data.patientProfile;
 
         if (baseProfile) {
           setPhone(baseProfile.phone ?? "");
@@ -134,7 +173,6 @@ export const useEditProfile = () => {
           setSelectedAudience(s.publicoAtendido ?? []);
           setObservations(s.observacoes ?? "");
         }
-
       } catch (err) {
         console.error(err);
         Alert.alert("Erro ao carregar dados do usuário.");
@@ -153,7 +191,17 @@ export const useEditProfile = () => {
     setSaving(true);
     try {
       const ref = doc(FIRESTORE_DB, "Users", currentUser?.uid || "");
-      const profilePath = currentProfileType === "caregiver" ? "caregiverProfile" : "patientProfile";
+      const profilePath =
+        currentProfileType === "caregiver"
+          ? "caregiverProfile"
+          : "patientProfile";
+
+      let photoURL = photo;
+
+      // Se a imagem for local, fazer upload
+      if (photo?.startsWith("file://")) {
+        photoURL = await uploadProfileImage(photo);
+      }
 
       await updateDoc(ref, {
         [`${profilePath}.phone`]: phone,
@@ -162,7 +210,7 @@ export const useEditProfile = () => {
         [`${profilePath}.city`]: city,
         [`${profilePath}.state`]: state,
         [`${profilePath}.neighborhood`]: neighborhood,
-        [`${profilePath}.photo`]: photo
+        [`${profilePath}.photo`]: photoURL,
       });
 
       Alert.alert("Sucesso", "Informações pessoais atualizadas!");
@@ -217,34 +265,34 @@ export const useEditProfile = () => {
   };
 
   async function fetchAddress(cep: string) {
-  try {
-    const cleanCep = cep.replace(/\D/g, "");
-    if (cleanCep.length !== 8) return; // só chama API se tiver 8 dígitos
+    try {
+      const cleanCep = cep.replace(/\D/g, "");
+      if (cleanCep.length !== 8) return; // só chama API se tiver 8 dígitos
 
-    const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
-    if (!response.ok) {
-      console.error("Erro ao consultar ViaCEP");
-      return;
+      const response = await fetch(
+        `https://viacep.com.br/ws/${cleanCep}/json/`
+      );
+      if (!response.ok) {
+        console.error("Erro ao consultar ViaCEP");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.erro) {
+        console.warn("CEP não encontrado");
+        return;
+      }
+
+      // Preenche automaticamente os campos
+      setStreet(data.logradouro || "");
+      setNeighborhood(data.bairro || "");
+      setCity(data.localidade || "");
+      setState(data.uf || "");
+    } catch (error) {
+      console.error("Erro no fetchAddress:", error);
     }
-
-    const data = await response.json();
-
-    if (data.erro) {
-      console.warn("CEP não encontrado");
-      return;
-    }
-
-    // Preenche automaticamente os campos
-    setStreet(data.logradouro || "");
-    setNeighborhood(data.bairro || "");
-    setCity(data.localidade || "");
-    setState(data.uf || "");
-
-  } catch (error) {
-    console.error("Erro no fetchAddress:", error);
   }
-}
-
 
   // -----------------------------
   // RETORNO
@@ -255,36 +303,60 @@ export const useEditProfile = () => {
     currentProfileType,
 
     // pessoais
-    phone, setPhone,
-    photo, setPhoto,
-    cep, setCep,
-    street, setStreet,
-    neighborhood, setNeighborhood,
-    city, setCity,
-    state, setState,
+    phone,
+    setPhone,
+    photo,
+    setPhoto,
+    cep,
+    setCep,
+    street,
+    setStreet,
+    neighborhood,
+    setNeighborhood,
+    city,
+    setCity,
+    state,
+    setState,
 
     // comuns
-    careCategory, setCareCategory,
-    selectedPeriods, setSelectedPeriods,
-    languages, setLanguages,
-    languageInput, setLanguageInput,
-    observations, setObservations,
+    careCategory,
+    setCareCategory,
+    selectedPeriods,
+    setSelectedPeriods,
+    languages,
+    setLanguages,
+    languageInput,
+    setLanguageInput,
+    observations,
+    setObservations,
 
     // profissional
-    qualifications, setQualifications,
-    qualificationInput, setQualificationInput,
-    experiences, setExperiences,
-    experienceInput, setExperienceInput,
-    selectedDays, setSelectedDays,
-    selectedAudience, setSelectedAudience,
+    qualifications,
+    setQualifications,
+    qualificationInput,
+    setQualificationInput,
+    experiences,
+    setExperiences,
+    experienceInput,
+    setExperienceInput,
+    selectedDays,
+    setSelectedDays,
+    selectedAudience,
+    setSelectedAudience,
 
     // paciente
-    conditions, setConditions,
-    conditionInput, setConditionInput,
-    allergies, setAllergies,
-    allergyInput, setAllergyInput,
-    medications, setMedications,
-    medicationInput, setMedicationInput,
+    conditions,
+    setConditions,
+    conditionInput,
+    setConditionInput,
+    allergies,
+    setAllergies,
+    allergyInput,
+    setAllergyInput,
+    medications,
+    setMedications,
+    medicationInput,
+    setMedicationInput,
 
     // outros
     handleSavePersonal,

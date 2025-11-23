@@ -117,7 +117,9 @@ export default function ExternalUser() {
             null,
 
           rating: data?.rating ?? 0,
-          imageUrl: data?.photoUrl ?? data?.avatar ?? null,
+          imageUrl: data?.caregiverProfile?.photo ??
+                    data?.patientProfile?.photo ??
+                    undefined,
 
           // Localização já tratada
           city,
@@ -415,7 +417,7 @@ export default function ExternalUser() {
 
           {/* avatar com leve overlap visual */}
           <View style={{ marginTop: -40, marginBottom: 8 }}>
-            <Avatar size={84} name={userName} imageUrl={remoteUser?.imageUrl} />
+            <Avatar size={84} name={userName} photoURL={remoteUser?.imageUrl} />
           </View>
 
           <Text

@@ -68,7 +68,7 @@ export function HistoryItem({
 
   return (
     <View style={historyStyles.container}>
-      <Avatar name={name} imageUrl={imageUrl} />
+      <Avatar name={name} photoURL={imageUrl} />
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={historyStyles.name}>{name}</Text>
         <Text style={historyStyles.careCategory}>
