@@ -250,60 +250,84 @@ export default function Home() {
   // ------------------------------
   // FUNÇÃO GLOBAL — pode ser usada no accept/decline
   // ------------------------------
-  async function loadRequests() {
-    console.log("\n==============================");
-    console.log("🔄 [loadRequests] Iniciando carregamento...");
-    console.log("==============================\n");
+async function loadRequests() {
+  try {
+    console.log("🔄 Carregando solicitações...");
 
-    try {
-      const requests: RequestItem[] = await getRequestsForUser(currentUserId);
+    const requests = await getRequestsForUser(currentUserId);
 
-      console.log("📥 [loadRequests] Requests recebidos:", requests);
-      console.log("📛 currentProfileType dentro do loadRequests:", currentProfileType);
-      console.log("📛 currentUserId usado:", currentUserId);
+    const formatted: HistoryData[] = [];
 
-      const formatted: HistoryData[] = requests.map((req: any) => {
-        // Força que currentProfileType seja do tipo correto
-        const profileType: "caregiver" | "patient" | undefined =
-          currentProfileType === "caregiver"
-            ? "caregiver"
-            : currentProfileType === "patient"
-              ? "patient"
-              : undefined;
+    for (const req of requests) {
+      const isCaregiver = currentProfileType === "caregiver";
+      const otherUserId = isCaregiver ? req.patientId : req.caregiverId;
 
-        // Formata a data sem os "de"
-        const dateObj = new Date(req.createdAt);
-        const parts = new Intl.DateTimeFormat("pt-BR", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }).formatToParts(dateObj);
+      // pegar dados do outro usuário
+      const otherRef = doc(FIRESTORE_DB, "Users", otherUserId);
+      const otherSnap = await getDoc(otherRef);
+      const otherData = otherSnap.data();
 
-        const day = parts.find(p => p.type === "day")?.value;
-        const month = parts.find(p => p.type === "month")?.value;
-        const year = parts.find(p => p.type === "year")?.value;
+      const name =
+        otherData?.name ||
+        otherData?.displayName ||
+        otherData?.patientProfile?.nome ||
+        otherData?.caregiverProfile?.nome ||
+        "Usuário";
 
-        const formattedDate = `${day} ${month} ${year}`;
+      const photo =
+        otherData?.patientProfile?.photo ||
+        otherData?.caregiverProfile?.photo ||
+        null;
 
-        return {
-          id: req.patientId ?? req.caregiverId ?? "",
-          name: req.patientName ?? req.caregiverName ?? "Usuário",
-          date: formattedDate,
-          requestStatus: req.status,
-          imageUrl: req.imageUrl ?? null,
-          rating: req.rating ?? null,
-          careCategory: req.careCategory ?? "",
-          currentProfileType: profileType,
-        };
+      const careCategory =
+        otherData?.caregiverSpecifications?.careCategory ||
+        otherData?.condition?.careCategory ||
+        otherData?.careCategory ||
+        "";
+
+      const rating =
+        otherData?.rating ??
+        otherData?.averageRating ??
+        0;
+
+      // converter status
+      const statusMap: any = {
+        pending: "pendente",
+        accepted: "aceita",
+        rejected: "recusada",
+      };
+
+      const mappedStatus = statusMap[req.status] ?? "pendente";
+
+      // formatar data
+      const dateObj = new Date(req.createdAt);
+      const formattedDate = dateObj.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
       });
 
-      setHistoryData(formatted.slice().reverse());
-
-      console.log("🟩 [Home] Dados formatados para lista:", formatted);
-    } catch (err) {
-      console.warn("Erro ao carregar solicitações:", err);
+      formatted.push({
+        id: otherUserId,
+        name,
+        imageUrl: photo,
+        careCategory,
+        rating,
+        date: formattedDate,
+        requestStatus: mappedStatus,
+        currentProfileType: currentProfileType as any,
+      });
     }
+
+    setHistoryData(formatted.reverse());
+    console.log("🟩 Histórico formatado:", formatted);
+
+  } catch (err) {
+    console.warn("Erro ao carregar solicitações:", err);
   }
+}
+
+
 
   // ------------------------------
   // useEffect apenas chama loadRequests

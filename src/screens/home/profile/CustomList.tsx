@@ -33,7 +33,6 @@ type CustomListProps = {
 
 export function CustomList({ type, data, onAccept, onDecline }: CustomListProps) {
   const navigation = useNavigation<any>();
-
   return (
     <FlatList<any>
       data={data}
@@ -50,7 +49,7 @@ export function CustomList({ type, data, onAccept, onDecline }: CustomListProps)
                 rating={item.rating}
                 date={item.date}
                 careCategory={item.careCategory}
-                imageUrl={item.imageUrl || ""}
+                imageUrl={(item as HistoryData).imageUrl || ""}
                 requestStatus={item.requestStatus}
                 currentProfileType={item.currentProfileType}
                 onPress={handlePress}

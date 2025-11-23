@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import { baseTypography } from "../../styles/typography";
 
+
 function getInitials(name: string) {
   if (!name) return "";
   const parts = name.trim().split(" ");
@@ -14,15 +15,19 @@ type AvatarProps = {
   size?: number;
   backgroundColor?: string;
   textColor?: string;
-  imageUrl?: string | null;
+  photoURL?: string | null;
 };
 
-export function Avatar({ name, size = 60, backgroundColor = "#e0f7fa", textColor = "#00796b", imageUrl }: AvatarProps) {
+export function Avatar({ name, size = 60, backgroundColor = "#e0f7fa", textColor = "#00796b", photoURL }: AvatarProps) {
   const initials = getInitials(name);
   const [isLoading, setIsLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
-  const showFallback = !imageUrl || isLoading || imageError;
+  const hasPhoto =
+    photoURL &&
+    (photoURL.startsWith("data:image") || photoURL.startsWith("http"));
+
+  const showFallback = !hasPhoto || imageError;
 
   return (
     <View
@@ -33,9 +38,9 @@ export function Avatar({ name, size = 60, backgroundColor = "#e0f7fa", textColor
     >
       {showFallback && <Text style={[styles.text, { color: textColor, fontSize: size * 0.45 }]}>{initials}</Text>}
 
-      {imageUrl && !imageError && (
+      {photoURL && !imageError && (
         <Image
-          source={{ uri: imageUrl }}
+          source={{ uri: photoURL?.startsWith("data:image") ? photoURL : `${photoURL}` }}
           style={{ width: size, height: size, borderRadius: size / 2, position: "absolute", resizeMode: "cover" }}
           onLoadStart={() => setIsLoading(true)}
           onLoadEnd={() => setIsLoading(false)}
