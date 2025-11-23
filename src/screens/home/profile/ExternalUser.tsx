@@ -22,6 +22,8 @@ import PatientProfileInfo from "./PatientProfileInfo";
 import { openWhatsApp } from "../../../../utils/openWhatsApp";
 import { TopBar } from "../../../components/TopBar";
 import { savePatientContactRequest } from "../../../services/patientService";
+import { acceptRequest, declineRequest } from "../../../services/requestService";
+import { ClockCountdown, Confetti, SealCheck, Sparkle, Prohibit } from "phosphor-react-native";
 
 interface User {
   //Dados necessários para exibir perfil de outros usuários
@@ -36,7 +38,7 @@ interface User {
 export default function ExternalUser() {
   const [userName, setUserName] = useState("");
   const [contactRequested, setContactRequested] = useState(false); // Estado para controlar se o contato foi solicitado
-  const [acceptedContact, setAcceptedContact] = useState(false);
+  const [acceptedContact, setAcceptedContact] = useState<boolean | null>(null);
   const [showStars, setShowStars] = useState(false); // Estado para controlar se entrou em contato
   const [rating, setRating] = useState(0);
 
@@ -49,13 +51,13 @@ export default function ExternalUser() {
   const [loading, setLoading] = useState(true);
   const [remoteUser, setRemoteUser] = useState<any>(null);
 
+  const auth = getAuth();
   // busca os dados do usuário selecionado; se não houver param, tenta exibir currentUser como antes
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         const db = getFirestore();
-        const auth = getAuth();
         const uid = userIdParam ?? auth.currentUser?.uid;
 
         if (!uid) {
@@ -187,6 +189,7 @@ export default function ExternalUser() {
 
   const handleRequest = async () => {
     setContactRequested(true);
+    setAcceptedContact(null); // pendente
 
     await savePatientContactRequest(remoteUser.id, remoteUser.name);
 
@@ -196,6 +199,44 @@ export default function ExternalUser() {
       [{ text: "OK" }]
     );
   };
+
+  const loggedUserId = auth.currentUser?.uid;
+  const remoteUserId = remoteUser?.id;
+
+  const isPatient = remoteUser?.role === "patient";
+
+  const patientId = isPatient ? loggedUserId : remoteUserId;
+  const caregiverId = isPatient ? remoteUserId : loggedUserId;
+
+  async function handleAccept() {
+    if (!patientId || !caregiverId) {
+      console.warn("IDs ausentes para aceitar solicitação");
+      return;
+    }
+
+    const result = await acceptRequest(patientId, caregiverId);
+
+    if (result.ok) {
+      setAcceptedContact(true);
+    } else {
+      console.error(result.error);
+    }
+  }
+
+  async function handleDecline() {
+    if (!patientId || !caregiverId) {
+      console.warn("IDs ausentes para recusar solicitação");
+      return;
+    }
+
+    const result = await declineRequest(patientId, caregiverId);
+
+    if (result.ok) {
+      setAcceptedContact(false);
+    } else {
+      console.error(result.error);
+    }
+  }
 
   return (
     <ScrollView
@@ -213,7 +254,7 @@ export default function ExternalUser() {
     >
       <TopBar title="" />
       {/* Foto de perfil, nome e estrelas - estilo atualizado para card centralizado */}
-      <View style={{ marginHorizontal: 16, marginTop: 20, marginBottom: 12 }}>
+      <View style={{ marginHorizontal: 16, marginTop: 20, marginBottom: 8 }}>
         <View
           style={{
             backgroundColor: colors.whiteFBFE,
@@ -356,19 +397,24 @@ export default function ExternalUser() {
                   disabled={!remoteUser?.phone}
                 />
               ) : (
-                <View style={{ width: "100%", flexDirection: "row", gap: 8 }}>
-                  <ActionButton
-                    title="Aceitar"
-                    icon={<Check size={20} color={colors.greenAccept} />}
-                    type="aceitar"
-                    onPress={() => setAcceptedContact(true)}
-                  />
-                  <ActionButton
-                    title="Recusar"
-                    icon={<X size={20} color={colors.redc00} />}
-                    type="recusar"
-                    onPress={() => setAcceptedContact(false)}
-                  />
+                <View style={{ width: "100%", margin: 0, padding: 0, gap: 16, flexDirection: "column" }} >
+                  <View style={{ width: "100%", margin: 0, padding: 0, backgroundColor: colors.grayE8 }}>
+                    <Text style={{ fontSize: 14, fontWeight: 600, color: colors.gray47, justifyContent: "center" }}>Solicitação pendente</Text>
+                  </View>
+                  <View style={{ width: "100%", flexDirection: "row", gap: 8 }}>
+                    <ActionButton
+                      title="Aceitar"
+                      icon={<Check size={20} color={colors.greenAccept} />}
+                      type="aceitar"
+                      onPress={handleAccept}
+                    />
+                    <ActionButton
+                      title="Recusar"
+                      icon={<X size={20} color={colors.redc00} />}
+                      type="recusar"
+                      onPress={handleDecline}
+                    />
+                  </View>
                 </View>
               )}
             </View>
@@ -428,46 +474,74 @@ export default function ExternalUser() {
           </View>
         ) : (
           <View style={{ width: "100%", flexDirection: "column", gap: 8 }}>
-            {contactRequested ? (
-              <PrimaryButton
-                title="Entrar em contato"
-                onPress={() => {
-                  setShowStars(true);
-                  const firstName = remoteUser?.name?.split(" ")[0] || "";
-                  if (remoteUser?.phone) {
-                    const initialMessage =
-                      remoteUser.role === "patient"
-                        ? `Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital.`
-                        : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`;
-                    openWhatsApp(String(remoteUser.phone), initialMessage);
-                  } else {
-                    Alert.alert(
-                      "Contato indisponível",
-                      "O número de telefone deste usuário não está disponível no momento."
-                    );
-                  }
-                }}
-                icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
-                disabled={!remoteUser?.phone}
-              />
-            ) : (
+            {!contactRequested && (
               <OutlinedButton
                 title="Solicitar contato"
                 onPress={() => {
-                  Alert.alert(
-                    "Atenção",
-                    "Ao solicitar o contato, seu número também ficará visível para o outro usuário caso ele aceite sua solicitação. Deseja continuar?",
-                    [
-                      { text: "Cancelar", style: "cancel" },
-                      {
-                        text: "Continuar",
-                        onPress: handleRequest,
-                      },
-                    ]
-                  );
+                  handleRequest()
+                  //Reativar
+
+                  // Alert.alert(
+                  //   "Atenção",
+                  //   "Ao solicitar o contato, seu número também ficará visível para o outro usuário caso ele aceite sua solicitação. Deseja continuar?",
+                  //   [
+                  //     { text: "Cancelar", style: "cancel" },
+                  //     {
+                  //       text: "Continuar",
+                  //       onPress: handleRequest,
+                  //     },
+                  //   ]
+                  // );
                 }}
                 icon={<WhatsappLogo size={20} color={colors.green382} />}
               />
+            )}
+
+            {/* Contato pendente */}
+            {contactRequested && acceptedContact === null && (
+              <View style={{ width: "100%", paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.grayE8, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 8 }}>
+                <ClockCountdown size={18} color={colors.gray47} />
+                <Text style={{ fontSize: 14, fontWeight: 600, color: colors.gray47 }}>Solicitação pendente</Text>
+              </View>
+            )}
+
+            {/* Contato aceito */}
+            {contactRequested && acceptedContact === true && (
+              <View style={{ width: "100%", gap: 16, flexDirection: "column" }}>
+                <View style={{ width: "100%", paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.greenAcceptBg, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 8 }}>
+                  <SealCheck size={18} color={colors.greenAccept} />
+                  <Text style={{ fontSize: 14, fontWeight: 600, color: colors.greenAccept }}>Solicitação aceita</Text>
+                </View>
+                <PrimaryButton
+                  title="Entrar em contato"
+                  onPress={() => {
+                    setShowStars(true);
+                    const firstName = remoteUser?.name?.split(" ")[0] || "";
+                    if (remoteUser?.phone) {
+                      const initialMessage =
+                        remoteUser.role === "patient"
+                          ? `Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital.`
+                          : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`;
+                      openWhatsApp(String(remoteUser.phone), initialMessage);
+                    } else {
+                      Alert.alert(
+                        "Contato indisponível",
+                        "O número de telefone deste usuário não está disponível no momento."
+                      );
+                    }
+                  }}
+                  icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
+                  disabled={!remoteUser?.phone}
+                />
+              </View>
+            )}
+
+            {/* Contato recusado */}
+            {contactRequested && acceptedContact === false && (
+              <View style={{ width: "100%", paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.redc0019, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 8 }}>
+                <Prohibit size={18} color={colors.redc00} />
+                <Text style={{ fontSize: 14, fontWeight: 600, color: colors.redc00 }}>Solicitação recusada</Text>
+              </View>
             )}
 
             {showStars && (
@@ -527,16 +601,6 @@ export default function ExternalUser() {
         )}
       </View>
 
-      {/* DEBUG: mostrar conteúdo recebido do Firestore (remova depois) */}
-      {/* <View style={{ paddingHorizontal: 16, marginBottom: 12 }}>
-                <Text style={{ fontWeight: "700", marginBottom: 6 }}>DEBUG - patientProfile / condition:</Text>
-                <ScrollView horizontal contentContainerStyle={{ paddingRight: 16 }}>
-                    <Text style={{ fontFamily: "monospace" }}>
-                        {remoteUser ? JSON.stringify(remoteUser.patientProfile ?? remoteUser.raw ?? {}, null, 2) : "remoteUser vazio"}
-                    </Text>
-                </ScrollView>
-            </View> */}
-
       <View
         style={{
           flexDirection: "row",
@@ -566,13 +630,15 @@ export default function ExternalUser() {
       </View>
 
       {/* Conteúdo */}
-      {ProfileInfoComponent ? (
-        <ProfileInfoComponent {...(profileProps as any)} />
-      ) : (
-        <Text style={{ color: colors.gray75 }}>
-          Informações não disponíveis
-        </Text>
-      )}
-    </ScrollView>
+      {
+        ProfileInfoComponent ? (
+          <ProfileInfoComponent {...(profileProps as any)} />
+        ) : (
+          <Text style={{ color: colors.gray75 }}>
+            Informações não disponíveis
+          </Text>
+        )
+      }
+    </ScrollView >
   );
 }

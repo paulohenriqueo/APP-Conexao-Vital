@@ -35,6 +35,12 @@ declare module "phosphor-react-native" {
   export const EnvelopeOpen: React.FC<IconProps>;
   export const Envelope: React.FC<IconProps>;
 
+  export const Confetti: React.FC<IconProps>;
+  export const SealCheck: React.FC<IconProps>;
+  export const Sparkle: React.FC<IconProps>;
+  export const Prohibit: React.FC<IconProps>;
+  export const ClockCountdown: React.FC<IconProps>;
+
   export const PhosphorIcon: React.FC<IconProps>;
 }
 declare module "firebase/auth";

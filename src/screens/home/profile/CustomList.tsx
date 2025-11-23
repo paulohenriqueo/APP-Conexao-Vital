@@ -26,9 +26,11 @@ type SearchData = {
 type CustomListProps = {
   type: "history" | "search";
   data: HistoryData[] | SearchData[];
+  onAccept?: (id: string) => void;
+  onDecline?: (id: string) => void;
 };
 
-export function CustomList({ type, data }: CustomListProps) {
+export function CustomList({ type, data, onAccept, onDecline }: CustomListProps) {
   const navigation = useNavigation<any>();
 
   return (
@@ -43,12 +45,16 @@ export function CustomList({ type, data }: CustomListProps) {
           <View style={{ marginBottom: 12 }}>
             {type === "history" ? (
               <HistoryItem
-                name={(item as HistoryData).name}
-                rating={(item as HistoryData).rating}
-                date={(item as HistoryData).date}
-                careCategory={(item as HistoryData).careCategory}
-                imageUrl={(item as HistoryData).imageUrl || ""}
+                name={item.name}
+                rating={item.rating}
+                date={item.date}
+                careCategory={item.careCategory}
+                imageUrl={item.imageUrl || ""}
+                requestStatus={item.requestStatus}
+                currentProfileType={item.currentProfileType}
                 onPress={handlePress}
+                onAccept={() => onAccept?.(item.id)}
+                onDecline={() => onDecline?.(item.id)}
               />
             ) : (
               <SearchResultItem
