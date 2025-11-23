@@ -271,10 +271,24 @@ export default function Home() {
               ? "patient"
               : undefined;
 
+        // Formata a data sem os "de"
+        const dateObj = new Date(req.createdAt);
+        const parts = new Intl.DateTimeFormat("pt-BR", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }).formatToParts(dateObj);
+
+        const day = parts.find(p => p.type === "day")?.value;
+        const month = parts.find(p => p.type === "month")?.value;
+        const year = parts.find(p => p.type === "year")?.value;
+
+        const formattedDate = `${day} ${month} ${year}`;
+
         return {
           id: req.patientId ?? req.caregiverId ?? "",
           name: req.patientName ?? req.caregiverName ?? "Usuário",
-          date: req.createdAt,
+          date: formattedDate,
           requestStatus: req.status,
           imageUrl: req.imageUrl ?? null,
           rating: req.rating ?? null,
