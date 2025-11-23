@@ -11,8 +11,6 @@ export type RequestItem = {
   createdAt: any;
 };
 
-type AnyRequest = Record<string, any>;
-
 export async function getRequestsForUser(userId: string) {
   console.log("📌 [getRequestsForUser] Buscando solicitações para:", userId);
 
@@ -44,14 +42,14 @@ export async function getRequestsForUser(userId: string) {
  * Atualiza a solicitação para ACEITA
  */
 export async function acceptRequest(patientId: string, caregiverId: string) {
-  return updateStatus(patientId, caregiverId, "aceito");
+  return updateStatus(patientId, caregiverId, "aceita");
 }
 
 /**
  * Atualiza a solicitação para RECUSADA
  */
 export async function declineRequest(patientId: string, caregiverId: string) {
-  return updateStatus(patientId, caregiverId, "recusado");
+  return updateStatus(patientId, caregiverId, "recusada");
 }
 
 /**
@@ -60,7 +58,7 @@ export async function declineRequest(patientId: string, caregiverId: string) {
 export async function updateStatus(
   patientId: string,
   caregiverId: string,
-  newStatus: "aceito" | "recusado"
+  newStatus: "aceita" | "recusada"
 ) {
   console.log("🔄 [updateStatus] Iniciando atualização...");
   console.log("👤 Paciente:", patientId);

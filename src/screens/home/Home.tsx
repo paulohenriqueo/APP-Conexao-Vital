@@ -262,18 +262,28 @@ export default function Home() {
       console.log("📛 currentProfileType dentro do loadRequests:", currentProfileType);
       console.log("📛 currentUserId usado:", currentUserId);
 
-      const formatted = result.map((req) => ({
-        id: req.patientId ?? req.caregiverId ?? "",
-        name: req.patientName ?? req.caregiverName ?? "Usuário",
-        date: req.createdAt,
-        requestStatus: req.status,
-        imageUrl: req.imageUrl ?? null,
-        rating: req.rating ?? null,
-        careCategory: req.careCategory ?? "",
-        currentProfileType,
-      }));
+      const formatted: HistoryData[] = requests.map((req: any) => {
+        // Força que currentProfileType seja do tipo correto
+        const profileType: "caregiver" | "patient" | undefined =
+          currentProfileType === "caregiver"
+            ? "caregiver"
+            : currentProfileType === "patient"
+              ? "patient"
+              : undefined;
 
-      setHistoryData(formatted);
+        return {
+          id: req.patientId ?? req.caregiverId ?? "",
+          name: req.patientName ?? req.caregiverName ?? "Usuário",
+          date: req.createdAt,
+          requestStatus: req.status,
+          imageUrl: req.imageUrl ?? null,
+          rating: req.rating ?? null,
+          careCategory: req.careCategory ?? "",
+          currentProfileType: profileType,
+        };
+      });
+
+      setHistoryData(formatted.slice().reverse());
 
       console.log("🟩 [Home] Dados formatados para lista:", formatted);
     } catch (err) {
@@ -296,14 +306,14 @@ export default function Home() {
   // ------------------------------
   async function acceptRequestFromHistory(id: string) {
     console.log("✔️ [acceptRequest] Aceitando ID:", id);
-    await updateStatus(id, currentUserId, "aceito");
+    await updateStatus(id, currentUserId, "aceita");
     console.log("🔄 [acceptRequest] Atualizando lista...");
     await loadRequests();
   }
 
   async function declineRequestFromHistory(id: string) {
     console.log("❌ [declineRequest] Recusando ID:", id);
-    await updateStatus(id, currentUserId, "recusado");
+    await updateStatus(id, currentUserId, "recusada");
     console.log("🔄 [declineRequest] Atualizando lista...");
     await loadRequests();
   }
@@ -318,6 +328,7 @@ export default function Home() {
           <>
             {currentProfileType === "caregiver" ? (
               // Home do profissional
+              //Pegar métricas
               <View style={{ flex: 1, width: "100%", padding: 0, gap: 16 }}>
                 {/* Solicitações pendentes */}
                 <LinearGradient
