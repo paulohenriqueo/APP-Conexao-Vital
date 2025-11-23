@@ -58,13 +58,13 @@ export function HistoryItem({
       break;
   }
 
-  function handleAccept() {
-    Alert.alert("Solicitação de contato aceita")
-  }
+  // function handleAccept() {
+  //   Alert.alert("Solicitação de contato aceita")
+  // }
 
-  function handleDecline() {
-    Alert.alert("Solicitação de contato recusada")
-  }
+  // function handleDecline() {
+  //   Alert.alert("Solicitação de contato recusada")
+  // }
 
   return (
     <View style={historyStyles.container}>
@@ -88,11 +88,16 @@ export function HistoryItem({
       </View>
 
       <View style={[historyStyles.requestStatus, { marginRight: 6, alignSelf: "stretch", gap: 8 }]}>
-        {currentProfileType === "caregiver" && requestStatus === "pendente" ? (
+        <>
+          {
+            console.log(currentProfileType, requestStatus)
+          }
+        </>
+        {currentProfileType === "caregiver" && requestStatus === "pendente" || "pending" ? (
           // botões para aceitar ou recusar
           <View style={{ marginRight: 12, gap: 6 }}>
-            <CircleButton type="aceitar" onPress={()=> onAccept} icon={<Check size={20} color={colors.greenAccept} weight="bold"></Check>}></CircleButton>
-            <CircleButton type="recusar" onPress={()=> onDecline} icon={<X size={20} color={colors.redc00} weight="bold"></X>}></CircleButton>
+            <CircleButton type="aceitar" onPress={() => onAccept?.()} icon={<Check size={20} color={colors.greenAccept} weight="bold"></Check>}></CircleButton>
+            <CircleButton type="recusar" onPress={() => onDecline?.()} icon={<X size={20} color={colors.redc00} weight="bold"></X>}></CircleButton>
           </View>
         ) : (
           // tag com requestStatus

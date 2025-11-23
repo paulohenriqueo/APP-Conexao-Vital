@@ -125,12 +125,6 @@ export default function Register() {
     signUp(true); // passa explicitamente que os termos foram aceitos
   };
 
-  // const handleRegisterGoogle = () => {
-  //   console.log("Cadastro com Google pressionado");
-  //   Alert.alert("Cadastro com Google concluído com sucesso!");
-  //   navigation.navigate("Login"); // simulação
-  // }
-
   return (
     <View style={styles.container}>
       <KeyboardAwareScrollView
@@ -160,13 +154,6 @@ export default function Register() {
           <InputPassword placeholder="Repita a senha" value={confirmPassword} onChangeText={setConfirmPassword} showForgotPassword={false} />
 
           <PrimaryButton title="Criar conta" onPress={handleRegisterPress} />
-
-          {/* <View style={styles.dividerContainer}>
-            <View style={styles.line} />
-            <Text style={styles.dividerText}>ou</Text>
-            <View style={styles.line} />
-          </View>
-          <GoogleButton onPress={handleRegisterGoogle} /> */}
         </View>
 
         <View style={{ ...styles.boxBottom, marginTop: 16 }}>

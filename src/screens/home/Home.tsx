@@ -233,27 +233,13 @@ export default function Home() {
     navigation.navigate("CaregiverForms");
   };
 
-  // const handleRequest = () => {
-  //   if (!profileCompleted) {
-  //     Alert.alert(
-  //       "Cadastro incompleto",
-  //       "Para fazer qualquer solicitação, é necessário completar seu cadastro.",
-  //       [{ text: "OK" }]
-  //     );
-  //   } else {
-  //     navigation.navigate("RequestScreen"); // muda para tela real de solicitação
-  //   }
-  // };
-
   const [historyData, setHistoryData] = useState<HistoryData[]>([]);
 
   // ------------------------------
   // FUNÇÃO GLOBAL — pode ser usada no accept/decline
   // ------------------------------
   async function loadRequests() {
-    console.log("\n==============================");
     console.log("🔄 [loadRequests] Iniciando carregamento...");
-    console.log("==============================\n");
 
     try {
       const requests: RequestItem[] = await getRequestsForUser(currentUserId);
@@ -581,7 +567,7 @@ export default function Home() {
           </>
         );
 
-      // adicionar forma de exibir a pesquisa
+      // exibir a pesquisa
       case "search":
         return (
           <View style={{ flex: 1, width: "100%", padding: 0 }}>

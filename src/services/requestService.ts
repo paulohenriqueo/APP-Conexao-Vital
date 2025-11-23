@@ -7,7 +7,7 @@ export type RequestItem = {
   id: string;
   clientId: string;
   professionalId: string;
-  status: "pending" | "accepted" | "rejected";
+  status: "pendente" | "aceita" | "recusada";
   createdAt: any;
 };
 
@@ -39,17 +39,29 @@ export async function getRequestsForUser(userId: string) {
 }
 
 /**
- * Atualiza a solicitação para ACEITA
+ * Atualiza o status de uma solicitação entre dois usuários.
+ * 
+ * @param otherUserId ID do outro usuário (contra-parte)
+ * @param currentUserId ID do usuário logado
+ * @param newStatus "aceita" | "recusada"
  */
-export async function acceptRequest(patientId: string, caregiverId: string) {
-  return updateStatus(patientId, caregiverId, "aceita");
+
+export async function updateRequestStatus(
+  otherUserId: string,
+  currentUserId: string,
+  newStatus: "aceita" | "recusada"
+) {
+  return updateStatus(otherUserId, currentUserId, newStatus);
 }
 
-/**
- * Atualiza a solicitação para RECUSADA
- */
-export async function declineRequest(patientId: string, caregiverId: string) {
-  return updateStatus(patientId, caregiverId, "recusada");
+/** Aceitar solicitação */
+export async function acceptRequest(otherUserId: string, currentUserId: string) {
+  return updateRequestStatus(otherUserId, currentUserId, "aceita");
+}
+
+/** Recusar solicitação */
+export async function declineRequest(otherUserId: string, currentUserId: string) {
+  return updateRequestStatus(otherUserId, currentUserId, "recusada");
 }
 
 /**
@@ -89,6 +101,9 @@ export async function updateStatus(
       return req;
     });
 
+    console.log("Paciente antes do update:", patientData?.requests);
+    console.log("Paciente depois do map:", updatedPatientRequests);
+
     console.log("📦 [updateStatus] Novo array do paciente:", updatedPatientRequests);
 
     await updateDoc(patientRef, {
@@ -105,6 +120,8 @@ export async function updateStatus(
       return req;
     });
 
+    console.log("Cuidador antes do update:", caregiverData?.receivedRequests);
+    console.log("Cuidador depois do map:", updatedReceived);
     console.log("📦 [updateStatus] Novo array do cuidador:", updatedReceived);
 
     await updateDoc(caregiverRef, {
