@@ -11,25 +11,27 @@ import { Check, X } from "phosphor-react-native";
 type HistoryItemProps = {
   name: string;
   rating: number;
-  city: string;
   date: string;
   careCategory: string;
   imageUrl?: string;
   requestStatus?: "aceita" | "recusada" | "pendente";
   currentProfileType?: "caregiver" | "patient";
   onPress: () => void;
+  onAccept?: () => void;
+  onDecline?: () => void;
 };
 
 export function HistoryItem({
   name,
   careCategory,
   rating,
-  city,
   date,
   imageUrl,
   currentProfileType = "caregiver",
   requestStatus = "pendente",
   onPress,
+  onAccept,
+  onDecline,
 }: HistoryItemProps) {
 
   let bgColor = colors.grayE8;
@@ -89,8 +91,8 @@ export function HistoryItem({
         {currentProfileType === "caregiver" && requestStatus === "pendente" ? (
           // botões para aceitar ou recusar
           <View style={{ marginRight: 12, gap: 6 }}>
-            <CircleButton type="aceitar" onPress={handleAccept} icon={<Check size={20} color={colors.greenAccept} weight="bold"></Check>}></CircleButton>
-            <CircleButton type="recusar" onPress={handleDecline} icon={<X size={20} color={colors.redc00} weight="bold"></X>}></CircleButton>
+            <CircleButton type="aceitar" onPress={()=> onAccept} icon={<Check size={20} color={colors.greenAccept} weight="bold"></Check>}></CircleButton>
+            <CircleButton type="recusar" onPress={()=> onDecline} icon={<X size={20} color={colors.redc00} weight="bold"></X>}></CircleButton>
           </View>
         ) : (
           // tag com requestStatus

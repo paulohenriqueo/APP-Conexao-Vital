@@ -1,5 +1,7 @@
 import { doc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { FIRESTORE_DB, FIREBASE_AUTH } from "../../FirebaseConfig";
+import { arrayUnion } from "firebase/firestore";
+import { getDoc } from "firebase/firestore";
 
 export type PatientFormPayload = {
   cpf?: string;
@@ -95,6 +97,104 @@ export async function updateUserFields(fields: Record<string, any>, uid?: string
     return { ok: true };
   } catch (error) {
     console.error("updateUserFields error:", error);
+    return { ok: false, error };
+  }
+}
+
+// ===============================================
+// 3) SALVAR SOLICITAÇÃO NO HISTÓRICO DO PACIENTE
+// ===============================================
+
+export async function savePatientContactRequest(caregiverId: string, caregiverName: string) {
+  const patientId = FIREBASE_AUTH.currentUser?.uid;
+
+  console.log("🟦 [savePatientContactRequest] Iniciando...");
+  console.log("👤 Paciente:", patientId);
+  console.log("🧑‍⚕️ Cuidador:", caregiverId, caregiverName);
+
+  if (!patientId) {
+    console.error("❌ [savePatientContactRequest] Usuário não autenticado");
+    return { ok: false, error: new Error("Usuário não autenticado") };
+  }
+
+  try {
+    const patientRef = doc(FIRESTORE_DB, "Users", patientId);
+
+    const newRequest = {
+      caregiverId,
+      caregiverName,
+      status: "pending",
+      createdAt: new Date().toISOString(), // ✔ permitido
+    };
+
+    console.log("📝 [savePatientContactRequest] Salvando no paciente:", newRequest);
+
+    // 1) Salvar no paciente
+    await updateDoc(patientRef, {
+      requests: arrayUnion(newRequest),
+      updatedAt: serverTimestamp(), // ✔ permitido pois NÃO está no array
+    });
+
+    // 2) Buscar nome do paciente
+    const patientSnap = await getDoc(patientRef);
+    const patientName = patientSnap.data()?.name ?? "Paciente";
+
+    console.log("📄 [savePatientContactRequest] Nome do paciente:", patientName);
+
+    // 3) Salvar no cuidador
+    const caregiverRef = doc(FIRESTORE_DB, "Users", caregiverId);
+
+    const receivedEntry = {
+      patientId,
+      patientName,
+      status: "pending",
+      createdAt: new Date().toISOString(), // ✔ permitido
+    };
+
+    console.log("📥 [savePatientContactRequest] Salvando no cuidador:", receivedEntry);
+
+    await updateDoc(caregiverRef, {
+      receivedRequests: arrayUnion(receivedEntry),
+      updatedAt: serverTimestamp(),
+    });
+
+    console.log("✅ [savePatientContactRequest] FINALIZADO com sucesso.");
+
+    return { ok: true };
+  } catch (error) {
+    console.error("savePatientContactRequest error:", error);
+    return { ok: false, error };
+  }
+}
+
+
+// =======================================================
+// 4) SALVAR HISTÓRICO DE SOLICITAÇÕES NO DOCUMENTO DO CUIDADOR
+// =======================================================
+
+export async function saveCaregiverReceivedRequest(
+  caregiverId: string,
+  patientId: string,
+  patientName: string
+) {
+  try {
+    const caregiverRef = doc(FIRESTORE_DB, "Users", caregiverId);
+
+    const newEntry = {
+      patientId,
+      patientName,
+      status: "pending",
+      createdAt: serverTimestamp(),
+    };
+
+    await updateDoc(caregiverRef, {
+      receivedRequests: arrayUnion(newEntry),
+      updatedAt: serverTimestamp(),
+    });
+
+    return { ok: true };
+  } catch (error) {
+    console.error("saveCaregiverReceivedRequest error:", error);
     return { ok: false, error };
   }
 }
