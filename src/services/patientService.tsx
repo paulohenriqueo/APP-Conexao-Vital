@@ -107,7 +107,15 @@ export async function updateUserFields(fields: Record<string, any>, uid?: string
 
 export async function savePatientContactRequest(caregiverId: string, caregiverName: string) {
   const patientId = FIREBASE_AUTH.currentUser?.uid;
-  if (!patientId) return { ok: false, error: new Error("Usuário não autenticado") };
+
+  console.log("🟦 [savePatientContactRequest] Iniciando...");
+  console.log("👤 Paciente:", patientId);
+  console.log("🧑‍⚕️ Cuidador:", caregiverId, caregiverName);
+
+  if (!patientId) {
+    console.error("❌ [savePatientContactRequest] Usuário não autenticado");
+    return { ok: false, error: new Error("Usuário não autenticado") };
+  }
 
   try {
     const patientRef = doc(FIRESTORE_DB, "Users", patientId);
@@ -119,6 +127,8 @@ export async function savePatientContactRequest(caregiverId: string, caregiverNa
       createdAt: new Date().toISOString(), // ✔ permitido
     };
 
+    console.log("📝 [savePatientContactRequest] Salvando no paciente:", newRequest);
+
     // 1) Salvar no paciente
     await updateDoc(patientRef, {
       requests: arrayUnion(newRequest),
@@ -128,6 +138,8 @@ export async function savePatientContactRequest(caregiverId: string, caregiverNa
     // 2) Buscar nome do paciente
     const patientSnap = await getDoc(patientRef);
     const patientName = patientSnap.data()?.name ?? "Paciente";
+
+    console.log("📄 [savePatientContactRequest] Nome do paciente:", patientName);
 
     // 3) Salvar no cuidador
     const caregiverRef = doc(FIRESTORE_DB, "Users", caregiverId);
@@ -139,10 +151,14 @@ export async function savePatientContactRequest(caregiverId: string, caregiverNa
       createdAt: new Date().toISOString(), // ✔ permitido
     };
 
+    console.log("📥 [savePatientContactRequest] Salvando no cuidador:", receivedEntry);
+
     await updateDoc(caregiverRef, {
       receivedRequests: arrayUnion(receivedEntry),
       updatedAt: serverTimestamp(),
     });
+
+    console.log("✅ [savePatientContactRequest] FINALIZADO com sucesso.");
 
     return { ok: true };
   } catch (error) {

@@ -3,15 +3,16 @@ import { FlatList, View } from "react-native";
 import { HistoryItem } from "../../../components/HistoryItem";
 import { SearchResultItem } from "../../../components/SearchResultItem";
 import { useNavigation } from "@react-navigation/native";
-import { TouchableOpacity } from "react-native-gesture-handler";
 
-type HistoryData = {
+export type HistoryData = {
   id: string;
   name: string;
   rating: number;
   date: string;
   careCategory: string;
   imageUrl?: string;
+  requestStatus?: "aceita" | "recusada" | "pendente";
+  currentProfileType?: "caregiver" | "patient";
 };
 
 type SearchData = {

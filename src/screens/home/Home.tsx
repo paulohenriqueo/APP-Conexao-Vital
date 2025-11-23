@@ -12,11 +12,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import PopUpFormsModel from "../model/PopUpFormsModel";
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import ExternalUser from "./profile/ExternalUser";
-import { getCurrentUserType, getProfilesByType, searchProfilesByName, PublicProfile } from "../../services/userService";
+import { getCurrentUserType, getProfilesByType, searchProfilesByName, PublicProfile, getUserProfile } from "../../services/userService";
 import { SecondaryButton } from "../../components/Button";
 import { Picker } from "@react-native-picker/picker";
 import { getPendingRequestsColors, getAverageRatingColors } from "../../../utils/getColors";
 import { LinearGradient } from "expo-linear-gradient";
+import { getRequestsForUser, RequestItem, updateStatus } from "../../services/requestService";
+import type { HistoryData } from "./profile/CustomList";
+import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../FirebaseConfig";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -62,6 +66,34 @@ export default function Home() {
   const { gradient: ratingGradient, textColor: ratingText } = getAverageRatingColors(averageRating);
   const neutralGradient = [colors.gray7FD, colors.grayF5, colors.grayE8] as const;
 
+  const currentUserId = FIREBASE_AUTH.currentUser?.uid!;
+
+  console.log("USER LOGADO:", FIREBASE_AUTH.currentUser?.uid);
+  useEffect(() => {
+    async function loadDebugUser() {
+      const userId = FIREBASE_AUTH.currentUser?.uid;
+
+      console.log("🔵 [DEBUG] Usuário logado:", userId);
+
+      if (!userId) {
+        console.log("⚠️ [DEBUG] Nenhum usuário logado.");
+        return;
+      }
+
+      try {
+        const ref = doc(FIRESTORE_DB, "Users", userId);
+        const snap = await getDoc(ref);
+
+        console.log("🟣 [DEBUG] Documento bruto do usuário:");
+        console.log(snap.data());
+
+      } catch (err) {
+        console.log("❌ [DEBUG] Erro ao buscar usuário:", err);
+      }
+    }
+
+    loadDebugUser();
+  }, []);
 
   useEffect(() => {
     // Exemplo de mock de dados — depois você pode trocar por fetch do Firestore
@@ -201,30 +233,82 @@ export default function Home() {
     navigation.navigate("CaregiverForms");
   };
 
-  const handleRequest = () => {
-    if (!profileCompleted) {
-      Alert.alert(
-        "Cadastro incompleto",
-        "Para fazer qualquer solicitação, é necessário completar seu cadastro.",
-        [{ text: "OK" }]
-      );
-    } else {
-      navigation.navigate("RequestScreen"); // muda para tela real de solicitação
+  // const handleRequest = () => {
+  //   if (!profileCompleted) {
+  //     Alert.alert(
+  //       "Cadastro incompleto",
+  //       "Para fazer qualquer solicitação, é necessário completar seu cadastro.",
+  //       [{ text: "OK" }]
+  //     );
+  //   } else {
+  //     navigation.navigate("RequestScreen"); // muda para tela real de solicitação
+  //   }
+  // };
+
+  const [historyData, setHistoryData] = useState<HistoryData[]>([]);
+
+  // ------------------------------
+  // FUNÇÃO GLOBAL — pode ser usada no accept/decline
+  // ------------------------------
+  async function loadRequests() {
+    console.log("\n==============================");
+    console.log("🔄 [loadRequests] Iniciando carregamento...");
+    console.log("==============================\n");
+
+    try {
+      const requests: RequestItem[] = await getRequestsForUser(currentUserId);
+
+      console.log("📥 [loadRequests] Requests recebidos:", requests);
+      console.log("📛 currentProfileType dentro do loadRequests:", currentProfileType);
+      console.log("📛 currentUserId usado:", currentUserId);
+
+      const formatted = result.map((req) => ({
+        id: req.patientId ?? req.caregiverId ?? "",
+        name: req.patientName ?? req.caregiverName ?? "Usuário",
+        date: req.createdAt,
+        requestStatus: req.status,
+        imageUrl: req.imageUrl ?? null,
+        rating: req.rating ?? null,
+        careCategory: req.careCategory ?? "",
+        currentProfileType,
+      }));
+
+      setHistoryData(formatted);
+
+      console.log("🟩 [Home] Dados formatados para lista:", formatted);
+    } catch (err) {
+      console.warn("Erro ao carregar solicitações:", err);
     }
-  };
+  }
 
-  // Dados para teste de lista
-  const historyData = [
-    { id: "1", name: "Maria Silva", rating: 5, date: "04 abr.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-genbccd101bd8dbac5f8bb60897e38ab2be.jpg", careCategory: "Cuidado Domiciliar" },
-    { id: "2", name: "João Souza", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen6b3b5faef405b1681627466f154dd5bf.jpg", careCategory: "Enfermeiro" },
-    { id: "3", name: "João Almeida", rating: 4, date: "15 mar.", imageUrl: "https://this-person-does-not-exist.com/img/avatar-gend4affcf39479b0e32a6b292ee316cc18.jpg", careCategory: "Cuidado Domiciliar" },
-  ];
+  // ------------------------------
+  // useEffect apenas chama loadRequests
+  // ------------------------------
+  useEffect(() => {
+    if (!currentUserId || !currentProfileType) return;
 
-  const searchData = [
-    { id: "1", name: "Ana Clara", rating: 5, tags: ["CuidadoDomiciliar", "Idosos"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen3de81692a53179ab914d9ff7d102fee1.jpg", careCategory: "Cuidado Domiciliar" },
-    { id: "2", name: "Carlos Lima", rating: 4, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen80b45514e179756196f7b7682ba17bb0.jpg", careCategory: "Enfermeiro" },
-    { id: "3", name: "Julia Lima", rating: 2, tags: ["Enfermagem", "Acompanhante"], imageUrl: "https://this-person-does-not-exist.com/img/avatar-gen63cb16d668b8c7c84a755fc3a4450b7b.jpg", careCategory: "Acompanhante" },
-  ];
+    console.log("🟦 Chamando loadRequests: userId e type prontos");
+    loadRequests();
+  }, [currentUserId, currentProfileType]);
+
+  // ------------------------------
+  // Funções de aceitar/recusar
+  // ------------------------------
+  async function acceptRequestFromHistory(id: string) {
+    console.log("✔️ [acceptRequest] Aceitando ID:", id);
+    await updateStatus(id, currentUserId, "aceito");
+    console.log("🔄 [acceptRequest] Atualizando lista...");
+    await loadRequests();
+  }
+
+  async function declineRequestFromHistory(id: string) {
+    console.log("❌ [declineRequest] Recusando ID:", id);
+    await updateStatus(id, currentUserId, "recusado");
+    console.log("🔄 [declineRequest] Atualizando lista...");
+    await loadRequests();
+  }
+
+  const searchData = [] as any;
 
   // Função para renderizar conteúdo dependendo da aba selecionada
   const renderContent = () => {
@@ -507,6 +591,12 @@ export default function Home() {
             <CustomList
               type="history"
               data={historyData}
+              onAccept={async (id) => {
+                await acceptRequestFromHistory(id);
+              }}
+              onDecline={async (id) => {
+                await declineRequestFromHistory(id);
+              }}
             />
           </View>
         );

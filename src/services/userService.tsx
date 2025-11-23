@@ -217,3 +217,18 @@ export async function searchProfilesByName(
     return [];
   }
 }
+
+export async function getUserProfile(userId: string) {
+  console.log("🔎 [getUserProfile] Buscando perfil do UID:", userId);
+
+  const docRef = doc(FIRESTORE_DB, "users", userId);
+  const docSnap = await getDoc(docRef);
+  
+  console.log("📄 [getUserProfile] Documento encontrado:", docSnap.exists());
+
+  if (docSnap.exists()) {
+    console.log("📚 [getUserProfile] Dados do usuário:", docSnap.data());
+  }
+
+  return docSnap.exists() ? docSnap.data() : null;
+}
