@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native"
+import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from "react-native"
 import { getAuth } from "firebase/auth"
 import { getFirestore, doc, getDoc } from "firebase/firestore"
 import { colors } from "../../../../styles/colors"
@@ -56,7 +56,7 @@ export default function ExternalUser() {
   const currentUserId = FIREBASE_AUTH.currentUser?.uid!
 
   const [requestStatus, setRequestStatus] = useState<"pending" | "accepted" | "declined" | null>(null)
-  const [isLoadingStatus, setIsLoadingStatus] = useState(false)
+  const [isLoadingStatus, setIsLoadingStatus] = useState(true)
 
   const loadStatusForUsers = useCallback(async (remoteUserId: string, currentUserIdParam: string) => {
     if (!remoteUserId || !currentUserIdParam) {
@@ -492,24 +492,87 @@ export default function ExternalUser() {
           marginVertical: 12,
         }}
       >
-        {remoteUser?.role === "patient" ? (
-          <View style={{ width: "100%", flexDirection: "column", gap: 16 }}>
-            {requestStatus === "accepted" && (
-              <>
-                <View
-                  style={{
-                    width: "100%",
-                    gap: 8,
-                    flexDirection: "column",
-                    marginBottom: 16,
-                  }}
-                >
+        {isLoadingStatus ? (
+          <View
+            style={{
+              width: "100%",
+              paddingVertical: 16,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <ActivityIndicator size="large" color={colors.green382} />
+          </View>
+        ) : (
+          <>
+            {remoteUser?.role === "patient" ? (
+              <View style={{ width: "100%", flexDirection: "column", gap: 16 }}>
+                {requestStatus === "accepted" && (
+                  <>
+                    <View
+                      style={{
+                        width: "100%",
+                        gap: 8,
+                        flexDirection: "column",
+                        marginBottom: 16,
+                      }}
+                    >
+                      <View
+                        style={{
+                          width: "100%",
+                          paddingVertical: 8,
+                          paddingHorizontal: 12,
+                          backgroundColor: colors.greenAcceptBg,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 6,
+                          borderRadius: 8,
+                        }}
+                      >
+                        <SealCheck size={18} color={colors.greenAccept} />
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: colors.greenAccept,
+                          }}
+                        >
+                          Solicitação aceita
+                        </Text>
+                      </View>
+                    </View>
+                    <PrimaryButton
+                      title="Entrar em contato"
+                      onPress={() => {
+                        setShowStars(true)
+                        const firstName = remoteUser?.name?.split(" ")[0] || ""
+                        if (remoteUser?.phone) {
+                          const initialMessage =
+                            remoteUser.role === "patient"
+                              ? `Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital.`
+                              : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`
+                          openWhatsApp(String(remoteUser.phone), initialMessage)
+                        } else {
+                          Alert.alert(
+                            "Contato indisponível",
+                            "O número de telefone deste usuário não está disponível no momento.",
+                          )
+                        }
+                      }}
+                      icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
+                      disabled={!remoteUser?.phone}
+                    />
+                  </>
+                )}
+
+                {requestStatus === "declined" && (
                   <View
                     style={{
                       width: "100%",
                       paddingVertical: 8,
                       paddingHorizontal: 12,
-                      backgroundColor: colors.greenAcceptBg,
+                      backgroundColor: colors.redc0019,
                       flexDirection: "row",
                       alignItems: "center",
                       justifyContent: "center",
@@ -517,344 +580,300 @@ export default function ExternalUser() {
                       borderRadius: 8,
                     }}
                   >
-                    <SealCheck size={18} color={colors.greenAccept} />
+                    <Prohibit size={18} color={colors.redc00} />
                     <Text
                       style={{
                         fontSize: 14,
                         fontWeight: 600,
-                        color: colors.greenAccept,
+                        color: colors.redc00,
                       }}
                     >
-                      Solicitação aceita
+                      Solicitação recusada
                     </Text>
                   </View>
-                </View>
-                <PrimaryButton
-                  title="Entrar em contato"
-                  onPress={() => {
-                    setShowStars(true)
-                    const firstName = remoteUser?.name?.split(" ")[0] || ""
-                    if (remoteUser?.phone) {
-                      const initialMessage =
-                        remoteUser.role === "patient"
-                          ? `Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital.`
-                          : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`
-                      openWhatsApp(String(remoteUser.phone), initialMessage)
-                    } else {
-                      Alert.alert(
-                        "Contato indisponível",
-                        "O número de telefone deste usuário não está disponível no momento.",
-                      )
-                    }
-                  }}
-                  icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
-                  disabled={!remoteUser?.phone}
-                />
-              </>
-            )}
+                )}
 
-            {requestStatus === "declined" && (
-              <View
-                style={{
-                  width: "100%",
-                  paddingVertical: 8,
-                  paddingHorizontal: 12,
-                  backgroundColor: colors.redc0019,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  borderRadius: 8,
-                }}
-              >
-                <Prohibit size={18} color={colors.redc00} />
-                <Text
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: colors.redc00,
-                  }}
-                >
-                  Solicitação recusada
-                </Text>
-              </View>
-            )}
-
-            {requestStatus === "pending" && (
-              <View
-                style={{
-                  width: "100%",
-                  margin: 0,
-                  padding: 0,
-                  gap: 16,
-                  flexDirection: "column",
-                }}
-              >
-                <View
-                  style={{
-                    width: "100%",
-                    paddingVertical: 8,
-                    paddingHorizontal: 12,
-                    backgroundColor: colors.grayE8,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6,
-                    borderRadius: 8,
-                  }}
-                >
-                  <ClockCountdown size={18} color={colors.gray47} />
-                  <Text
+                {requestStatus === "pending" && (
+                  <View
                     style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      color: colors.gray47,
+                      width: "100%",
+                      margin: 0,
+                      padding: 0,
+                      gap: 16,
+                      flexDirection: "column",
                     }}
                   >
-                    Solicitação pendente
-                  </Text>
-                </View>
-                <View style={{ width: "100%", flexDirection: "row", gap: 8 }}>
-                  <ActionButton
-                    title="Aceitar"
-                    icon={<Check size={20} color={colors.greenAccept} />}
-                    type="accepted"
+                    <View
+                      style={{
+                        width: "100%",
+                        paddingVertical: 8,
+                        paddingHorizontal: 12,
+                        backgroundColor: colors.grayE8,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                        borderRadius: 8,
+                      }}
+                    >
+                      <ClockCountdown size={18} color={colors.gray47} />
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 600,
+                          color: colors.gray47,
+                        }}
+                      >
+                        Solicitação pendente
+                      </Text>
+                    </View>
+                    <View style={{ width: "100%", flexDirection: "row", gap: 8 }}>
+                      <ActionButton
+                        title="Aceitar"
+                        icon={<Check size={20} color={colors.greenAccept} />}
+                        type="accepted"
+                        onPress={() => {
+                          handleAccept()
+                        }}
+                      />
+                      <ActionButton
+                        title="Recusar"
+                        icon={<X size={20} color={colors.redc00} />}
+                        type="declined"
+                        onPress={() => {
+                          handleDecline()
+                        }}
+                      />
+                    </View>
+                  </View>
+                )}
+
+                {showStars && (
+                  <View
+                    style={{
+                      flexDirection: "column",
+                      alignContent: "center",
+                      justifyContent: "center",
+                      gap: 12,
+                      backgroundColor: colors.grayEF1,
+                      paddingVertical: 16,
+                      paddingHorizontal: 12,
+                      borderRadius: 12,
+                      marginTop: 16,
+                      width: "100%",
+                    }}
+                  >
+                    <Text style={{ textAlign: "center", ...typography.M01R1214 }}>
+                      Gostaria de avaliar esse perfil?
+                    </Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignContent: "center",
+                        justifyContent: "center",
+                        gap: 8,
+                      }}
+                    >
+                      {[1, 2, 3, 4, 5].map((starNumber) => renderStar(starNumber))}
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        submitRating()
+                        setShowStars(false)
+                      }}
+                      disabled={rating === 0}
+                      style={{
+                        paddingVertical: 4,
+                        opacity: rating === 0 ? 0.6 : 1,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          ...typography.M01R1214,
+                          color: colors.green85F,
+                          textAlign: "center",
+                          fontWeight: "600",
+                          textDecorationLine: "underline",
+                        }}
+                      >
+                        Enviar avaliação
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            ) : (
+              <View style={{ width: "100%", flexDirection: "column", gap: 8 }}>
+                {requestStatus === null && requestAllowed && (
+                  <OutlinedButton
+                    title="Solicitar contato"
                     onPress={() => {
-                      handleAccept()
+                      handleRequest()
                     }}
+                    icon={<WhatsappLogo size={20} color={colors.green382} />}
                   />
-                  <ActionButton
-                    title="Recusar"
-                    icon={<X size={20} color={colors.redc00} />}
-                    type="declined"
-                    onPress={() => {
-                      handleDecline()
-                    }}
-                  />
-                </View>
-              </View>
-            )}
+                )}
 
-            {showStars && (
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignContent: "center",
-                  justifyContent: "center",
-                  gap: 12,
-                  backgroundColor: colors.grayEF1,
-                  paddingVertical: 16,
-                  paddingHorizontal: 12,
-                  borderRadius: 12,
-                  marginTop: 16,
-                  width: "100%",
-                }}
-              >
-                <Text style={{ textAlign: "center", ...typography.M01R1214 }}>Gostaria de avaliar esse perfil?</Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignContent: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                  }}
-                >
-                  {[1, 2, 3, 4, 5].map((starNumber) => renderStar(starNumber))}
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    submitRating()
-                    setShowStars(false)
-                  }}
-                  disabled={rating === 0}
-                  style={{
-                    paddingVertical: 4,
-                    opacity: rating === 0 ? 0.6 : 1,
-                  }}
-                >
-                  <Text
+                {requestStatus === "pending" && (
+                  <View
                     style={{
-                      ...typography.M01R1214,
-                      color: colors.green85F,
-                      textAlign: "center",
-                      fontWeight: "600",
-                      textDecorationLine: "underline",
+                      width: "100%",
+                      paddingVertical: 8,
+                      paddingHorizontal: 12,
+                      backgroundColor: colors.grayE8,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                      borderRadius: 8,
                     }}
                   >
-                    Enviar avaliação
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        ) : (
-          <View style={{ width: "100%", flexDirection: "column", gap: 8 }}>
-            {requestStatus === null && requestAllowed && (
-              <OutlinedButton
-                title="Solicitar contato"
-                onPress={() => {
-                  handleRequest()
-                }}
-                icon={<WhatsappLogo size={20} color={colors.green382} />}
-              />
-            )}
+                    <ClockCountdown size={18} color={colors.gray47} />
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: colors.gray47,
+                      }}
+                    >
+                      Solicitação pendente
+                    </Text>
+                  </View>
+                )}
 
-            {requestStatus === "pending" && (
-              <View
-                style={{
-                  width: "100%",
-                  paddingVertical: 8,
-                  paddingHorizontal: 12,
-                  backgroundColor: colors.grayE8,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  borderRadius: 8,
-                }}
-              >
-                <ClockCountdown size={18} color={colors.gray47} />
-                <Text
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: colors.gray47,
-                  }}
-                >
-                  Solicitação pendente
-                </Text>
-              </View>
-            )}
+                {requestStatus === "accepted" && (
+                  <View style={{ width: "100%", gap: 16, flexDirection: "column" }}>
+                    <View
+                      style={{
+                        width: "100%",
+                        paddingVertical: 8,
+                        paddingHorizontal: 12,
+                        backgroundColor: colors.greenAcceptBg,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                        borderRadius: 8,
+                      }}
+                    >
+                      <SealCheck size={18} color={colors.greenAccept} />
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 600,
+                          color: colors.greenAccept,
+                        }}
+                      >
+                        Solicitação aceita
+                      </Text>
+                    </View>
+                    <PrimaryButton
+                      title="Entrar em contato"
+                      onPress={() => {
+                        setShowStars(true)
+                        const firstName = remoteUser?.name?.split(" ")[0] || ""
+                        if (remoteUser?.phone) {
+                          const initialMessage =
+                            remoteUser.role === "patient"
+                              ? `Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital.`
+                              : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`
+                          openWhatsApp(String(remoteUser.phone), initialMessage)
+                        } else {
+                          Alert.alert(
+                            "Contato indisponível",
+                            "O número de telefone deste usuário não está disponível no momento.",
+                          )
+                        }
+                      }}
+                      icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
+                      disabled={!remoteUser?.phone}
+                    />
+                  </View>
+                )}
 
-            {requestStatus === "accepted" && (
-              <View style={{ width: "100%", gap: 16, flexDirection: "column" }}>
-                <View
-                  style={{
-                    width: "100%",
-                    paddingVertical: 8,
-                    paddingHorizontal: 12,
-                    backgroundColor: colors.greenAcceptBg,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6,
-                    borderRadius: 8,
-                  }}
-                >
-                  <SealCheck size={18} color={colors.greenAccept} />
-                  <Text
+                {requestStatus === "declined" && (
+                  <View
                     style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      color: colors.greenAccept,
+                      width: "100%",
+                      paddingVertical: 8,
+                      paddingHorizontal: 12,
+                      backgroundColor: colors.redc0019,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                      borderRadius: 8,
                     }}
                   >
-                    Solicitação aceita
-                  </Text>
-                </View>
-                <PrimaryButton
-                  title="Entrar em contato"
-                  onPress={() => {
-                    setShowStars(true)
-                    const firstName = remoteUser?.name?.split(" ")[0] || ""
-                    if (remoteUser?.phone) {
-                      const initialMessage =
-                        remoteUser.role === "patient"
-                          ? `Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital.`
-                          : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`
-                      openWhatsApp(String(remoteUser.phone), initialMessage)
-                    } else {
-                      Alert.alert(
-                        "Contato indisponível",
-                        "O número de telefone deste usuário não está disponível no momento.",
-                      )
-                    }
-                  }}
-                  icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
-                  disabled={!remoteUser?.phone}
-                />
-              </View>
-            )}
+                    <Prohibit size={18} color={colors.redc00} />
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: colors.redc00,
+                      }}
+                    >
+                      Solicitação recusada
+                    </Text>
+                  </View>
+                )}
 
-            {requestStatus === "declined" && (
-              <View
-                style={{
-                  width: "100%",
-                  paddingVertical: 8,
-                  paddingHorizontal: 12,
-                  backgroundColor: colors.redc0019,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  borderRadius: 8,
-                }}
-              >
-                <Prohibit size={18} color={colors.redc00} />
-                <Text
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: colors.redc00,
-                  }}
-                >
-                  Solicitação recusada
-                </Text>
-              </View>
-            )}
-
-            {showStars && (
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignContent: "center",
-                  justifyContent: "center",
-                  gap: 12,
-                  backgroundColor: colors.grayEF1,
-                  paddingVertical: 16,
-                  paddingHorizontal: 12,
-                  borderRadius: 12,
-                  marginTop: 16,
-                  width: "100%",
-                }}
-              >
-                <Text style={{ textAlign: "center", ...typography.M01R1214 }}>Gostaria de avaliar esse perfil?</Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignContent: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                  }}
-                >
-                  {[1, 2, 3, 4, 5].map((starNumber) => renderStar(starNumber))}
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    submitRating()
-                    setShowStars(false)
-                  }}
-                  disabled={rating === 0}
-                  style={{
-                    paddingVertical: 4,
-                    opacity: rating === 0 ? 0.6 : 1,
-                  }}
-                >
-                  <Text
+                {showStars && (
+                  <View
                     style={{
-                      ...typography.M01R1214,
-                      color: colors.green85F,
-                      textAlign: "center",
-                      fontWeight: "600",
-                      textDecorationLine: "underline",
+                      flexDirection: "column",
+                      alignContent: "center",
+                      justifyContent: "center",
+                      gap: 12,
+                      backgroundColor: colors.grayEF1,
+                      paddingVertical: 16,
+                      paddingHorizontal: 12,
+                      borderRadius: 12,
+                      marginTop: 16,
+                      width: "100%",
                     }}
                   >
-                    Enviar avaliação
-                  </Text>
-                </TouchableOpacity>
+                    <Text style={{ textAlign: "center", ...typography.M01R1214 }}>
+                      Gostaria de avaliar esse perfil?
+                    </Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignContent: "center",
+                        justifyContent: "center",
+                        gap: 8,
+                      }}
+                    >
+                      {[1, 2, 3, 4, 5].map((starNumber) => renderStar(starNumber))}
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        submitRating()
+                        setShowStars(false)
+                      }}
+                      disabled={rating === 0}
+                      style={{
+                        paddingVertical: 4,
+                        opacity: rating === 0 ? 0.6 : 1,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          ...typography.M01R1214,
+                          color: colors.green85F,
+                          textAlign: "center",
+                          fontWeight: "600",
+                          textDecorationLine: "underline",
+                        }}
+                      >
+                        Enviar avaliação
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
             )}
-          </View>
+          </>
         )}
       </View>
 
@@ -889,9 +908,9 @@ export default function ExternalUser() {
       ) : (
         <Text style={{ color: colors.gray75 }}>Informações não disponíveis</Text>
       )}
-      <View style={{ marginTop: 24, width: "92%", marginHorizontal: "4%" }}>
+      {/* <View style={{ marginTop: 24, width: "92%", marginHorizontal: "4%" }}>
         <UserReviews userId={remoteUser?.id} />
-      </View>
+      </View> */}
     </ScrollView>
   )
 }
