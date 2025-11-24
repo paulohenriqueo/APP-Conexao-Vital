@@ -1,173 +1,169 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
-import { getAuth } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { colors } from "../../../../styles/colors";
-import { typography } from "../../../../styles/typography";
-import {
-  useNavigation,
-  NavigationProp,
-  useRoute,
-} from "@react-navigation/native";
-import { CaretLeft, Check, WhatsappLogo, X } from "phosphor-react-native";
-import { Avatar } from "../../../components/Avatar";
-import { Ionicons } from "@expo/vector-icons";
-import CaregiverProfileInfo from "./CaregiverProfileInfo";
-import {
-  ActionButton,
-  OutlinedButton,
-  PrimaryButton,
-} from "../../../components/Button";
-import PatientProfileInfo from "./PatientProfileInfo";
-import { openWhatsApp } from "../../../../utils/openWhatsApp";
-import { TopBar } from "../../../components/TopBar";
-import { savePatientContactRequest } from "../../../services/patientService";
-import {
-  acceptRequest,
-  declineRequest,
-  getRequestsForUser,
-  RequestItem,
-  updateStatus,
-} from "../../../services/requestService";
-import { ClockCountdown, SealCheck, Prohibit } from "phosphor-react-native";
-import { HistoryData } from "./CustomList";
-import { FIREBASE_AUTH } from "../../../../FirebaseConfig";
-import { submitUserRating } from "../../../services/userService";
-import { UserReviews } from "../../../components/UserReviews";
+"use client"
+
+import { useState, useEffect, useCallback } from "react"
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native"
+import { getAuth } from "firebase/auth"
+import { getFirestore, doc, getDoc } from "firebase/firestore"
+import { colors } from "../../../../styles/colors"
+import { typography } from "../../../../styles/typography"
+import { useNavigation, type NavigationProp, useRoute, useFocusEffect } from "@react-navigation/native"
+import { CaretLeft, Check, WhatsappLogo, X } from "phosphor-react-native"
+import { Avatar } from "../../../components/Avatar"
+import { Ionicons } from "@expo/vector-icons"
+import CaregiverProfileInfo from "./CaregiverProfileInfo"
+import { ActionButton, OutlinedButton, PrimaryButton } from "../../../components/Button"
+import PatientProfileInfo from "./PatientProfileInfo"
+import { openWhatsApp } from "../../../../utils/openWhatsApp"
+import { TopBar } from "../../../components/TopBar"
+import { savePatientContactRequest } from "../../../services/patientService"
+import { acceptRequest, declineRequest, getRequestsForUser, type RequestItem } from "../../../services/requestService"
+import { ClockCountdown, SealCheck, Prohibit } from "phosphor-react-native"
+import type { HistoryData } from "./CustomList"
+import { FIREBASE_AUTH } from "../../../../FirebaseConfig"
+import { submitUserRating } from "../../../services/userService"
+import { UserReviews } from "../../../components/UserReviews"
 
 interface User {
   //Dados necessários para exibir perfil de outros usuários
-  bio?: string;
-  role?: "caregiver" | "patient" | "undefined";
-  userContact?: number;
-  qualifications?: string[];
-  rating?: number;
-  imageUrl?: string;
+  bio?: string
+  role?: "caregiver" | "patient" | "undefined"
+  userContact?: number
+  qualifications?: string[]
+  rating?: number
+  imageUrl?: string
 }
 
 export default function ExternalUser() {
-  const [userName, setUserName] = useState("");
-  const [contactRequested, setContactRequested] = useState(false); // Estado para controlar se o contato foi solicitado
-  const [acceptedContact, setAcceptedContact] = useState<boolean | null>(null);
-  const [existingRequest, setExistingRequest] = useState<boolean>(false);
-  const [showStars, setShowStars] = useState(false); // Estado para controlar se entrou em contato
-  const [rating, setRating] = useState(0);
+  const [userName, setUserName] = useState("")
+  const [contactRequested, setContactRequested] = useState(false) // Estado para controlar se o contato foi solicitado
+  const [acceptedContact, setAcceptedContact] = useState<boolean | null>(null)
+  const [existingRequest, setExistingRequest] = useState<boolean>(false)
+  const [showStars, setShowStars] = useState(false) // Estado para controlar se entrou em contato
+  const [rating, setRating] = useState(0)
 
-  const navigation = useNavigation<NavigationProp<any>>();
-  const route: any = useRoute();
+  const navigation = useNavigation<NavigationProp<any>>()
+  const route: any = useRoute()
 
   // usar userId passado via navegação para carregar usuário externo
-  const userIdParam: string | undefined = route.params?.userId;
+  const userIdParam: string | undefined = route.params?.userId
 
-  const [loading, setLoading] = useState(true);
-  const [remoteUser, setRemoteUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true)
+  const [remoteUser, setRemoteUser] = useState<any>(null)
 
-  const auth = getAuth();
+  const auth = getAuth()
 
-  const loggedUserId = auth.currentUser?.uid; 
-  const currentUserId = FIREBASE_AUTH.currentUser?.uid!;
+  const loggedUserId = auth.currentUser?.uid
+  const currentUserId = FIREBASE_AUTH.currentUser?.uid!
 
-  // NOVA FUNÇÃO (coloque antes do primeiro useEffect de status, por volta da linha 373)
-async function loadRealStatus() {
-  if (!remoteUser || !loggedUserId) return;
-  try {
-    const requests = await getRequestsForUser(loggedUserId);
+  const [requestStatus, setRequestStatus] = useState<"pending" | "accepted" | "declined" | null>(null)
+  const [isLoadingStatus, setIsLoadingStatus] = useState(false)
 
-    const relatedRequest = requests.find(
-      (req) =>
-        (req.patientId === loggedUserId && req.caregiverId === remoteUser.id) ||
-        (req.caregiverId === loggedUserId && req.patientId === remoteUser.id)
-    );
-
-    if (relatedRequest) {
-      // SEMPRE usa o status do banco de dados
-      setRequestStatus(relatedRequest.status);
-    } else {
-      // Se não existe solicitação, seta como undefined
-      setRequestStatus(undefined);
+  const loadStatusForUsers = useCallback(async (remoteUserId: string, currentUserIdParam: string) => {
+    if (!remoteUserId || !currentUserIdParam) {
+      return
     }
-  } catch (err) {
-    console.warn("Erro ao carregar status real:", err);
-    setRequestStatus(undefined);
-  }
-}
 
-// O useEffect que antes continha a função, agora apenas a chama
-useEffect(() => {
-  loadRealStatus();
-}, [remoteUser, loggedUserId]);
+    setIsLoadingStatus(true)
+    try {
+      const requests = await getRequestsForUser(currentUserIdParam)
 
+      // Procurar a solicitação entre esses dois usuários
+      const relatedRequest = requests.find((req: any) => {
+        // Se foi enviada (paciente enviou para cuidador)
+        if (req.direction === "sent") {
+          return req.caregiverId === remoteUserId
+        }
+        // Se foi recebida (cuidador recebeu do paciente)
+        if (req.direction === "received") {
+          return req.patientId === remoteUserId
+        }
+        return false
+      })
 
-  // busca os dados do usuário selecionado; se não houver param, tenta exibir currentUser como antes
+      if (relatedRequest) {
+        setRequestStatus(relatedRequest.status as "pending" | "accepted" | "declined")
+        console.log("[v0] Status encontrado:", relatedRequest.status)
+      } else {
+        setRequestStatus(null)
+        console.log("[v0] Nenhuma solicitação encontrada entre", currentUserIdParam, "e", remoteUserId)
+      }
+    } catch (err) {
+      console.warn("[v0] Erro ao carregar status:", err)
+      setRequestStatus(null)
+    } finally {
+      setIsLoadingStatus(false)
+    }
+  }, [])
+
   useEffect(() => {
-    (async () => {
+    if (remoteUser?.id && currentUserId) {
+      loadStatusForUsers(remoteUser.id, currentUserId)
+    }
+  }, [remoteUser?.id, currentUserId])
+
+  useFocusEffect(
+    useCallback(() => {
+      if (remoteUser?.id && currentUserId) {
+        loadStatusForUsers(remoteUser.id, currentUserId)
+      }
+    }, [remoteUser?.id, currentUserId]), // Removed loadStatusForUsers from dependencies
+  )
+
+  useEffect(() => {
+    ;(async () => {
       try {
-        setLoading(true);
-        const db = getFirestore();
-        const uid = userIdParam ?? auth.currentUser?.uid;
+        setLoading(true)
+        const db = getFirestore()
+        const uid = userIdParam ?? auth.currentUser?.uid
 
         if (!uid) {
-          setRemoteUser(null);
-          return;
+          setRemoteUser(null)
+          return
         }
 
-        const userDocRef = doc(db, "Users", uid);
-        const userSnap = await getDoc(userDocRef);
+        const userDocRef = doc(db, "Users", uid)
+        const userSnap = await getDoc(userDocRef)
 
         if (!userSnap.exists()) {
-          setRemoteUser(null);
-          return;
+          setRemoteUser(null)
+          return
         }
 
-        const data = userSnap.data();
-        console.log("ExternalUser: user document data:", data);
+        const data = userSnap.data()
 
-        // Identificação do tipo de perfil
         const role =
           data?.profileType ??
           (data?.caregiverSpecifications || data?.caregiverProfile
             ? "caregiver"
             : data?.patientProfile
-            ? "patient"
-            : "undefined");
+              ? "patient"
+              : "undefined")
 
-        // Localização (city + state)
-        const city =
-          data?.patientProfile?.city ?? data?.caregiverProfile?.city ?? "";
-        const state =
-          data?.patientProfile?.state ?? data?.caregiverProfile?.state ?? "";
+        const city = data?.patientProfile?.city ?? data?.caregiverProfile?.city ?? ""
+        const state = data?.patientProfile?.state ?? data?.caregiverProfile?.state ?? ""
 
-        let location = "";
-        if (city && state) location = `${city} | ${state}`;
-        else if (city) location = city;
-        else if (state) location = state;
-        else location = "Localização não informada";
+        let location = ""
+        if (city && state) location = `${city} | ${state}`
+        else if (city) location = city
+        else if (state) location = state
+        else location = "Localização não informada"
 
-        // Set do usuário remoto
         setRemoteUser({
           id: userSnap.id,
           name: data?.name ?? data?.displayName ?? "",
           email: data?.email ?? null,
           role,
 
-          phone:
-            data?.patientProfile?.phone ??
-            data?.caregiverProfile?.phone ??
-            null,
+          phone: data?.patientProfile?.phone ?? data?.caregiverProfile?.phone ?? null,
 
           rating: data?.rating ?? 0,
-          imageUrl:
-            data?.caregiverProfile?.photo ??
-            data?.patientProfile?.photo ??
-            undefined,
+          imageUrl: data?.caregiverProfile?.photo ?? data?.patientProfile?.photo ?? undefined,
 
-          // Localização já tratada
           city,
           state,
-          location, // <-- já formatado
+          location,
 
-          caregiverSpecifications:
-            data?.caregiverSpecifications ?? data?.caregiverProfile ?? null,
+          caregiverSpecifications: data?.caregiverSpecifications ?? data?.caregiverProfile ?? null,
 
           patientProfile: {
             ...(data?.patientProfile ?? {}),
@@ -175,274 +171,197 @@ useEffect(() => {
           },
 
           bio: data?.bio ?? data?.description ?? "",
-        });
+        })
       } catch (err) {
-        console.warn("Erro ao buscar ExternalUser:", err);
+        console.warn("Erro ao buscar ExternalUser:", err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    })();
-  }, [userIdParam]);
+    })()
+  }, [userIdParam])
 
-  const ProfileInfoComponent =
-    remoteUser?.role === "caregiver"
-      ? CaregiverProfileInfo
-      : PatientProfileInfo;
+  const ProfileInfoComponent = remoteUser?.role === "caregiver" ? CaregiverProfileInfo : PatientProfileInfo
   const profileProps =
     remoteUser?.role === "caregiver"
       ? { caregiverData: remoteUser?.caregiverSpecifications ?? {} }
-      : { patientData: remoteUser?.patientProfile ?? {} };
+      : { patientData: remoteUser?.patientProfile ?? {} }
 
   useEffect(() => {
     if (remoteUser) {
-      setUserName(remoteUser.name || "");
-      setRating(remoteUser.rating ?? 0);
+      setUserName(remoteUser.name || "")
+      setRating(remoteUser.rating ?? 0)
     }
-  }, [remoteUser]);
+  }, [remoteUser])
 
   const renderStar = (starNumber: number) => {
     return (
       <TouchableOpacity key={starNumber} onPress={() => setRating(starNumber)}>
-        <Ionicons
-          name={starNumber <= rating ? "star" : "star-outline"} // preenche estrelas anteriores
-          size={20}
-          color={colors.green85F}
-        />
+        <Ionicons name={starNumber <= rating ? "star" : "star-outline"} size={20} color={colors.green85F} />
       </TouchableOpacity>
-    );
-  };
+    )
+  }
 
   const submitRating = async () => {
     if (rating === 0) {
-      Alert.alert("Selecione uma avaliação antes de enviar!");
-      return;
+      Alert.alert("Selecione uma avaliação antes de enviar!")
+      return
     }
-    const result = await submitUserRating(remoteUser.id, rating);
+    const result = await submitUserRating(remoteUser.id, rating)
 
     if (result.ok) {
-      Alert.alert("Obrigado!", "Avaliação enviada com sucesso.");
+      Alert.alert("Obrigado!", "Avaliação enviada com sucesso.")
     } else {
-      Alert.alert("Erro", "Não foi possível enviar sua avaliação.");
+      Alert.alert("Erro", "Não foi possível enviar sua avaliação.")
     }
 
-    setShowStars(false);
+    setShowStars(false)
 
-    // fazer a lógica de envio para o backend
-    console.log("Avaliação enviada:", rating);
-    Alert.alert(
-      "Obrigado pela avaliação!",
-      `Você avaliou com ${rating} estrelas.`
-    );
+    console.log("Avaliação enviada:", rating)
+    Alert.alert("Obrigado pela avaliação!", `Você avaliou com ${rating} estrelas.`)
 
-    // Reset opcional
-    setRating(0);
-  };
+    setRating(0)
+  }
 
   const handleRequest = async () => {
-    setContactRequested(true);
-    setAcceptedContact(null); // pending
+    setContactRequested(true)
+    setAcceptedContact(null) // pending
 
-    await savePatientContactRequest(remoteUser.id, remoteUser.name);
+    await savePatientContactRequest(remoteUser.id, remoteUser.name)
 
-    Alert.alert(
-      "Contato solicitado",
-      "Sua solicitação de contato foi enviada com sucesso!",
-      [{ text: "OK" }]
-    );
-  };
-
-  const remoteUserId = remoteUser?.id;
-
-  const isPatient = remoteUser?.role === "patient";
-
-  // const patientId = isPatient ? loggedUserId : remoteUserId;
-  // const caregiverId = isPatient ? remoteUserId : loggedUserId;
-
-
-  const [historyData, setHistoryData] = useState<HistoryData[]>([]);
-
-  // ------------------------------
-  // FUNÇÃO GLOBAL — pode ser usada no accept/decline
-  // ------------------------------
-  async function loadRequests() {
-    console.log("🔄 [loadRequests] Iniciando carregamento...");
-
-    try {
-      const requests: RequestItem[] = await getRequestsForUser(currentUserId);
-
-      console.log("📥 [loadRequests] Requests recebidos:", requests);
-      console.log(
-        "📛 remote.user - outro user dentro do loadRequests:",
-        remoteUser.role
-      );
-      console.log("📛 currentUserId usado:", currentUserId);
-
-      const formatted: HistoryData[] = requests.map((req: any) => {
-        // Força que currentProfileType seja do tipo correto
-        const profileType: "caregiver" | "patient" | undefined =
-          remoteUser?.role === "patient"
-            ? "caregiver"
-            : remoteUser?.role === "caregiver"
-            ? "patient"
-            : undefined;
-
-        // Formata a data sem os "de"
-        const dateObj = new Date(req.createdAt);
-        const parts = new Intl.DateTimeFormat("pt-BR", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }).formatToParts(dateObj);
-
-        const day = parts.find((p) => p.type === "day")?.value;
-        const month = parts.find((p) => p.type === "month")?.value;
-        const year = parts.find((p) => p.type === "year")?.value;
-
-        const formattedDate = `${day} ${month} ${year}`;
-
-        return {
-          id: req.patientId ?? req.caregiverId ?? "",
-          name: req.patientName ?? req.caregiverName ?? "Usuário",
-          date: formattedDate,
-          requestStatus: req.status,
-          imageUrl: req.imageUrl ?? null,
-          rating: req.rating ?? null,
-          careCategory: req.careCategory ?? "",
-          currentProfileType: profileType,
-        };
-      });
-
-      setHistoryData(formatted.slice().reverse());
-
-      console.log("🟩 [Home] Dados formatados para lista:", formatted);
-    } catch (err) {
-      console.warn("Erro ao carregar solicitações:", err);
-    }
+    Alert.alert("Contato solicitado", "Sua solicitação de contato foi enviada com sucesso!", [{ text: "OK" }])
   }
 
-async function handleAccept() {
-  if (!remoteUser) return;
+  const remoteUserId = remoteUser?.id
 
-  const loggedUserId = FIREBASE_AUTH.currentUser?.uid; 
-  const remoteUserId = remoteUser.id;
-  const isRemoteUserPatient = remoteUser.role === "patient";
+  const isPatient = remoteUser?.role === "patient"
 
-  const patientIdToPass = isRemoteUserPatient ? remoteUserId : loggedUserId;
-  const caregiverIdToPass = isRemoteUserPatient ? loggedUserId : remoteUserId;
+  const [historyData, setHistoryData] = useState<HistoryData[]>([])
 
-  try {
-    const result = await acceptRequest(patientIdToPass, caregiverIdToPass);
-    
-    if (result.ok) {
-      // Atualiza o estado local E busca o status atualizado do banco
-      setRequestStatus("accepted");
-      await loadRealStatus(); // Busca o valor real do banco novamente
-      Alert.alert("Sucesso!", "Solicitação aceita e status atualizado.");
-    } else {
-      console.error(result.error);
-      Alert.alert("Erro", "Não foi possível aceitar a solicitação.");
-    }
-  } catch (error) {
-    console.error("Erro ao aceitar solicitação:", error);
-  }
-}
-
-async function handleDecline() {
-  if (!remoteUser) return;
-
-  const loggedUserId = FIREBASE_AUTH.currentUser?.uid; 
-  const remoteUserId = remoteUser.id;
-  const isRemoteUserPatient = remoteUser.role === "patient";
-  const patientIdToPass = isRemoteUserPatient ? remoteUserId : loggedUserId;
-  const caregiverIdToPass = isRemoteUserPatient ? loggedUserId : remoteUserId;
-
-  try {
-    const result = await declineRequest(patientIdToPass, caregiverIdToPass);
-    
-    if (result.ok) {
-      // Atualiza o estado local E busca o status atualizado do banco
-      setRequestStatus("declined");
-      await loadRealStatus(); // Busca o valor real do banco novamente
-    } else {
-      console.error(result.error);
-    }
-  } catch (error) {
-    console.error("Erro ao recusar solicitação:", error);
-  }
-}
+  const [requestsSent, setRequestsSent] = useState<RequestItem[]>([])
 
   useEffect(() => {
-    if (!remoteUser) return;
+    const loadRequestsSent = async () => {
+      if (!loggedUserId) {
+        setRequestsSent([])
+        return
+      }
+
+      try {
+        const requests = await getRequestsForUser(loggedUserId)
+        setRequestsSent(requests)
+      } catch (err) {
+        console.warn("Erro ao carregar requestsSent:", err)
+        setRequestsSent([])
+      }
+    }
+
+    loadRequestsSent()
+  }, [loggedUserId])
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadRequestsSent = async () => {
+        if (!loggedUserId) return
+
+        try {
+          const requests = await getRequestsForUser(loggedUserId)
+          setRequestsSent(requests)
+        } catch (err) {
+          console.warn("Erro ao carregar requestsSent:", err)
+        }
+      }
+
+      loadRequestsSent()
+    }, [loggedUserId]),
+  )
+
+  const handleAccept = useCallback(async () => {
+    if (!remoteUser) return
+
+    const loggedUserId = FIREBASE_AUTH.currentUser?.uid
+    const remoteUserId = remoteUser.id
+    const isRemoteUserPatient = remoteUser.role === "patient"
+    const patientIdToPass = isRemoteUserPatient ? remoteUserId : loggedUserId
+    const caregiverIdToPass = isRemoteUserPatient ? loggedUserId : remoteUserId
+
+    try {
+      const result = await acceptRequest(patientIdToPass, caregiverIdToPass)
+
+      if (result.ok) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        await loadStatusForUsers(remoteUserId, loggedUserId)
+        Alert.alert("Sucesso!", "Solicitação aceita e status atualizado.")
+      } else {
+        console.error("Erro ao aceitar:", result.error)
+        Alert.alert("Erro", "Não foi possível aceitar a solicitação.")
+      }
+    } catch (error) {
+      console.error("Erro na exceção:", error)
+    }
+  }, [remoteUser])
+
+  const handleDecline = useCallback(async () => {
+    if (!remoteUser) return
+
+    const loggedUserId = FIREBASE_AUTH.currentUser?.uid
+    const remoteUserId = remoteUser.id
+    const isRemoteUserPatient = remoteUser.role === "patient"
+    const patientIdToPass = isRemoteUserPatient ? remoteUserId : loggedUserId
+    const caregiverIdToPass = isRemoteUserPatient ? loggedUserId : remoteUserId
+
+    try {
+      const result = await declineRequest(patientIdToPass, caregiverIdToPass)
+
+      if (result.ok) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        await loadStatusForUsers(remoteUserId, loggedUserId)
+        Alert.alert("Solicitação recusada com sucesso.")
+      } else {
+        console.error("Erro ao recusar:", result.error)
+        Alert.alert("Erro", "Não foi possível recusar a solicitação.")
+      }
+    } catch (error) {
+      console.error("Erro na exceção:", error)
+    }
+  }, [remoteUser])
+
+  useEffect(() => {
+    if (!remoteUser) return
 
     const checkExistingRequest = async () => {
       try {
-        const requests = await getRequestsForUser(loggedUserId); // solicitações enviadas pelo logado
+        const requests = await getRequestsForUser(loggedUserId)
         const alreadyRequested = requests.some(
-          (req) =>
-            req.patientId === remoteUser.id || req.caregiverId === remoteUser.id
-        );
-        setExistingRequest(alreadyRequested);
+          (req) => req.patientId === remoteUser.id || req.caregiverId === remoteUser.id,
+        )
+        setExistingRequest(alreadyRequested)
       } catch (err) {
-        console.warn("Erro ao verificar solicitações existentes:", err);
+        console.warn("Erro ao verificar solicitações existentes:", err)
       }
-    };
+    }
 
-    checkExistingRequest();
-  }, [remoteUser, loggedUserId]);
-  const [requestsSent, setRequestsSent] = useState<RequestItem[]>([]);
+    checkExistingRequest()
+  }, [remoteUser, loggedUserId])
 
-  // Função para checar se pode solicitar contato
   function canRequestContact(targetUserId: string): boolean {
-  if (!requestsSent || requestsSent.length === 0) return true;
+    if (!requestsSent || requestsSent.length === 0) {
+      return true
+    }
 
-  const existingRequest = requestsSent.find(
-    (req) =>
-      req.patientId === targetUserId ||
-      req.caregiverId === targetUserId
-  );
+    const existingRequest = requestsSent.find((req) => {
+      if (!isPatient && remoteUser?.role === "patient") {
+        return req.patientId === targetUserId && req.caregiverId === loggedUserId
+      }
+      if (isPatient && remoteUser?.role === "caregiver") {
+        return req.patientId === loggedUserId && req.caregiverId === targetUserId
+      }
+      return false
+    })
 
-  return !existingRequest;
-}
+    return !existingRequest
+  }
 
-  // Determinar status da solicitação
-  const [requestStatus, setRequestStatus] = useState<
-    "pending" | "accepted" | "declined" | undefined
-  >();
-
-  // useEffect(() => {
-  //   if (!remoteUser) return;
-
-  //   async function loadRealStatus() {
-  //     try {
-  //       const requests = await getRequestsForUser(loggedUserId);
-
-  //       // Verifica se existe solicitação entre os dois usuários
-  //       const relatedRequest = requests.find(
-  //         (req) =>
-  //           (req.patientId === loggedUserId &&
-  //             req.caregiverId === remoteUser.id) ||
-  //           (req.caregiverId === loggedUserId &&
-  //             req.patientId === remoteUser.id)
-  //       );
-
-  //       if (relatedRequest) {
-  //         if (relatedRequest.status === "accepted") {
-  //           setRequestStatus("accepted");
-  //         } else if (relatedRequest.status === "declined") {
-  //           setRequestStatus("declined");
-  //         } else {
-  //           setRequestStatus("pending");
-  //         }
-  //       }
-  //     } catch (err) {
-  //       console.warn("Erro ao carregar status real:", err);
-  //     }
-  //   }
-
-  //   loadRealStatus();
-  // }, [remoteUser, loggedUserId]);
-
-  const requestAllowed = canRequestContact(remoteUser?.id ?? "");
+  const requestAllowed = canRequestContact(remoteUser?.id ?? "")
 
   return (
     <ScrollView
@@ -459,7 +378,6 @@ async function handleDecline() {
       }}
     >
       <TopBar title="" />
-      {/* Foto de perfil, nome e estrelas - estilo atualizado para card centralizado */}
       <View style={{ marginHorizontal: 16, marginTop: 20, marginBottom: 8 }}>
         <View
           style={{
@@ -483,7 +401,6 @@ async function handleDecline() {
             <CaretLeft size={24} color={colors.gray73} weight="bold" />
           </TouchableOpacity>
 
-          {/* avatar com leve overlap visual */}
           <View style={{ marginTop: -40, marginBottom: 8 }}>
             <Avatar size={84} name={userName} photoURL={remoteUser?.imageUrl} />
           </View>
@@ -540,7 +457,6 @@ async function handleDecline() {
                 : profileProps.patientData?.careType}
             </Text>
           )}
-          {/* Cidade (exibida se existir em qualquer lugar do usuário) */}
           <Text
             style={{
               fontSize: 14,
@@ -566,7 +482,6 @@ async function handleDecline() {
         </View>
       </View>
 
-      {/* Botão centralizado full-width */}
       <View
         style={{
           justifyContent: "center",
@@ -577,102 +492,16 @@ async function handleDecline() {
           marginVertical: 12,
         }}
       >
-        {/* Caso o perfil exibido seja de cliente */}
         {remoteUser?.role === "patient" ? (
           <View style={{ width: "100%", flexDirection: "column", gap: 16 }}>
-            <>
-              {requestStatus === "accepted" && ( //solicitação accepted
-                <>
-                  <View
-                    style={{
-                      width: "100%",
-                      gap: 8,
-                      flexDirection: "column",
-                      marginBottom: 16,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: "100%",
-                        paddingVertical: 8,
-                        paddingHorizontal: 12,
-                        backgroundColor: colors.greenAcceptBg,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 6,
-                        borderRadius: 8,
-                      }}
-                    >
-                      <SealCheck size={18} color={colors.greenAccept} />
-                      <Text
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 600,
-                          color: colors.greenAccept,
-                        }}
-                      >
-                        Solicitação accepted
-                      </Text>
-                    </View>
-                  </View>
-                  <PrimaryButton
-                    title="Entrar em contato"
-                    onPress={() => {
-                      setShowStars(true);
-                      const firstName = remoteUser?.name?.split(" ")[0] || "";
-                      if (remoteUser?.phone) {
-                        const initialMessage =
-                          remoteUser.role === "patient"
-                            ? `Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital.`
-                            : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`;
-                        openWhatsApp(String(remoteUser.phone), initialMessage);
-                      } else {
-                        Alert.alert(
-                          "Contato indisponível",
-                          "O número de telefone deste usuário não está disponível no momento."
-                        );
-                      }
-                    }}
-                    icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
-                    disabled={!remoteUser?.phone}
-                  />
-                </>
-              )}
-              {requestStatus === "declined" && (
+            {requestStatus === "accepted" && (
+              <>
                 <View
                   style={{
                     width: "100%",
-                    paddingVertical: 8,
-                    paddingHorizontal: 12,
-                    backgroundColor: colors.redc0019,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6,
-                    borderRadius: 8,
-                  }}
-                >
-                  <Prohibit size={18} color={colors.redc00} />
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      color: colors.redc00,
-                    }}
-                  >
-                    Solicitação declined
-                  </Text>
-                </View>
-              )}
-              {requestStatus === "pending" && (
-                <View
-                  style={{
-                    width: "100%",
-                    margin: 0,
-                    padding: 0,
-                    gap: 16,
+                    gap: 8,
                     flexDirection: "column",
+                    marginBottom: 16,
                   }}
                 >
                   <View
@@ -680,7 +509,7 @@ async function handleDecline() {
                       width: "100%",
                       paddingVertical: 8,
                       paddingHorizontal: 12,
-                      backgroundColor: colors.grayE8,
+                      backgroundColor: colors.greenAcceptBg,
                       flexDirection: "row",
                       alignItems: "center",
                       justifyContent: "center",
@@ -688,40 +517,123 @@ async function handleDecline() {
                       borderRadius: 8,
                     }}
                   >
-                    <ClockCountdown size={18} color={colors.gray47} />
+                    <SealCheck size={18} color={colors.greenAccept} />
                     <Text
                       style={{
                         fontSize: 14,
                         fontWeight: 600,
-                        color: colors.gray47,
+                        color: colors.greenAccept,
                       }}
                     >
-                      Solicitação Pendente
+                      Solicitação aceita
                     </Text>
                   </View>
-                  <View style={{ width: "100%", flexDirection: "row", gap: 8 }}>
-                    <ActionButton
-                      title="aceitar"
-                      icon={<Check size={20} color={colors.greenAccept} />}
-                      type="accepted"
-                      onPress={() => {
-                        handleAccept();
-                        console.log("handleAccept");
-                      }}
-                    />
-                    <ActionButton
-                      title="Recusar"
-                      icon={<X size={20} color={colors.redc00} />}
-                      type="declined"
-                      onPress={() => {
-                        handleDecline();
-                        console.log("handleDecline");
-                      }}
-                    />
-                  </View>
                 </View>
-              )}
-            </>
+                <PrimaryButton
+                  title="Entrar em contato"
+                  onPress={() => {
+                    setShowStars(true)
+                    const firstName = remoteUser?.name?.split(" ")[0] || ""
+                    if (remoteUser?.phone) {
+                      const initialMessage =
+                        remoteUser.role === "patient"
+                          ? `Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital.`
+                          : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`
+                      openWhatsApp(String(remoteUser.phone), initialMessage)
+                    } else {
+                      Alert.alert(
+                        "Contato indisponível",
+                        "O número de telefone deste usuário não está disponível no momento.",
+                      )
+                    }
+                  }}
+                  icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
+                  disabled={!remoteUser?.phone}
+                />
+              </>
+            )}
+
+            {requestStatus === "declined" && (
+              <View
+                style={{
+                  width: "100%",
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  backgroundColor: colors.redc0019,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  borderRadius: 8,
+                }}
+              >
+                <Prohibit size={18} color={colors.redc00} />
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: colors.redc00,
+                  }}
+                >
+                  Solicitação recusada
+                </Text>
+              </View>
+            )}
+
+            {requestStatus === "pending" && (
+              <View
+                style={{
+                  width: "100%",
+                  margin: 0,
+                  padding: 0,
+                  gap: 16,
+                  flexDirection: "column",
+                }}
+              >
+                <View
+                  style={{
+                    width: "100%",
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    backgroundColor: colors.grayE8,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    borderRadius: 8,
+                  }}
+                >
+                  <ClockCountdown size={18} color={colors.gray47} />
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: colors.gray47,
+                    }}
+                  >
+                    Solicitação pendente
+                  </Text>
+                </View>
+                <View style={{ width: "100%", flexDirection: "row", gap: 8 }}>
+                  <ActionButton
+                    title="Aceitar"
+                    icon={<Check size={20} color={colors.greenAccept} />}
+                    type="accepted"
+                    onPress={() => {
+                      handleAccept()
+                    }}
+                  />
+                  <ActionButton
+                    title="Recusar"
+                    icon={<X size={20} color={colors.redc00} />}
+                    type="declined"
+                    onPress={() => {
+                      handleDecline()
+                    }}
+                  />
+                </View>
+              </View>
+            )}
 
             {showStars && (
               <View
@@ -738,9 +650,7 @@ async function handleDecline() {
                   width: "100%",
                 }}
               >
-                <Text style={{ textAlign: "center", ...typography.M01R1214 }}>
-                  Gostaria de avaliar esse perfil?
-                </Text>
+                <Text style={{ textAlign: "center", ...typography.M01R1214 }}>Gostaria de avaliar esse perfil?</Text>
                 <View
                   style={{
                     flexDirection: "row",
@@ -753,8 +663,8 @@ async function handleDecline() {
                 </View>
                 <TouchableOpacity
                   onPress={() => {
-                    submitRating();
-                    setShowStars(false);
+                    submitRating()
+                    setShowStars(false)
                   }}
                   disabled={rating === 0}
                   style={{
@@ -778,33 +688,17 @@ async function handleDecline() {
             )}
           </View>
         ) : (
-          //{/* Caso o perfil exibido seja de profissional */}
           <View style={{ width: "100%", flexDirection: "column", gap: 8 }}>
-            {requestAllowed && (
+            {requestStatus === null && requestAllowed && (
               <OutlinedButton
                 title="Solicitar contato"
                 onPress={() => {
-                  //Teste no computador
-                  handleRequest();
-
-                  //Reativar
-                  // Alert.alert(
-                  //   "Atenção",
-                  //   "Ao solicitar o contato, seu número também ficará visível para o outro usuário caso ele aceite sua solicitação. Deseja continuar?",
-                  //   [
-                  //     { text: "Cancelar", style: "cancel" },
-                  //     {
-                  //       text: "Continuar",
-                  //       onPress: handleRequest,
-                  //     },
-                  //   ]
-                  // );
+                  handleRequest()
                 }}
                 icon={<WhatsappLogo size={20} color={colors.green382} />}
               />
             )}
 
-            {/* Contato pending */}
             {requestStatus === "pending" && (
               <View
                 style={{
@@ -827,12 +721,11 @@ async function handleDecline() {
                     color: colors.gray47,
                   }}
                 >
-                  Solicitação pending
+                  Solicitação pendente
                 </Text>
               </View>
             )}
 
-            {/* Contato aceito */}
             {requestStatus === "accepted" && (
               <View style={{ width: "100%", gap: 16, flexDirection: "column" }}>
                 <View
@@ -856,25 +749,25 @@ async function handleDecline() {
                       color: colors.greenAccept,
                     }}
                   >
-                    Solicitação accepted
+                    Solicitação aceita
                   </Text>
                 </View>
                 <PrimaryButton
                   title="Entrar em contato"
                   onPress={() => {
-                    setShowStars(true);
-                    const firstName = remoteUser?.name?.split(" ")[0] || "";
+                    setShowStars(true)
+                    const firstName = remoteUser?.name?.split(" ")[0] || ""
                     if (remoteUser?.phone) {
                       const initialMessage =
                         remoteUser.role === "patient"
                           ? `Olá ${firstName}! Tenho interesse nos seus serviços e encontrei seu perfil pelo aplicativo Conexão Vital.`
-                          : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`;
-                      openWhatsApp(String(remoteUser.phone), initialMessage);
+                          : `Olá ${firstName}! Vi sua solicitação pelo aplicativo Conexão Vital e estou entrando em contato para conversarmos sobre o que você precisa.`
+                      openWhatsApp(String(remoteUser.phone), initialMessage)
                     } else {
                       Alert.alert(
                         "Contato indisponível",
-                        "O número de telefone deste usuário não está disponível no momento."
-                      );
+                        "O número de telefone deste usuário não está disponível no momento.",
+                      )
                     }
                   }}
                   icon={<WhatsappLogo size={20} color={colors.whiteFBFE} />}
@@ -883,7 +776,6 @@ async function handleDecline() {
               </View>
             )}
 
-            {/* Contato recusado */}
             {requestStatus === "declined" && (
               <View
                 style={{
@@ -906,7 +798,7 @@ async function handleDecline() {
                     color: colors.redc00,
                   }}
                 >
-                  Solicitação declined
+                  Solicitação recusada
                 </Text>
               </View>
             )}
@@ -923,12 +815,10 @@ async function handleDecline() {
                   paddingHorizontal: 12,
                   borderRadius: 12,
                   marginTop: 16,
-                  // width: "100%",
+                  width: "100%",
                 }}
               >
-                <Text style={{ textAlign: "center", ...typography.M01R1214 }}>
-                  Gostaria de avaliar esse perfil?
-                </Text>
+                <Text style={{ textAlign: "center", ...typography.M01R1214 }}>Gostaria de avaliar esse perfil?</Text>
                 <View
                   style={{
                     flexDirection: "row",
@@ -941,8 +831,8 @@ async function handleDecline() {
                 </View>
                 <TouchableOpacity
                   onPress={() => {
-                    submitRating();
-                    setShowStars(false);
+                    submitRating()
+                    setShowStars(false)
                   }}
                   disabled={rating === 0}
                   style={{
@@ -990,24 +880,18 @@ async function handleDecline() {
             borderBottomColor: colors.green382,
           }}
         >
-          <Text style={{ ...typography.M01B1624, color: colors.green382 }}>
-            Informações {/* gerais */}
-          </Text>
+          <Text style={{ ...typography.M01B1624, color: colors.green382 }}>Informações</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Conteúdo */}
       {ProfileInfoComponent ? (
         <ProfileInfoComponent {...(profileProps as any)} />
       ) : (
-        <Text style={{ color: colors.gray75 }}>
-          Informações não disponíveis
-        </Text>
+        <Text style={{ color: colors.gray75 }}>Informações não disponíveis</Text>
       )}
-      {/* ======= ÁREA DE AVALIAÇÕES DO USUÁRIO ======= */}
       <View style={{ marginTop: 24, width: "92%", marginHorizontal: "4%" }}>
         <UserReviews userId={remoteUser?.id} />
       </View>
     </ScrollView>
-  );
+  )
 }
