@@ -22,10 +22,18 @@ import PatientProfileInfo from "./PatientProfileInfo";
 import { openWhatsApp } from "../../../../utils/openWhatsApp";
 import { TopBar } from "../../../components/TopBar";
 import { savePatientContactRequest } from "../../../services/patientService";
-import { acceptRequest, declineRequest, getRequestsForUser, RequestItem, updateStatus } from "../../../services/requestService";
+import {
+  acceptRequest,
+  declineRequest,
+  getRequestsForUser,
+  RequestItem,
+  updateStatus,
+} from "../../../services/requestService";
 import { ClockCountdown, SealCheck, Prohibit } from "phosphor-react-native";
 import { HistoryData } from "./CustomList";
 import { FIREBASE_AUTH } from "../../../../FirebaseConfig";
+import { submitUserRating } from "../../../services/userService";
+import { UserReviews } from "../../../components/UserReviews";
 
 interface User {
   //Dados necessários para exibir perfil de outros usuários
@@ -55,6 +63,41 @@ export default function ExternalUser() {
   const [remoteUser, setRemoteUser] = useState<any>(null);
 
   const auth = getAuth();
+
+  const loggedUserId = auth.currentUser?.uid; 
+  const currentUserId = FIREBASE_AUTH.currentUser?.uid!;
+
+  // NOVA FUNÇÃO (coloque antes do primeiro useEffect de status, por volta da linha 373)
+async function loadRealStatus() {
+  if (!remoteUser || !loggedUserId) return;
+  try {
+    const requests = await getRequestsForUser(loggedUserId);
+
+    const relatedRequest = requests.find(
+      (req) =>
+        (req.patientId === loggedUserId && req.caregiverId === remoteUser.id) ||
+        (req.caregiverId === loggedUserId && req.patientId === remoteUser.id)
+    );
+
+    if (relatedRequest) {
+      // SEMPRE usa o status do banco de dados
+      setRequestStatus(relatedRequest.status);
+    } else {
+      // Se não existe solicitação, seta como undefined
+      setRequestStatus(undefined);
+    }
+  } catch (err) {
+    console.warn("Erro ao carregar status real:", err);
+    setRequestStatus(undefined);
+  }
+}
+
+// O useEffect que antes continha a função, agora apenas a chama
+useEffect(() => {
+  loadRealStatus();
+}, [remoteUser, loggedUserId]);
+
+
   // busca os dados do usuário selecionado; se não houver param, tenta exibir currentUser como antes
   useEffect(() => {
     (async () => {
@@ -85,18 +128,14 @@ export default function ExternalUser() {
           (data?.caregiverSpecifications || data?.caregiverProfile
             ? "caregiver"
             : data?.patientProfile
-              ? "patient"
-              : "undefined");
+            ? "patient"
+            : "undefined");
 
         // Localização (city + state)
         const city =
-          data?.patientProfile?.city ??
-          data?.caregiverProfile?.city ??
-          "";
+          data?.patientProfile?.city ?? data?.caregiverProfile?.city ?? "";
         const state =
-          data?.patientProfile?.state ??
-          data?.caregiverProfile?.state ??
-          "";
+          data?.patientProfile?.state ?? data?.caregiverProfile?.state ?? "";
 
         let location = "";
         if (city && state) location = `${city} | ${state}`;
@@ -117,9 +156,10 @@ export default function ExternalUser() {
             null,
 
           rating: data?.rating ?? 0,
-          imageUrl: data?.caregiverProfile?.photo ??
-                    data?.patientProfile?.photo ??
-                    undefined,
+          imageUrl:
+            data?.caregiverProfile?.photo ??
+            data?.patientProfile?.photo ??
+            undefined,
 
           // Localização já tratada
           city,
@@ -127,9 +167,7 @@ export default function ExternalUser() {
           location, // <-- já formatado
 
           caregiverSpecifications:
-            data?.caregiverSpecifications ??
-            data?.caregiverProfile ??
-            null,
+            data?.caregiverSpecifications ?? data?.caregiverProfile ?? null,
 
           patientProfile: {
             ...(data?.patientProfile ?? {}),
@@ -138,7 +176,6 @@ export default function ExternalUser() {
 
           bio: data?.bio ?? data?.description ?? "",
         });
-
       } catch (err) {
         console.warn("Erro ao buscar ExternalUser:", err);
       } finally {
@@ -175,11 +212,20 @@ export default function ExternalUser() {
     );
   };
 
-  const submitRating = () => {
+  const submitRating = async () => {
     if (rating === 0) {
       Alert.alert("Selecione uma avaliação antes de enviar!");
       return;
     }
+    const result = await submitUserRating(remoteUser.id, rating);
+
+    if (result.ok) {
+      Alert.alert("Obrigado!", "Avaliação enviada com sucesso.");
+    } else {
+      Alert.alert("Erro", "Não foi possível enviar sua avaliação.");
+    }
+
+    setShowStars(false);
 
     // fazer a lógica de envio para o backend
     console.log("Avaliação enviada:", rating);
@@ -194,7 +240,7 @@ export default function ExternalUser() {
 
   const handleRequest = async () => {
     setContactRequested(true);
-    setAcceptedContact(null); // pendente
+    setAcceptedContact(null); // pending
 
     await savePatientContactRequest(remoteUser.id, remoteUser.name);
 
@@ -205,15 +251,13 @@ export default function ExternalUser() {
     );
   };
 
-  const loggedUserId = auth.currentUser?.uid;
   const remoteUserId = remoteUser?.id;
 
   const isPatient = remoteUser?.role === "patient";
 
-  const patientId = isPatient ? loggedUserId : remoteUserId;
-  const caregiverId = isPatient ? remoteUserId : loggedUserId;
+  // const patientId = isPatient ? loggedUserId : remoteUserId;
+  // const caregiverId = isPatient ? remoteUserId : loggedUserId;
 
-  const currentUserId = FIREBASE_AUTH.currentUser?.uid!;
 
   const [historyData, setHistoryData] = useState<HistoryData[]>([]);
 
@@ -227,7 +271,10 @@ export default function ExternalUser() {
       const requests: RequestItem[] = await getRequestsForUser(currentUserId);
 
       console.log("📥 [loadRequests] Requests recebidos:", requests);
-      console.log("📛 remote.user - outro user dentro do loadRequests:", remoteUser.role);
+      console.log(
+        "📛 remote.user - outro user dentro do loadRequests:",
+        remoteUser.role
+      );
       console.log("📛 currentUserId usado:", currentUserId);
 
       const formatted: HistoryData[] = requests.map((req: any) => {
@@ -236,8 +283,8 @@ export default function ExternalUser() {
           remoteUser?.role === "patient"
             ? "caregiver"
             : remoteUser?.role === "caregiver"
-              ? "patient"
-              : undefined;
+            ? "patient"
+            : undefined;
 
         // Formata a data sem os "de"
         const dateObj = new Date(req.createdAt);
@@ -247,9 +294,9 @@ export default function ExternalUser() {
           year: "numeric",
         }).formatToParts(dateObj);
 
-        const day = parts.find(p => p.type === "day")?.value;
-        const month = parts.find(p => p.type === "month")?.value;
-        const year = parts.find(p => p.type === "year")?.value;
+        const day = parts.find((p) => p.type === "day")?.value;
+        const month = parts.find((p) => p.type === "month")?.value;
+        const year = parts.find((p) => p.type === "year")?.value;
 
         const formattedDate = `${day} ${month} ${year}`;
 
@@ -273,39 +320,56 @@ export default function ExternalUser() {
     }
   }
 
-  async function handleAccept() {
-    if (!patientId || !caregiverId) {
-      console.warn("IDs ausentes para aceitar solicitação");
-      return;
-    }
+async function handleAccept() {
+  if (!remoteUser) return;
 
-    const result = await acceptRequest(patientId, caregiverId);
-    await loadRequests();
+  const loggedUserId = FIREBASE_AUTH.currentUser?.uid; 
+  const remoteUserId = remoteUser.id;
+  const isRemoteUserPatient = remoteUser.role === "patient";
 
+  const patientIdToPass = isRemoteUserPatient ? remoteUserId : loggedUserId;
+  const caregiverIdToPass = isRemoteUserPatient ? loggedUserId : remoteUserId;
+
+  try {
+    const result = await acceptRequest(patientIdToPass, caregiverIdToPass);
+    
     if (result.ok) {
-      setAcceptedContact(true); //limpar
-      setRequestStatus("aceita");
+      // Atualiza o estado local E busca o status atualizado do banco
+      setRequestStatus("accepted");
+      await loadRealStatus(); // Busca o valor real do banco novamente
+      Alert.alert("Sucesso!", "Solicitação aceita e status atualizado.");
+    } else {
+      console.error(result.error);
+      Alert.alert("Erro", "Não foi possível aceitar a solicitação.");
+    }
+  } catch (error) {
+    console.error("Erro ao aceitar solicitação:", error);
+  }
+}
+
+async function handleDecline() {
+  if (!remoteUser) return;
+
+  const loggedUserId = FIREBASE_AUTH.currentUser?.uid; 
+  const remoteUserId = remoteUser.id;
+  const isRemoteUserPatient = remoteUser.role === "patient";
+  const patientIdToPass = isRemoteUserPatient ? remoteUserId : loggedUserId;
+  const caregiverIdToPass = isRemoteUserPatient ? loggedUserId : remoteUserId;
+
+  try {
+    const result = await declineRequest(patientIdToPass, caregiverIdToPass);
+    
+    if (result.ok) {
+      // Atualiza o estado local E busca o status atualizado do banco
+      setRequestStatus("declined");
+      await loadRealStatus(); // Busca o valor real do banco novamente
     } else {
       console.error(result.error);
     }
+  } catch (error) {
+    console.error("Erro ao recusar solicitação:", error);
   }
-
-  async function handleDecline() {
-    if (!patientId || !caregiverId) {
-      console.warn("IDs ausentes para recusar solicitação");
-      return;
-    }
-
-    const result = await declineRequest(patientId, caregiverId);
-    await loadRequests();
-
-    if (result.ok) {
-      setAcceptedContact(false); //limpar
-      setRequestStatus("recusada");
-    } else {
-      console.error(result.error);
-    }
-  }
+}
 
   useEffect(() => {
     if (!remoteUser) return;
@@ -315,8 +379,7 @@ export default function ExternalUser() {
         const requests = await getRequestsForUser(loggedUserId); // solicitações enviadas pelo logado
         const alreadyRequested = requests.some(
           (req) =>
-            (req.patientId === remoteUser.id) ||
-            (req.caregiverId === remoteUser.id)
+            req.patientId === remoteUser.id || req.caregiverId === remoteUser.id
         );
         setExistingRequest(alreadyRequested);
       } catch (err) {
@@ -330,49 +393,54 @@ export default function ExternalUser() {
 
   // Função para checar se pode solicitar contato
   function canRequestContact(targetUserId: string): boolean {
-    if (!requestsSent || requestsSent.length === 0) return true;
+  if (!requestsSent || requestsSent.length === 0) return true;
 
-    const existingRequest = requestsSent.find(
-      (req) => req.clientId === targetUserId || req.professionalId === targetUserId
-    );
+  const existingRequest = requestsSent.find(
+    (req) =>
+      req.patientId === targetUserId ||
+      req.caregiverId === targetUserId
+  );
 
-    return !existingRequest; // true se ainda não existe solicitação
-  }
+  return !existingRequest;
+}
+
   // Determinar status da solicitação
   const [requestStatus, setRequestStatus] = useState<
-    "pendente" | "aceita" | "recusada"
-  >("pendente");
+    "pending" | "accepted" | "declined" | undefined
+  >();
 
-  useEffect(() => {
-    if (!remoteUser) return;
+  // useEffect(() => {
+  //   if (!remoteUser) return;
 
-    async function loadRealStatus() {
-      try {
-        const requests = await getRequestsForUser(loggedUserId);
+  //   async function loadRealStatus() {
+  //     try {
+  //       const requests = await getRequestsForUser(loggedUserId);
 
-        // Verifica se existe solicitação entre os dois usuários
-        const relatedRequest = requests.find(
-          (req) =>
-            (req.patientId === loggedUserId && req.caregiverId === remoteUser.id) ||
-            (req.caregiverId === loggedUserId && req.patientId === remoteUser.id)
-        );
+  //       // Verifica se existe solicitação entre os dois usuários
+  //       const relatedRequest = requests.find(
+  //         (req) =>
+  //           (req.patientId === loggedUserId &&
+  //             req.caregiverId === remoteUser.id) ||
+  //           (req.caregiverId === loggedUserId &&
+  //             req.patientId === remoteUser.id)
+  //       );
 
-        if (relatedRequest) {
-          if (relatedRequest.status === "aceita") {
-            setRequestStatus("aceita");
-          } else if (relatedRequest.status === "recusada") {
-            setRequestStatus("recusada");
-          } else {
-            setRequestStatus("pendente");
-          }
-        }
-      } catch (err) {
-        console.warn("Erro ao carregar status real:", err);
-      }
-    }
+  //       if (relatedRequest) {
+  //         if (relatedRequest.status === "accepted") {
+  //           setRequestStatus("accepted");
+  //         } else if (relatedRequest.status === "declined") {
+  //           setRequestStatus("declined");
+  //         } else {
+  //           setRequestStatus("pending");
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.warn("Erro ao carregar status real:", err);
+  //     }
+  //   }
 
-    loadRealStatus();
-  }, [remoteUser, loggedUserId]);
+  //   loadRealStatus();
+  // }, [remoteUser, loggedUserId]);
 
   const requestAllowed = canRequestContact(remoteUser?.id ?? "");
 
@@ -513,12 +581,39 @@ export default function ExternalUser() {
         {remoteUser?.role === "patient" ? (
           <View style={{ width: "100%", flexDirection: "column", gap: 16 }}>
             <>
-              {requestStatus === "aceita" && ( //solicitação aceita
+              {requestStatus === "accepted" && ( //solicitação accepted
                 <>
-                  <View style={{ width: "100%", gap: 8, flexDirection: "column", marginBottom: 16 }}>
-                    <View style={{ width: "100%", paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.greenAcceptBg, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 8 }}>
+                  <View
+                    style={{
+                      width: "100%",
+                      gap: 8,
+                      flexDirection: "column",
+                      marginBottom: 16,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: "100%",
+                        paddingVertical: 8,
+                        paddingHorizontal: 12,
+                        backgroundColor: colors.greenAcceptBg,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                        borderRadius: 8,
+                      }}
+                    >
                       <SealCheck size={18} color={colors.greenAccept} />
-                      <Text style={{ fontSize: 14, fontWeight: 600, color: colors.greenAccept }}>Solicitação aceita</Text>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 600,
+                          color: colors.greenAccept,
+                        }}
+                      >
+                        Solicitação accepted
+                      </Text>
                     </View>
                   </View>
                   <PrimaryButton
@@ -544,35 +639,83 @@ export default function ExternalUser() {
                   />
                 </>
               )}
-              {requestStatus === "recusada" && (
-                <View style={{ width: "100%", paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.redc0019, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 8 }}>
+              {requestStatus === "declined" && (
+                <View
+                  style={{
+                    width: "100%",
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    backgroundColor: colors.redc0019,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    borderRadius: 8,
+                  }}
+                >
                   <Prohibit size={18} color={colors.redc00} />
-                  <Text style={{ fontSize: 14, fontWeight: 600, color: colors.redc00 }}>Solicitação recusada</Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: colors.redc00,
+                    }}
+                  >
+                    Solicitação declined
+                  </Text>
                 </View>
               )}
-              {requestStatus === "pendente" && (
-                <View style={{ width: "100%", margin: 0, padding: 0, gap: 16, flexDirection: "column" }} >
-                  <View style={{ width: "100%", paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.grayE8, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 8 }}>
+              {requestStatus === "pending" && (
+                <View
+                  style={{
+                    width: "100%",
+                    margin: 0,
+                    padding: 0,
+                    gap: 16,
+                    flexDirection: "column",
+                  }}
+                >
+                  <View
+                    style={{
+                      width: "100%",
+                      paddingVertical: 8,
+                      paddingHorizontal: 12,
+                      backgroundColor: colors.grayE8,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 6,
+                      borderRadius: 8,
+                    }}
+                  >
                     <ClockCountdown size={18} color={colors.gray47} />
-                    <Text style={{ fontSize: 14, fontWeight: 600, color: colors.gray47 }}>Solicitação pendente</Text>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: colors.gray47,
+                      }}
+                    >
+                      Solicitação Pendente
+                    </Text>
                   </View>
                   <View style={{ width: "100%", flexDirection: "row", gap: 8 }}>
                     <ActionButton
-                      title="Aceitar"
+                      title="aceitar"
                       icon={<Check size={20} color={colors.greenAccept} />}
-                      type="aceitar"
+                      type="accepted"
                       onPress={() => {
-                        handleAccept()
-                        console.log("handleAccept")
+                        handleAccept();
+                        console.log("handleAccept");
                       }}
                     />
                     <ActionButton
                       title="Recusar"
                       icon={<X size={20} color={colors.redc00} />}
-                      type="recusar"
+                      type="declined"
                       onPress={() => {
-                        handleDecline
-                        console.log("handleDecline")
+                        handleDecline();
+                        console.log("handleDecline");
                       }}
                     />
                   </View>
@@ -642,7 +785,7 @@ export default function ExternalUser() {
                 title="Solicitar contato"
                 onPress={() => {
                   //Teste no computador
-                  handleRequest()
+                  handleRequest();
 
                   //Reativar
                   // Alert.alert(
@@ -661,20 +804,60 @@ export default function ExternalUser() {
               />
             )}
 
-            {/* Contato pendente */}
-            {requestStatus === "pendente" && (
-              <View style={{ width: "100%", paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.grayE8, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 8 }}>
+            {/* Contato pending */}
+            {requestStatus === "pending" && (
+              <View
+                style={{
+                  width: "100%",
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  backgroundColor: colors.grayE8,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  borderRadius: 8,
+                }}
+              >
                 <ClockCountdown size={18} color={colors.gray47} />
-                <Text style={{ fontSize: 14, fontWeight: 600, color: colors.gray47 }}>Solicitação pendente</Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: colors.gray47,
+                  }}
+                >
+                  Solicitação pending
+                </Text>
               </View>
             )}
 
             {/* Contato aceito */}
-            {requestStatus === "aceita" && (
+            {requestStatus === "accepted" && (
               <View style={{ width: "100%", gap: 16, flexDirection: "column" }}>
-                <View style={{ width: "100%", paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.greenAcceptBg, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 8 }}>
+                <View
+                  style={{
+                    width: "100%",
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    backgroundColor: colors.greenAcceptBg,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    borderRadius: 8,
+                  }}
+                >
                   <SealCheck size={18} color={colors.greenAccept} />
-                  <Text style={{ fontSize: 14, fontWeight: 600, color: colors.greenAccept }}>Solicitação aceita</Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: colors.greenAccept,
+                    }}
+                  >
+                    Solicitação accepted
+                  </Text>
                 </View>
                 <PrimaryButton
                   title="Entrar em contato"
@@ -701,10 +884,30 @@ export default function ExternalUser() {
             )}
 
             {/* Contato recusado */}
-            {requestStatus === "recusada" && (
-              <View style={{ width: "100%", paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.redc0019, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 8 }}>
+            {requestStatus === "declined" && (
+              <View
+                style={{
+                  width: "100%",
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  backgroundColor: colors.redc0019,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  borderRadius: 8,
+                }}
+              >
                 <Prohibit size={18} color={colors.redc00} />
-                <Text style={{ fontSize: 14, fontWeight: 600, color: colors.redc00 }}>Solicitação recusada</Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: colors.redc00,
+                  }}
+                >
+                  Solicitação declined
+                </Text>
               </View>
             )}
 
@@ -738,7 +941,7 @@ export default function ExternalUser() {
                 </View>
                 <TouchableOpacity
                   onPress={() => {
-                    submitRating;
+                    submitRating();
                     setShowStars(false);
                   }}
                   disabled={rating === 0}
@@ -794,15 +997,17 @@ export default function ExternalUser() {
       </View>
 
       {/* Conteúdo */}
-      {
-        ProfileInfoComponent ? (
-          <ProfileInfoComponent {...(profileProps as any)} />
-        ) : (
-          <Text style={{ color: colors.gray75 }}>
-            Informações não disponíveis
-          </Text>
-        )
-      }
-    </ScrollView >
+      {ProfileInfoComponent ? (
+        <ProfileInfoComponent {...(profileProps as any)} />
+      ) : (
+        <Text style={{ color: colors.gray75 }}>
+          Informações não disponíveis
+        </Text>
+      )}
+      {/* ======= ÁREA DE AVALIAÇÕES DO USUÁRIO ======= */}
+      <View style={{ marginTop: 24, width: "92%", marginHorizontal: "4%" }}>
+        <UserReviews userId={remoteUser?.id} />
+      </View>
+    </ScrollView>
   );
 }
