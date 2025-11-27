@@ -135,13 +135,7 @@ export const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column", 
-    
         backgroundColor: colors.gray7FD,
-        // shadowColor: colors.blackShadow,
-        // shadowOpacity: 0.16,
-        // shadowRadius: 8,
-        // shadowOffset: { width: 0, height: 4 },
-        // elevation: 4,
     },
     professionalHomeBoxRow: {
         width: "100%",

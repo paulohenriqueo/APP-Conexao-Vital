@@ -41,7 +41,7 @@ export function UserReviews({ userId }: { userId: string }) {
     );
 
   return (
-    <View style={{ marginTop: 24 }}>
+    <View style={{ marginVertical: 24 }}>
       <Text
         style={{
           ...typography.M01B1624,

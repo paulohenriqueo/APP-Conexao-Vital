@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, Image, Alert } from "react-native";
+import { View, Text, Image, Alert, TouchableOpacity } from "react-native";
 
-import { styles, typography } from "../../../styles/styles";
+import { colors, styles, typography } from "../../../styles/styles";
 import Logo from "../../assets/logo.png";
 import { InputPassword } from "../../components/Input";
 import { PrimaryButton } from "../../components/Button";
 import { useNavigation } from "@react-navigation/native";
 import Register from "./Register";
+import { CaretLeft } from "phosphor-react-native";
 
 
 export default function NewPassword() {
@@ -38,6 +39,13 @@ export default function NewPassword() {
   return (
     <View style={styles.container}>
       <View style={[styles.boxTop, { flex: 1 }]}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ position: "absolute", left: 24, top: 48, padding: 8 }}
+          accessibilityLabel="Voltar"
+        >
+          <CaretLeft size={24} color={colors.whiteFBFE} weight="bold" />
+        </TouchableOpacity>
         <Image source={Logo} style={styles.logoLogin} />
         <Text style={typography.M0L3644}>Criar nova senha</Text>
       </View>

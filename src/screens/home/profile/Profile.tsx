@@ -116,30 +116,30 @@ export default function Profile() {
   }, []);
 
   useEffect(() => {
-  const fetchUserPhoto = async () => {
-    const auth = getAuth();
-    const db = getFirestore();
-    const currentUser = auth.currentUser;
+    const fetchUserPhoto = async () => {
+      const auth = getAuth();
+      const db = getFirestore();
+      const currentUser = auth.currentUser;
 
-    if (currentUser) {
-      const userDocRef = doc(db, "Users", currentUser.uid);
-      const userDoc = await getDoc(userDocRef);
+      if (currentUser) {
+        const userDocRef = doc(db, "Users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
 
-      if (userDoc.exists()) {
-        const data = userDoc.data();
+        if (userDoc.exists()) {
+          const data = userDoc.data();
 
-        const photoURL =
-          data?.caregiverProfile?.photo ??
-          data?.patientProfile?.photo ??
-          null;
+          const photoURL =
+            data?.caregiverProfile?.photo ??
+            data?.patientProfile?.photo ??
+            null;
 
-        setPhoto(photoURL);
+          setPhoto(photoURL);
+        }
       }
-    }
-  };
+    };
 
-  fetchUserPhoto();
-}, []);
+    fetchUserPhoto();
+  }, []);
 
 
   useEffect(() => {
@@ -259,8 +259,14 @@ export default function Profile() {
 
   // Cria um array único com todas as seções e itens
   const items: SectionItem[] = [
-    { section: "Históricos", title: "Avaliações realizadas", onPress: () => console.log("Completed Reviews") },
-    { section: "Históricos", title: "Compra de créditos", onPress: () => console.log("Purchase Credits") },
+    { section: "Históricos", title: "Avaliações recebidas", onPress: () => navigation.navigate("ReceivedReviews") },
+    {
+      section: "Históricos", title: "Compra de créditos", onPress: () => Alert.alert(
+        "Em breve",
+        "Essa funcionalidade ainda será implementada.", [
+        { text: "OK", style: "default" },
+      ])
+    },
     { section: "Ajuda e Suporte", title: "Termos de Uso", onPress: () => navigation.navigate("Terms") },
     { section: "Ajuda e Suporte", title: "Política de Privacidade", onPress: () => navigation.navigate("PrivacyPolicy") },
     { section: "Ajuda e Suporte", title: "Alterar senha", onPress: () => navigation.navigate("NewPassword") },

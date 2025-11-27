@@ -12,14 +12,12 @@ import { styles, typography } from "../../../styles/styles";
 import Logo from '../../assets/logo.png'
 import { colors } from "../../../styles/colors";
 import { Input, InputPassword } from "../../components/Input";
-import { PrimaryButton, GoogleButton } from "../../components/Button";
+import { PrimaryButton } from "../../components/Button";
 import { useNavigation } from "@react-navigation/native";
 import { FIREBASE_AUTH } from "../../../FirebaseConfig";
-import { GoogleAuthProvider, signInWithCredential, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import * as WebBrowser from 'expo-web-browser';
 import { ActivityIndicator } from "react-native";
-import { makeRedirectUri } from 'expo-auth-session';
-import * as Google from 'expo-auth-session/providers/google';
 import { useAuthRequest } from 'expo-auth-session/providers/google';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -96,29 +94,6 @@ export default function Login() {
         }
     };
 
-    // useEffect(() => {
-    //     const signInWithGoogle = async () => {
-    //         if (response?.type === 'success') {
-    //             const { authentication } = response;
-    //             if (authentication?.accessToken) {
-    //                 const credential = GoogleAuthProvider.credential(null, authentication.accessToken);
-    //                 try {
-    //                     await signInWithCredential(auth, credential);
-    //                     Alert.alert("Login Google bem-sucedido!");
-    //                     navigation.navigate("Home");
-    //                 } catch (error) {
-    //                     Alert.alert("Erro ao autenticar com Firebase.");
-    //                 }
-    //             }
-    //         }
-    //     };
-    //     signInWithGoogle();
-    // }, [response]);
-
-    // const handleGoogleLogin = () => {
-    //     promptAsync();
-    // };
-
     return (
         <View style={styles.container}>
             <KeyboardAvoidingView behavior="padding" style={{ flex: 1, width: "100%", alignItems: 'center', justifyContent: 'center' }}>
@@ -149,16 +124,7 @@ export default function Login() {
                         {loading ? (
                             <ActivityIndicator size="large" color={colors.green382} />
                         ) : (
-                            <>
-                                <PrimaryButton title="Entrar" onPress={singIn} />
-                                {/* <View style={styles.dividerContainer}>
-                                    <View style={styles.line} />
-                                    <Text style={styles.dividerText}>ou</Text>
-                                    <View style={styles.line} />
-                                </View>
-                                <GoogleButton onPress={handleGoogleLogin} />
-                                */}
-                            </>
+                            <PrimaryButton title="Entrar" onPress={singIn} />
                         )}
 
                     </View>

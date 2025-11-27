@@ -11,7 +11,6 @@ import { CustomList } from "./profile/CustomList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PopUpFormsModel from "../model/PopUpFormsModel";
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import ExternalUser from "./profile/ExternalUser";
 import { getCurrentUserType, getProfilesByType, searchProfilesByName, PublicProfile, getUserProfile } from "../../services/userService";
 import { SecondaryButton } from "../../components/Button";
 import { Picker } from "@react-native-picker/picker";
@@ -21,6 +20,8 @@ import { getRequestsForUser, RequestItem, updateStatus } from "../../services/re
 import type { HistoryData } from "./profile/CustomList";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../FirebaseConfig";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -95,13 +96,67 @@ export default function Home() {
     loadDebugUser();
   }, []);
 
+  interface RequestItem {
+    status: string;
+    patientId: string;
+    createdAt: string;
+    patientName: string;
+  }
+
+  interface RatingItem {
+    fromUserId?: string;
+    fromUserName: string;
+    rating: number;
+    createdAt: string | Date | any;
+  }
+
   useEffect(() => {
-    // Exemplo de mock de dados — depois você pode trocar por fetch do Firestore
-    setPendingRequests(3);
-    setReceivedRequests(10);
-    setAcceptedRequests(7);
-    setTotalRatings(12);
-    setAverageRating(4.8);
+    const fetchDashboardData = async () => {
+      try {
+        const auth = getAuth();
+        const db = getFirestore();
+        const currentUser = auth.currentUser;
+
+        if (!currentUser) return;
+
+        const userRef = doc(db, "Users", currentUser.uid);
+        const snap = await getDoc(userRef);
+
+        if (!snap.exists()) return;
+
+        const data = snap.data();
+
+        // ========== SOLICITAÇÕES ==========
+        const receivedRequests: RequestItem[] = data.receivedRequests || [];
+
+        const totalReceived = receivedRequests.length;
+        const pending = receivedRequests.filter((r) => r.status === "pending").length;
+        const accepted = receivedRequests.filter((r) => r.status === "accepted").length;
+
+        setReceivedRequests(totalReceived);
+        setPendingRequests(pending);
+        setAcceptedRequests(accepted);
+
+        // ========== AVALIAÇÕES ==========
+        // Só falta o nome do campo no Firestore
+        const ratings: RatingItem[] = data.ratings || [];
+
+        const totalRatings = ratings.length;
+
+        const avgRating =
+          ratings.length > 0
+            ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+            : 0;
+
+        setTotalRatings(totalRatings);
+        setAverageRating(avgRating);
+
+      } catch (error) {
+        console.error("Erro ao carregar dashboard:", error);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   useEffect(() => {
@@ -238,84 +293,82 @@ export default function Home() {
   // ------------------------------
   // FUNÇÃO GLOBAL — pode ser usada no accept/decline
   // ------------------------------
-async function loadRequests() {
-  try {
-    console.log("🔄 Carregando solicitações...");
+  async function loadRequests() {
+    try {
+      console.log("🔄 Carregando solicitações...");
 
-    const requests = await getRequestsForUser(currentUserId);
+      const requests = await getRequestsForUser(currentUserId);
 
-    const formatted: HistoryData[] = [];
+      const formatted: HistoryData[] = [];
 
-    for (const req of requests) {
-      const isCaregiver = currentProfileType === "caregiver";
-      const otherUserId = isCaregiver ? req.patientId : req.caregiverId;
+      for (const req of requests) {
+        const isCaregiver = currentProfileType === "caregiver";
+        const otherUserId = isCaregiver ? req.patientId : req.caregiverId;
 
-      // pegar dados do outro usuário
-      const otherRef = doc(FIRESTORE_DB, "Users", otherUserId);
-      const otherSnap = await getDoc(otherRef);
-      const otherData = otherSnap.data();
+        // pegar dados do outro usuário
+        const otherRef = doc(FIRESTORE_DB, "Users", otherUserId);
+        const otherSnap = await getDoc(otherRef);
+        const otherData = otherSnap.data();
 
-      const name =
-        otherData?.name ||
-        otherData?.displayName ||
-        otherData?.patientProfile?.nome ||
-        otherData?.caregiverProfile?.nome ||
-        "Usuário";
+        const name =
+          otherData?.name ||
+          otherData?.displayName ||
+          otherData?.patientProfile?.nome ||
+          otherData?.caregiverProfile?.nome ||
+          "Usuário";
 
-      const photo =
-        otherData?.patientProfile?.photo ||
-        otherData?.caregiverProfile?.photo ||
-        null;
+        const photo =
+          otherData?.patientProfile?.photo ||
+          otherData?.caregiverProfile?.photo ||
+          null;
 
-      const careCategory =
-        otherData?.caregiverSpecifications?.careCategory ||
-        otherData?.condition?.careCategory ||
-        otherData?.careCategory ||
-        "";
+        const careCategory =
+          otherData?.caregiverSpecifications?.careCategory ||
+          otherData?.condition?.careCategory ||
+          otherData?.careCategory ||
+          "";
 
-      const rating =
-        otherData?.rating ??
-        otherData?.averageRating ??
-        0;
+        const rating =
+          otherData?.rating ??
+          otherData?.averageRating ??
+          0;
 
-      // converter status
-      const statusMap: any = {
-        pending: "pendente",
-        accepted: "aceita",
-        rejected: "recusada",
-      };
+        // converter status
+        const statusMap: any = {
+          pending: "pendente",
+          accepted: "aceita",
+          rejected: "recusada",
+        };
 
-      const mappedStatus = statusMap[req.status] ?? "pendente";
+        const mappedStatus = statusMap[req.status] ?? "pendente";
 
-      // formatar data
-      const dateObj = new Date(req.createdAt);
-      const formattedDate = dateObj.toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
+        // formatar data
+        const dateObj = new Date(req.createdAt);
+        const formattedDate = dateObj.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
 
-      formatted.push({
-        id: otherUserId,
-        name,
-        imageUrl: photo,
-        careCategory,
-        rating,
-        date: formattedDate,
-        requestStatus: mappedStatus,
-        currentProfileType: currentProfileType as any,
-      });
+        formatted.push({
+          id: otherUserId,
+          name,
+          imageUrl: photo,
+          careCategory,
+          rating,
+          date: formattedDate,
+          requestStatus: mappedStatus,
+          currentProfileType: currentProfileType as any,
+        });
+      }
+
+      setHistoryData(formatted.reverse());
+      console.log("🟩 Histórico formatado:", formatted);
+
+    } catch (err) {
+      console.warn("Erro ao carregar solicitações:", err);
     }
-
-    setHistoryData(formatted.reverse());
-    console.log("🟩 Histórico formatado:", formatted);
-
-  } catch (err) {
-    console.warn("Erro ao carregar solicitações:", err);
   }
-}
-
-
 
   // ------------------------------
   // useEffect apenas chama loadRequests
@@ -332,14 +385,14 @@ async function loadRequests() {
   // ------------------------------
   async function acceptRequestFromHistory(id: string) {
     console.log("✔️ [acceptRequest] Aceitando ID:", id);
-    await updateStatus(id, currentUserId, "aceita");
+    await updateStatus(id, currentUserId, "accepted");
     console.log("🔄 [acceptRequest] Atualizando lista...");
     await loadRequests();
   }
 
   async function declineRequestFromHistory(id: string) {
     console.log("❌ [declineRequest] Recusando ID:", id);
-    await updateStatus(id, currentUserId, "recusada");
+    await updateStatus(id, currentUserId, "declined");
     console.log("🔄 [declineRequest] Atualizando lista...");
     await loadRequests();
   }
@@ -622,9 +675,14 @@ async function loadRequests() {
               onPressFilter={() => console.log("Filter pressed in History")}
               placeholder="Pesquisar..."
             />
-            <Text style={{ ...styles.subtitleText, textAlign: "left", paddingVertical: 16 }}>
-              Histórico de solicitações
-            </Text>
+            <View style={{ flexDirection: "column", gap: 2, alignContent: "flex-start" }}>
+              <Text style={{ ...styles.subtitleText, textAlign: "left", paddingTop: 16 }}>
+                Histórico de solicitações
+              </Text>
+              <Text style={{ ...typography.M01M1420, color: colors.gray94, textAlign: "left", paddingBottom: 16 }}>
+                Total de solicitações: {receivedRequests}
+              </Text>
+            </View>
             <CustomList
               type="history"
               data={historyData}
@@ -687,14 +745,6 @@ async function loadRequests() {
       <TopBar title="" />
 
       <View style={styles.contentArea}>{renderContent()}</View>
-      {/* Botões para testar troca de cores */}
-      {/* <TouchableOpacity onPress={() => { setPendingRequests(7) }}>Pending Requests = 7</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setPendingRequests(3) }}>Pending Requests = 3</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setPendingRequests(0) }}>Pending Requests = 0</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setAverageRating(0) }}>Average Rating = 0</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setAverageRating(2) }}>Average Rating = 2</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setAverageRating(3) }}>Average Rating = 3</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setAverageRating(4) }}>Average Rating = 4</TouchableOpacity> */}
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />
 
       <PopUpFormsModel

@@ -42,13 +42,13 @@ export function HistoryItem({
     case "accepted":
       bgColor = colors.greenAcceptBg;
       textColor = colors.greenAccept;
-      label = "Accepted";
+      label = "Aceita";
       break;
 
     case "declined":
       bgColor = colors.redc0019;
       textColor = colors.redc00;
-      label = "Declined";
+      label = "Recusada";
       break;
 
     default:
