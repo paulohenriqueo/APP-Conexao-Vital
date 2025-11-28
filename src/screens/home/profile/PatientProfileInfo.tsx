@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { colors } from "../../../../styles/colors";
-import { typography } from "../../../../styles/typography";
+import { baseTypography, typography } from "../../../../styles/typography";
 
 type Props = {
   patientData?: any;
@@ -19,6 +19,7 @@ export const PatientProfileInfo: React.FC<Props> = ({ patientData = {} }) => {
   const alergias = patientData.alergias ?? patientData.allergies ?? [];
   const medicamentos = patientData.medicamentos ?? patientData.medicines ?? [];
   const condicoes = patientData.condicoes ?? patientData.conditions ?? [];
+  const periodo = patientData?.condition?.periodos ?? patientData?.condition?.periodo ?? [];
   const idiomas = patientData.idiomasPreferidos ?? patientData.preferredLanguages ?? [];
   const observacoes = patientData.observacoes ?? patientData.observacoes ?? patientData.notes ?? "";
 
@@ -30,13 +31,12 @@ export const PatientProfileInfo: React.FC<Props> = ({ patientData = {} }) => {
       <Section title="Alergias" content={renderList(alergias)} />
       <Section title="Medicamentos" content={renderList(medicamentos)} />
       <Section title="Condições" content={renderList(condicoes)} />
+      <Section title="Período" content={renderList(periodo)} />
       <Section title="Idiomas Preferidos" content={renderList(idiomas)} />
       <Section title="Observações" content={observacoes ? observacoes : "Nenhuma observação informada"} />
     </View>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -44,16 +44,20 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   section: {
-    marginBottom: 18,
+    marginBottom: 8,
   },
   title: {
-    ...typography.H02B1820,
-    color: colors.black000,
-    marginBottom: 6,
+    ...baseTypography.montserratMedium,
+    fontSize: 16,
+    lineHeight: 20,
+    color: colors.gray23,
+    marginVertical: 6,
   },
   content: {
-    ...typography.M01R1214,
-    color: colors.gray75,
+    ...baseTypography.montserratRegular,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.gray47,
   },
 });
 

@@ -125,20 +125,24 @@ export default function Home() {
         if (!snap.exists()) return;
 
         const data = snap.data();
-
+        console.log("DATA")
+        console.log(data)
         // ========== SOLICITAÇÕES ==========
-        const receivedRequests: RequestItem[] = data.receivedRequests || [];
 
-        const totalReceived = receivedRequests.length;
-        const pending = receivedRequests.filter((r) => r.status === "pending").length;
-        const accepted = receivedRequests.filter((r) => r.status === "accepted").length;
+        const receivedRequests: RequestItem[] = data.receivedRequests ?? [];
+        const sentRequests: RequestItem[] = data.requests ?? [];
 
-        setReceivedRequests(totalReceived);
+        const allRequests: RequestItem[] = data.profileType === "patient" ? sentRequests: receivedRequests;
+
+        const total = allRequests.length;
+        const pending = allRequests.filter((r) => r.status === "pending").length;
+        const accepted = allRequests.filter((r) => r.status === "accepted").length;
+
+        setReceivedRequests(total);
         setPendingRequests(pending);
         setAcceptedRequests(accepted);
 
         // ========== AVALIAÇÕES ==========
-        // Só falta o nome do campo no Firestore
         const ratings: RatingItem[] = data.ratings || [];
 
         const totalRatings = ratings.length;

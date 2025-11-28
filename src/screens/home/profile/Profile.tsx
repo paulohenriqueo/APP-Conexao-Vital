@@ -4,7 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { deleteUser, getAuth, signOut } from "firebase/auth";
 import { deleteDoc, getFirestore, doc, getDoc } from "firebase/firestore";
 import { colors } from "../../../../styles/colors";
-import { typography } from "../../../../styles/typography";
+import { baseTypography, typography } from "../../../../styles/typography";
 import { useNavigation, NavigationProp, useFocusEffect } from "@react-navigation/native";
 import ProfileItem from "../../../components/ProfileItem";
 import { SignOut } from "phosphor-react-native";
@@ -40,6 +40,7 @@ interface SectionItem {
 export default function Profile() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [userLocation, setUserLocation] = useState("");
   const [userCareCategory, setUserCareCategory] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
   const [currentProfileType, setCurrentProfileType] = useState<string | null>(null);
@@ -48,15 +49,8 @@ export default function Profile() {
 
   const navigation = useNavigation<NavigationProp<any>>();
 
-  // Dados provisórios do usuário
-  const user: User = {
-    role: currentProfileType,
-    rating: 5, //Avaliação a ser exibida - já incluío na exibição de estrelas
-    // careCategory: "Cuidados Domiciliares",
-  };
-
   // Definir o componente de informações do perfil com base na função do usuário
-  const ProfileInfoComponent = user.role === "caregiver" ? CaregiverProfileInfo : PatientProfileInfo;
+  const ProfileInfoComponent = currentProfileType === "caregiver" ? CaregiverProfileInfo : PatientProfileInfo;
 
   const profileProps =
     currentProfileType?.toLowerCase() === "caregiver"
@@ -65,7 +59,7 @@ export default function Profile() {
           experiencia: [],
           qualificacoes: [],
           dispoDia: [],
-          period: [],
+          periodo: [],
           publicoAtendido: [],
           observacoes: "",
         },
@@ -75,10 +69,25 @@ export default function Profile() {
           alergias: [],
           medicamentos: [],
           condicoes: [],
+          periodo: [],
           idiomasPreferidos: [],
           observacoes: "",
         },
       };
+
+  useEffect(() => {
+    if (!userData) return;
+
+    if (userData.city && userData.state) {
+      setUserLocation(`${userData.city} | ${userData.state}`);
+    } else if (userData.city) {
+      setUserLocation(userData.city);
+    } else if (userData.state) {
+      setUserLocation(userData.state);
+    } else {
+      setUserLocation("");
+    }
+  }, [userData]);
 
   // Buscar email, nome e foto
   useEffect(() => {
@@ -338,24 +347,38 @@ export default function Profile() {
             color: colors.gray75,
             textAlign: "center",
             fontWeight: "600",
+          }}>
+          {userData?.careCategory ?? userData?.caregiverSpecifications?.careCategory ?? userData?.condition?.careCategory ?? "Categoria não informada"}
+        </Text>
+        <Text
+          style={{
+            ...baseTypography.hindSemiBold,
+            fontSize: 14,
+            lineHeight: 16,
+            color: colors.gray75,
+            textAlign: "center",
+            fontWeight: "600",
           }}
         >
           {userEmail}
         </Text>
         <Text
           style={{
-            ...typography.H01SB1618,
+            ...baseTypography.hindSemiBold,
+            fontSize: 14,
+            lineHeight: 16,
             color: colors.gray75,
             textAlign: "center",
             fontWeight: "600",
-          }}>
-          {userData?.condition?.careCategory || "Categoria não informada"}
+          }}
+        >
+          {userLocation}
         </Text>
         <View style={{ ...styles.ratingContainer }}>
-          {Array.from({ length: Number(user.rating) }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <Ionicons
               key={i}
-              name={i < (user.rating || 0) ? "star" : "star-outline"}
+              name={i < 4 ? "star" : "star-outline"}
               size={20}
               color={colors.ambar400}
             />
