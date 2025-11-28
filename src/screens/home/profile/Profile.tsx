@@ -362,18 +362,20 @@ export default function Profile() {
         >
           {userEmail}
         </Text>
-        <Text
-          style={{
-            ...baseTypography.hindSemiBold,
-            fontSize: 14,
-            lineHeight: 16,
-            color: colors.gray75,
-            textAlign: "center",
-            fontWeight: "600",
-          }}
-        >
-          {userLocation}
-        </Text>
+        {userLocation ?
+          <Text
+            style={{
+              ...baseTypography.hindSemiBold,
+              fontSize: 14,
+              lineHeight: 16,
+              color: colors.gray75,
+              textAlign: "center",
+              fontWeight: "600",
+            }}
+          >
+            {userLocation}
+          </Text>
+          : null}
         <View style={{ ...styles.ratingContainer }}>
           {Array.from({ length: 5 }).map((_, i) => (
             <Ionicons
