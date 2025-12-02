@@ -63,13 +63,20 @@ export default function Login() {
                     break;
 
                 case "auth/user-not-found":
-                case "auth/invalid-credential":
-                    Alert.alert("Conta não encontrada", "O e-mail informado pode estar incorreto ou a conta pode ter sido excluída. Verifique as informações ou crie uma nova conta.");
-                    console.warn("DEBUG: conta não encontrada para o e-mail:", email);
+                    Alert.alert(
+                        "Conta não encontrada",
+                        "Não encontramos uma conta com este e-mail. Ele pode estar incorreto ou ter sido removido."
+                    );
+                    console.warn("DEBUG: user-not-found:", email);
                     break;
 
+                case "auth/invalid-credential":
                 case "auth/wrong-password":
-                    Alert.alert("Senha incorreta", "A senha informada está incorreta. Tente novamente.");
+                    Alert.alert(
+                        "Credenciais inválidas",
+                        "E-mail ou senha incorretos. Verifique os dados e tente novamente."
+                    );
+                    console.warn("DEBUG: invalid-credential para o e-mail:", email);
                     console.warn("DEBUG: senha incorreta para o e-mail:", email);
                     break;
 

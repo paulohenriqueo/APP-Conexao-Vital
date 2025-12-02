@@ -43,6 +43,7 @@ export default function Profile() {
   const [userLocation, setUserLocation] = useState("");
   const [userCareCategory, setUserCareCategory] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
+  const [rating, setRating] = useState<number>(0);
   const [currentProfileType, setCurrentProfileType] = useState<string | null>(null);
   const [showSelect, setShowSelect] = useState(false);
   const [userData, setUserData] = useState<any>(null);
@@ -61,6 +62,7 @@ export default function Profile() {
           dispoDia: [],
           periodo: [],
           publicoAtendido: [],
+          idioma: [],
           observacoes: "",
         },
       }
@@ -150,6 +152,31 @@ export default function Profile() {
     fetchUserPhoto();
   }, []);
 
+  useEffect(() => {
+    const fetchUserRating = async () => {
+      const auth = getAuth();
+      const db = getFirestore();
+      const currentUser = auth.currentUser;
+
+      if (currentUser) {
+        const userDocRef = doc(db, "Users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+
+          const rating =
+            data?.caregiverProfile?.rating ??
+            data?.patientProfile?.rating ??
+            0;
+
+          setRating(rating);
+        }
+      }
+    };
+
+    fetchUserRating();
+  }, []);
 
   useEffect(() => {
     // carrega tipo do usuário e dados do perfil
@@ -380,7 +407,7 @@ export default function Profile() {
           {Array.from({ length: 5 }).map((_, i) => (
             <Ionicons
               key={i}
-              name={i < 4 ? "star" : "star-outline"}
+              name={i < rating ? "star" : "star-outline"}
               size={20}
               color={colors.ambar400}
             />

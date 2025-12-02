@@ -29,6 +29,7 @@ const CaregiverProfileInfo: React.FC<Props> = ({ caregiverData = {} }) => {
   const dispoDia = caregiverData.dispoDia ?? caregiverData.dayOptions ?? [];
   const periodo = caregiverData.periodo ?? caregiverData.periodos ?? caregiverData.periodOptions ?? [];
   const publicoAtendido = caregiverData.publicoAtendido ?? caregiverData.caregiverSpecifications?.publicoAtendido ?? [];
+  const idiomas = caregiverData.idiomasPreferidos ?? caregiverData.preferredLanguages ?? [];
   const observacoes = caregiverData.observacoes ?? caregiverData.caregiverSpecifications?.observacoes ?? caregiverData.notes ?? "";
 
   return (
@@ -38,6 +39,7 @@ const CaregiverProfileInfo: React.FC<Props> = ({ caregiverData = {} }) => {
       <Section title="Disponibilidade de dias" content={joinOrNone(dispoDia)} />
       <Section title="Período de atendimento" content={joinOrNone(periodo)} />
       <Section title="Público atendido" content={joinOrNone(publicoAtendido)} />
+      <Section title="Idiomas" content={joinOrNone(idiomas)} />
       <Section title="Observações" content={observacoes ? observacoes : "Nenhuma observação informada"} />
     </View>
   );

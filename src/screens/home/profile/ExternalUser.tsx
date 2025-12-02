@@ -50,7 +50,7 @@ export default function ExternalUser() {
   const [contactRequested, setContactRequested] = useState(false); // Estado para controlar se o contato foi solicitado
   const [acceptedContact, setAcceptedContact] = useState<boolean | null>(null);
   const [existingRequest, setExistingRequest] = useState<boolean>(false);
-  const [showStars, setShowStars] = useState(false); // Estado para controlar se entrou em contato
+  const [showStars, setShowStars] = useState(true); // Estado para controlar se entrou em contato
   const [rating, setRating] = useState(0);
 
   const navigation = useNavigation<NavigationProp<any>>();
@@ -785,20 +785,20 @@ async function handleDecline() {
                 title="Solicitar contato"
                 onPress={() => {
                   //Teste no computador
-                  handleRequest();
+                  // handleRequest();
 
                   //Reativar
-                  // Alert.alert(
-                  //   "Atenção",
-                  //   "Ao solicitar o contato, seu número também ficará visível para o outro usuário caso ele aceite sua solicitação. Deseja continuar?",
-                  //   [
-                  //     { text: "Cancelar", style: "cancel" },
-                  //     {
-                  //       text: "Continuar",
-                  //       onPress: handleRequest,
-                  //     },
-                  //   ]
-                  // );
+                  Alert.alert(
+                    "Atenção",
+                    "Ao solicitar o contato, seu número também ficará visível para o outro usuário caso ele aceite sua solicitação. Deseja continuar?",
+                    [
+                      { text: "Cancelar", style: "cancel" },
+                      {
+                        text: "Continuar",
+                        onPress: handleRequest,
+                      },
+                    ]
+                  );
                 }}
                 icon={<WhatsappLogo size={20} color={colors.green382} />}
               />
