@@ -34,15 +34,29 @@ export async function getRequestsForUser(userId: string) {
     return [];
   }
 
-  const sent = (userData.requests ?? []).map((req: any) => ({
+const normalize = (req: any, direction: "sent" | "received") => {
+  return {
     ...req,
-    direction: "sent",
-  }));
+    direction,
+    id: req.id,
+    status: req.status ?? "pending",
 
-  const received = (userData.receivedRequests ?? []).map((req: any) => ({
-    ...req,
-    direction: "received",
-  }));
+    // se não tiver caregiverId, colocamos baseado no usuário logado
+    caregiverId: req.caregiverId ?? (direction === "received" ? userId : req.caregiverId),
+
+    // se não tiver patientId e for enviado, mantemos
+    patientId: req.patientId ?? "",
+  };
+};
+
+
+  const sent = (userData.requests ?? []).map((req: any) =>
+    normalize(req, "sent")
+  );
+
+  const received = (userData.receivedRequests ?? []).map((req: any) =>
+    normalize(req, "received")
+  );
 
   console.log("➡️ ENVIADAS:", sent);
   console.log("⬅️ RECEBIDAS:", received);
@@ -101,6 +115,7 @@ export async function updateStatus(
       requests: updatedPatientRequests,
       updatedAt: serverTimestamp(),
     });
+    console.log("✅ [updateStatus] Lado do paciente atualizado: ", updateDoc);
 
     // ======================================================
     //  UPDATE DO LADO DO CUIDADOR

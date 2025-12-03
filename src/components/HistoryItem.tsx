@@ -14,7 +14,7 @@ type HistoryItemProps = {
   date: string;
   careCategory: string;
   imageUrl?: string;
-  requestStatus?: "pending" | "accepted" | "declined";
+  requestStatus?:  "aceita" | "accepted" | "recusada" | "declined" | "pendente" | "pending" | undefined;
   currentProfileType?: "caregiver" | "patient";
   onPress: () => void;
   onAccept?: () => void;
@@ -28,7 +28,7 @@ export function HistoryItem({
   date,
   imageUrl,
   currentProfileType = "caregiver",
-  requestStatus = "pending",
+  requestStatus = "pendente",
   onPress,
   onAccept,
   onDecline,
@@ -44,8 +44,18 @@ export function HistoryItem({
       textColor = colors.greenAccept;
       label = "Aceita";
       break;
+    case "aceita":
+      bgColor = colors.greenAcceptBg;
+      textColor = colors.greenAccept;
+      label = "Aceita";
+      break;
 
     case "declined":
+      bgColor = colors.redc0019;
+      textColor = colors.redc00;
+      label = "Recusada";
+      break;
+    case "recusada":
       bgColor = colors.redc0019;
       textColor = colors.redc00;
       label = "Recusada";
@@ -80,7 +90,7 @@ export function HistoryItem({
         <Text style={historyStyles.date}>{date}</Text>
       </View>
 
-      <View style={[historyStyles.requestStatus, { marginRight: 6, gap: 8 }]}>
+      <View style={[historyStyles.requestStatus, { marginRight: 6, marginLeft: 2, gap: 8 }]}>
         {currentProfileType === "caregiver" && requestStatus === "pending" ? (
           <View style={{ marginRight: 12, gap: 6 }}>
             <CircleButton
