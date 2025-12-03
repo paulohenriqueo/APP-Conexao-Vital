@@ -85,102 +85,6 @@ export default function ReceivedReviews() {
         return `${dia} ${mes}. ${ano}`;
     }
 
-    //mock para teste de visualização
-    /*
-    useEffect(() => {
-        const mock = [
-            {
-                fromUserId: "u1",
-                fromUserName: "Ana Paula",
-                photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL3dvbWFuL3NlZWQyMzk2My5qcGVn",
-                rating: 5,
-                createdAt: new Date(),
-            },
-            {
-                fromUserId: "u2",
-                fromUserName: "João Silva",
-                photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL21hbi9zZWVkMTc4NjIuanBlZw==",
-                rating: 4,
-                createdAt: new Date("2025-11-20"),
-            },
-            {
-                fromUserId: "u3",
-                fromUserName: "Marcos Vinícius",
-                photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL21hbi9zZWVkMjQzODIuanBlZw==",
-                rating: 3,
-                createdAt: new Date("2025-11-15"),
-            },
-            {
-                fromUserId: "u4",
-                fromUserName: "Camila Andrade",
-                photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL3dvbWFuL3NlZWQ5Nzg1LmpwZWc=",
-                rating: 5,
-                createdAt: new Date("2025-11-15"),
-            },
-            // {
-            //     fromUserId: "u1",
-            //     fromUserName: "Ana Paula",
-            //     photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL3dvbWFuL3NlZWQyMzk2My5qcGVn",
-            //     rating: 5,
-            //     createdAt: new Date(),
-            // },
-            // {
-            //     fromUserId: "u2",
-            //     fromUserName: "João Silva",
-            //     photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL21hbi9zZWVkMTc4NjIuanBlZw==",
-            //     rating: 4,
-            //     createdAt: new Date("2025-11-20"),
-            // },
-            // {
-            //     fromUserId: "u3",
-            //     fromUserName: "Marcos Vinícius",
-            //     photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL21hbi9zZWVkMjQzODIuanBlZw==",
-            //     rating: 3,
-            //     createdAt: new Date("2025-11-15"),
-            // },
-            // {
-            //     fromUserId: "u4",
-            //     fromUserName: "Camila Andrade",
-            //     photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL3dvbWFuL3NlZWQ5Nzg1LmpwZWc=",
-            //     rating: 5,
-            //     createdAt: new Date("2025-11-15"),
-            // },
-            // {
-            //     fromUserId: "u1",
-            //     fromUserName: "Ana Paula",
-            //     photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL3dvbWFuL3NlZWQyMzk2My5qcGVn",
-            //     rating: 5,
-            //     createdAt: new Date(),
-            // },
-            // {
-            //     fromUserId: "u2",
-            //     fromUserName: "João Silva",
-            //     photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL21hbi9zZWVkMTc4NjIuanBlZw==",
-            //     rating: 4,
-            //     createdAt: new Date("2025-11-20"),
-            // },
-            // {
-            //     fromUserId: "u3",
-            //     fromUserName: "Marcos Vinícius",
-            //     photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL21hbi9zZWVkMjQzODIuanBlZw==",
-            //     rating: 3,
-            //     createdAt: new Date("2025-11-15"),
-            // },
-            // {
-            //     fromUserId: "u4",
-            //     fromUserName: "Camila Andrade",
-            //     photoURL: "https://thispersonnotexist.org/downloadimage/Ac3RhdGljL3dvbWFuL3NlZWQ5Nzg1LmpwZWc=",
-            //     rating: 5,
-            //     createdAt: new Date("2025-11-15"),
-            // },
-        ];
-
-        setRatingsList(mock);
-        setTotalRatings(4);
-        setAverageRating(4.25);
-        setLoading(false);
-    }, []);*/
-
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
@@ -197,7 +101,7 @@ export default function ReceivedReviews() {
 
                 const data = snap.data();
 
-                const ratings: RatingItem[] = data.ratings || [];
+                const ratings: RatingItem[] = data.reviews || [];
 
                 const total = ratings.length;
 
@@ -220,6 +124,9 @@ export default function ReceivedReviews() {
                         return {
                             ...r,
                             photoURL: userSnap.exists() ? userSnap.data().photoURL : undefined,
+                            fromUserName: userSnap.exists()
+                                ? userSnap.data().name || userSnap.data().fullName
+                                : r.fromUserName,
                         };
                     })
                 );

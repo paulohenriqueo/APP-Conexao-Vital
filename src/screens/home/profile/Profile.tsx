@@ -164,13 +164,9 @@ export default function Profile() {
 
         if (userDoc.exists()) {
           const data = userDoc.data();
-
-          const rating =
-            data?.caregiverProfile?.rating ??
-            data?.patientProfile?.rating ??
-            0;
-
-          setRating(rating);
+          const avgRating =
+            data?.rating ?? 0;
+          setRating(avgRating);
         }
       }
     };

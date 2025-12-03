@@ -135,8 +135,8 @@ export default function Home() {
         const allRequests: RequestItem[] = data.profileType === "patient" ? sentRequests: receivedRequests;
 
         const total = allRequests.length;
-        const pending = allRequests.filter((r) => r.status === "pending" || "pendente").length;
-        const accepted = allRequests.filter((r) => r.status === "accepted" || "aceita").length;
+        const pending = allRequests.filter((r) => r.status === "pending" || r.status === "pendente").length;
+        const accepted = allRequests.filter((r) => r.status === "accepted" || r.status === "aceita").length;
 
         setReceivedRequests(total);
         setPendingRequests(pending);
@@ -145,7 +145,7 @@ export default function Home() {
         setAcceptedRequests(accepted);
 
         // ========== AVALIAÇÕES ==========
-        const ratings: RatingItem[] = data.ratings || [];
+        const ratings: RatingItem[] = data.reviews || [];
 
         const totalRatings = ratings.length;
 
