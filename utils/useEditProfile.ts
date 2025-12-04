@@ -38,7 +38,7 @@ export const useEditProfile = () => {
 
   // ESPECÍFICOS
   const [careCategory, setCareCategory] = useState("");
-  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
+  const [selectedPeriodos, setSelectedPeriodos] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [languageInput, setLanguageInput] = useState("");
   const [observations, setObservations] = useState("");
@@ -59,7 +59,7 @@ export const useEditProfile = () => {
   const [medications, setMedications] = useState<string[]>([]);
   const [medicationInput, setMedicationInput] = useState("");
 
-  const periodOptions = ["Matutino", "Vespertino", "Noturno"];
+  const periodos = ["Matutino", "Vespertino", "Noturno"];
 
   // -----------------------------
   // UTILITÁRIAS
@@ -159,7 +159,7 @@ export const useEditProfile = () => {
           setMedications(c.medicamentos ?? []);
           setLanguages(c.idiomasPreferidos ?? []);
           setObservations(c.observacoes ?? "");
-          setSelectedPeriods(c.periodos ?? []);
+          setSelectedPeriodos(c.periodos ?? []);
         }
 
         if (currentProfileType === "caregiver") {
@@ -169,7 +169,7 @@ export const useEditProfile = () => {
           setQualifications(s.qualificacoes ?? []);
           setExperiences(s.experiencias ?? []);
           setSelectedDays(s.dayOptions ?? []);
-          setSelectedPeriods(s.periodOptions ?? []);
+          setSelectedPeriodos(s.periodos ?? []);
           setSelectedAudience(s.publicoAtendido ?? []);
           setObservations(s.observacoes ?? "");
         }
@@ -238,7 +238,7 @@ export const useEditProfile = () => {
           "condition.medicamentos": medications,
           "condition.idiomasPreferidos": languages,
           "condition.observacoes": observations,
-          "condition.periodos": selectedPeriods,
+          "condition.periodos": selectedPeriodos,
         });
       }
 
@@ -248,7 +248,7 @@ export const useEditProfile = () => {
           "caregiverSpecifications.qualificacoes": qualifications,
           "caregiverSpecifications.experiencias": experiences,
           "caregiverSpecifications.dayOptions": selectedDays,
-          "caregiverSpecifications.periodOptions": selectedPeriods,
+          "caregiverSpecifications.periodos": selectedPeriodos,
           "caregiverSpecifications.publicoAtendido": selectedAudience,
           "caregiverSpecifications.idiomasPreferidos": languages,
           "caregiverSpecifications.observacoes": observations,
@@ -321,8 +321,8 @@ export const useEditProfile = () => {
     // comuns
     careCategory,
     setCareCategory,
-    selectedPeriods,
-    setSelectedPeriods,
+    selectedPeriodos,
+    setSelectedPeriodos,
     languages,
     setLanguages,
     languageInput,
@@ -365,6 +365,6 @@ export const useEditProfile = () => {
     toggleItem,
     addToList,
     removeFromList,
-    periodOptions,
+    periodos,
   };
 };

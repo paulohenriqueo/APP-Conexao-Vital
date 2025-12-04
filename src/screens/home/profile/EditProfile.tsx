@@ -48,8 +48,8 @@ export default function EditProfile() {
 
     // Específicas
     careCategory, setCareCategory,
-    selectedPeriods, setSelectedPeriods,
-    periodOptions,
+    selectedPeriodos, setSelectedPeriodos,
+    periodos,
     languages, setLanguages,
     languageInput, setLanguageInput,
     observations, setObservations,
@@ -157,22 +157,22 @@ export default function EditProfile() {
           {/* Período */}
           <Text style={{ color: colors.gray73, marginBottom: 6 }}>Período</Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 8 }}>
-            {periodOptions.map((p) => (
-              <TouchableOpacity key={p} onPress={() => toggleItem(selectedPeriods, p, setSelectedPeriods)} style={{ flexDirection: "row", alignItems: "center", marginRight: 12, marginBottom: 8 }}>
+            {periodos.map((p) => (
+              <TouchableOpacity key={p} onPress={() => toggleItem(selectedPeriodos, p, setSelectedPeriodos)} style={{ flexDirection: "row", alignItems: "center", marginRight: 12, marginBottom: 8 }}>
                 <View
                   style={{
                     width: 20,
                     height: 20,
                     borderRadius: 4,
                     borderWidth: 1.5,
-                    borderColor: selectedPeriods.includes(p) ? colors.green85F : colors.grayE8,
-                    backgroundColor: selectedPeriods.includes(p) ? colors.green85F : "#fff",
+                    borderColor: selectedPeriodos.includes(p) ? colors.green85F : colors.grayE8,
+                    backgroundColor: selectedPeriodos.includes(p) ? colors.green85F : "#fff",
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: 8,
                   }}
                 >
-                  {selectedPeriods.includes(p) && <Text style={{ color: "#fff", fontSize: 12 }}>✓</Text>}
+                  {selectedPeriodos.includes(p) && <Text style={{ color: "#fff", fontSize: 12 }}>✓</Text>}
                 </View>
                 <Text style={{ color: colors.gray73 }}>{p}</Text>
               </TouchableOpacity>

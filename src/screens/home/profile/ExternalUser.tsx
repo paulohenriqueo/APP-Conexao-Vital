@@ -419,14 +419,16 @@ export default function ExternalUser() {
               {remoteUser?.role === "caregiver" ? (
                 <Text
                   style={{
-                    fontSize: 14,
-                    lineHeight: 18,
+                    ...typography.H01SB1618,
+                    color: colors.gray75,
+                    textAlign: "center",
                     fontWeight: "600",
-                    color: colors.gray7590,
                     marginTop: 4,
                   }}
                 >
-                  Área de atuação não informada
+                  {profileProps.caregiverData?.careCategory
+                    ? profileProps.caregiverData.careCategory
+                    : "Área de atuação não informada"}
                 </Text>
               ) : (
                 <Text
@@ -438,7 +440,9 @@ export default function ExternalUser() {
                     marginTop: 4,
                   }}
                 >
-                  Tipo de cuidado não informado
+                  {profileProps.patientData?.careCategory
+                    ? profileProps.patientData.careCategory
+                    : "Tipo de cuidado não informado"}
                 </Text>
               )}
             </>
@@ -453,8 +457,8 @@ export default function ExternalUser() {
               }}
             >
               {remoteUser?.role === "caregiver"
-                ? profileProps.caregiverData?.careCategory
-                : profileProps.patientData?.careType}
+                ? "Área de atuação não informada"
+                : "Tipo de cuidado não informado"}
             </Text>
           )}
           <Text

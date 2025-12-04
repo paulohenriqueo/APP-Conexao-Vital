@@ -36,7 +36,7 @@ export function CustomList({ type, data, onAccept, onDecline }: CustomListProps)
   return (
     <FlatList<any>
       data={data}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => `${item.id}-${index}`}
       renderItem={({ item }) => {
         const handlePress = () =>
           navigation.navigate("ExternalUser", { userId: String(item.id) });
