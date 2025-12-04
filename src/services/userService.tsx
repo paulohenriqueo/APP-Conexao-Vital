@@ -115,26 +115,29 @@ export async function submitUserRating(targetUserId: string, rating: number) {
 
     const userData = userSnap.data();
     const currentUser = FIREBASE_AUTH.currentUser;
+    
+    const previousTotal = userData.totalRatings ?? 0;
+
+    const previousAvg = userData.rating ?? 0;
+
+    const updatedSum = previousAvg * previousTotal + rating;
+
+    const updatedTotal = previousTotal + 1;
 
     const review = {
       fromUserId: currentUser?.uid,
       fromUserName: currentUser?.displayName || currentUser?.email || "Usuário",
       rating,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     };
 
-    const previousTotal = userData.totalRatings ?? 0;
-    const previousAvg = userData.rating ?? 0;
-
-    const updatedTotal = previousTotal + 1;
-    const updatedSum = previousAvg * previousTotal + rating;
+    
 
     const updatedAverage = Number((updatedSum / updatedTotal).toFixed(1));
 
     await updateDoc(userRef, {
       reviews: arrayUnion(review),
       totalRatings: updatedTotal,
-      rating: updatedAverage,
       updatedAt: serverTimestamp(),
     });
 
@@ -152,28 +155,24 @@ export async function submitUserRating(targetUserId: string, rating: number) {
 
 export async function getUserReviews(userId: string) {
   try {
-    const ref = doc(FIRESTORE_DB, "Users", userId);
-    const snap = await getDoc(ref);
+    const ref = doc(FIRESTORE_DB, "Users", userId)
+    const snap = await getDoc(ref)
 
-    if (!snap.exists()) return null;
+    if (!snap.exists()) return null
 
-    const data = snap.data();
-    let reviews = data.reviews ?? [];
+    const data = snap.data()
+    let reviews = data.reviews ?? []
 
-    reviews = reviews.sort(
-      (a: any, b: any) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    reviews = reviews.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
     return {
-      rating: data.rating ?? 0,
+      rating: data.reviews.rating ?? 0,
       totalRatings: data.totalRatings ?? 0,
       reviews,
-    };
-
+    }
   } catch (err) {
-    console.error("getUserReviews error:", err);
-    return null;
+    console.error("getUserReviews error:", err)
+    return null
   }
 }
 

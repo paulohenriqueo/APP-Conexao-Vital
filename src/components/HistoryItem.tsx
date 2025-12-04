@@ -28,37 +28,27 @@ export function HistoryItem({
   date,
   imageUrl,
   currentProfileType = "caregiver",
-  requestStatus = "pendente",
+  requestStatus,
   onPress,
   onAccept,
   onDecline,
 }: HistoryItemProps) {
 
-  let bgColor = colors.grayE8;
-  let textColor = colors.gray47;
-  let label = "Pendente";
+  let bgColor;
+  let textColor;
+  let label;
 
   switch (requestStatus) {
     case "accepted":
       bgColor = colors.greenAcceptBg;
       textColor = colors.greenAccept;
-      label = "Aceita";
-      break;
-    case "aceita":
-      bgColor = colors.greenAcceptBg;
-      textColor = colors.greenAccept;
-      label = "Aceita";
+      label = "Aceito";
       break;
 
     case "declined":
       bgColor = colors.redc0019;
       textColor = colors.redc00;
-      label = "Recusada";
-      break;
-    case "recusada":
-      bgColor = colors.redc0019;
-      textColor = colors.redc00;
-      label = "Recusada";
+      label = "Recusado";
       break;
 
     default:

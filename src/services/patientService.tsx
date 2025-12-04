@@ -123,7 +123,7 @@ export async function savePatientContactRequest(caregiverId: string, caregiverNa
     const newRequest = {
       caregiverId,
       caregiverName,
-      status: "pendente",
+      status: "pending",
       createdAt: new Date().toISOString(), // ✔ permitido
     };
 
@@ -147,7 +147,7 @@ export async function savePatientContactRequest(caregiverId: string, caregiverNa
     const receivedEntry = {
       patientId,
       patientName,
-      status: "pendente",
+      status: "pending",
       createdAt: new Date().toISOString(), // ✔ permitido
     };
 
@@ -183,7 +183,7 @@ export async function saveCaregiverReceivedRequest(
     const newEntry = {
       patientId,
       patientName,
-      status: "pendente",
+      status: "pending",
       createdAt: serverTimestamp(),
     };
 
