@@ -102,6 +102,90 @@ export async function getUserProfile(userId: string) {
   return docSnap.exists() ? docSnap.data() : null;
 }
 
+
+// ------------------------------------------------------
+// BUSCA PERFIL PELO NOME
+// ------------------------------------------------------
+export async function searchProfilesByName(
+  type: string,
+  nameQuery: string,
+  filters?: { city?: string; state?: string; period?: string; languages?: string[] }
+): Promise<PublicProfile[]> {
+  try {
+    const col = collection(FIRESTORE_DB, "Users");
+    const q = query(col, where("profileType", "==", type));
+    const snaps = await getDocs(q);
+    const term = (nameQuery || "").trim().toLowerCase();
+
+    const list: PublicProfile[] = snaps.docs
+      .map((d: any) => {
+        const data: any = d.data();
+        const name =
+          data?.name ||
+          "";
+
+        // campos para filtro
+        const city =
+          data?.patientProfile?.city ||
+          data?.caregiverProfile?.city ||
+          "";
+        const state =
+          data?.patientProfile?.state ||
+          data?.caregiverProfile?.state ||
+          "";
+        const period =
+          data?.condition?.periodOptions ||
+          data?.caregiverProfile?.periodOptions ||
+          "";
+        const languages: string[] =
+          data?.patientProfile?.idiomasPreferidos ||
+          data?.caregiverSpecifications?.idiomasPreferidos ||
+          [];
+
+        return {
+          id: d.id,
+          name,
+          rating: data?.rating ?? 0,
+          tags: data?.tags ?? data?.especializacoes ?? [],
+          imageUrl: data?.caregiverProfile?.photo ||
+                    data?.patientProfile?.photo ||
+                    null,
+          especialization: data?.especialization ?? data?.especializacoes?.[0] ?? type,
+          profileType: data?.profileType ?? null,
+          _meta: { city, state, period, languages },
+        } as PublicProfile;
+      })
+      .filter((p: any) => {
+        // filtro por nome
+        if (term && (!p.name || !p.name.toLowerCase().includes(term))) return false;
+        // filtro cidade
+        if (filters?.city && filters.city.trim() !== "") {
+          if (!p._meta.city || !p._meta.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
+        }
+        // filtro estado
+        if (filters?.state && filters.state.trim() !== "") {
+          if (!p._meta.state || !p._meta.state.toLowerCase().includes(filters.state.toLowerCase())) return false;
+        }
+        // filtro período
+        if (filters?.period && filters.period.trim() !== "") {
+          if (!p._meta.period || !p._meta.period.toLowerCase().includes(filters.period.toLowerCase())) return false;
+        }
+        // filtro idiomas
+        if (filters?.languages && filters.languages.length > 0) {
+          const langs = (p._meta.languages || []).map((l: string) => l.toLowerCase());
+          const required = filters.languages.map((l) => l.toLowerCase());
+          if (!required.some((r) => langs.includes(r))) return false;
+        }
+        return true;
+      });
+
+    return list;
+  } catch (err) {
+    console.error("searchProfilesByName error:", err);
+    return [];
+  }
+}
+
 // ------------------------------------------------------
 // SALVAR AVALIAÇÃO DE USUÁRIO
 // ------------------------------------------------------

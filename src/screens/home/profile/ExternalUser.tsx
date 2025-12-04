@@ -228,6 +228,11 @@ export default function ExternalUser() {
 
     await savePatientContactRequest(remoteUser.id, remoteUser.name)
 
+    // Atualiza status após solicitar contato
+  if (remoteUser?.id && currentUserId) {
+    await loadStatusForUsers(remoteUser.id, currentUserId)
+  }
+
     Alert.alert("Contato solicitado", "Sua solicitação de contato foi enviada com sucesso!", [{ text: "OK" }])
   }
 
