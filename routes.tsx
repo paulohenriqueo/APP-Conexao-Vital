@@ -7,8 +7,15 @@ import Register from "./src/screens/auth/Register";
 import PasswordRecover from "./src/screens/auth/PasswordRecover";
 import NewPassword from "./src/screens/auth/NewPassword";
 import Terms from "./src/screens/legal/Terms";
-import PrivacyPoliticy from "./src/screens/legal/PrivacyPolicy";
+import PrivacyPolicy from "./src/screens/legal/PrivacyPolicy";
 import Home from "./src/screens/home/Home";
+import PatientForms from "./src/screens/onboarding/patient/PatientForms";
+import PatientCondition from "./src/screens/onboarding/patient/PatientCondition";
+import CaregiverForms from "./src/screens/onboarding/caregiver/CaregiverForms";
+import CaregiverSpecifications from "./src/screens/onboarding/caregiver/CaregiverSpecifications";
+import ExternalUser from "./src/screens/home/profile/ExternalUser";
+import EditProfile from "./src/screens/home/profile/EditProfile";
+import ReceivedReviews from "./src/screens/home/profile/ReceivedReviews";
 
 const Stack = createStackNavigator();
 
@@ -21,8 +28,15 @@ export default function Routes() {
         <Stack.Screen name="PasswordRecover" component={PasswordRecover} />
         <Stack.Screen name="NewPassword" component={NewPassword} />
         <Stack.Screen name="Terms" component={Terms} />
-        <Stack.Screen name="PrivacyPolicy" component={PrivacyPoliticy} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="PatientForms" component={PatientForms} />
+        <Stack.Screen name ="PatientCondition" component={PatientCondition} />
+        <Stack.Screen name="CaregiverForms" component={CaregiverForms} />
+        <Stack.Screen name="CaregiverSpecifications" component={CaregiverSpecifications} />
+        <Stack.Screen name="ExternalUser" component={ExternalUser} />
+        <Stack.Screen name="EditProfile" component={EditProfile} />
+        <Stack.Screen name="ReceivedReviews" component={ReceivedReviews} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -16,12 +16,32 @@ declare module "phosphor-react-native" {
     weight?: IconWeight;
   }
 
+  // Ícones que você usa
   export const House: React.FC<IconProps>;
   export const User: React.FC<IconProps>;
   export const Clock: React.FC<IconProps>;
   export const FunnelSimple: React.FC<IconProps>;
   export const MagnifyingGlass: React.FC<IconProps>;
-  
+  export const CaretLeft: React.FC<IconProps>; // Adiciona o ícone de voltar
+  export const CaretRight: React.FC<IconProps>;
+  export const Gear: React.FC<IconProps>;
+  export const Check: React.FC<IconProps>;
+  export const X: React.FC<IconProps>;
+  export const SignOut: React.FC<IconProps>;
+  export const WhatsappLogo: React.FC<IconProps>;
+  export const Camera: React.FC<IconProps>;
+  export const Images: React.FC<IconProps>;
+  export const Trash: React.FC<IconProps>;
+  export const EnvelopeOpen: React.FC<IconProps>;
+  export const Envelope: React.FC<IconProps>;
+
+  export const Confetti: React.FC<IconProps>;
+  export const SealCheck: React.FC<IconProps>;
+  export const Sparkle: React.FC<IconProps>;
+  export const Prohibit: React.FC<IconProps>;
+  export const ClockCountdown: React.FC<IconProps>;
 
   export const PhosphorIcon: React.FC<IconProps>;
 }
+declare module "firebase/auth";
+declare module "firebase/firestore";

@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput } from "react-native";
+import { StyleSheet, useColorScheme } from "react-native";
 import { colors } from "./colors";
 import { typography } from "./typography";
 import { scale } from 'react-native-size-matters';
@@ -77,7 +77,7 @@ export const styles = StyleSheet.create({
         marginBottom: 8,
     },
     paragraph: {
-        ...typography.M01R1418,
+        ...typography.H01R1624,
         textAlign: "justify",
         marginBottom: 16
     },
@@ -101,8 +101,53 @@ export const styles = StyleSheet.create({
         alignItems: "center",
     },
     contentText: {
-        ...typography.M01R1418,
+        ...typography.H01R1624,
+    },
+    subtitleText: {
+        ...typography.M01M1824,
+    },
+    ratingContainer: {
+        flexDirection: "row",
+        marginVertical: 4,
+    },
+    tagsContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+    },
+    tag: {
+        backgroundColor: "#d1f5e0",
+        borderRadius: 8,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        marginRight: 6,
+        marginTop: 4,
+    },
+    tagText: {
+        color: "#00796b",
+        fontSize: 12,
+    },
+    professionalHomeBox: {
+        width: "100%",
+        borderRadius: 16,
+        paddingVertical: 24,
+        paddingHorizontal: 16,
+        color: colors.gray14,
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column", 
+        backgroundColor: colors.gray7FD,
+    },
+    professionalHomeBoxRow: {
+        width: "100%",
+        flexDirection: "row", 
+        paddingVertical: 0, 
+        paddingHorizontal: 24,
+        gap: 24,
+        alignItems: "center", 
+        justifyContent: "center", 
+    },
+    professionalHomeText: {
         color: colors.gray14,
     },
 });
-export { typography };
+export { typography, colors };
