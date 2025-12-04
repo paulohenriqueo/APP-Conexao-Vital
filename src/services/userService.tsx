@@ -1,5 +1,20 @@
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { 
+  collection, 
+  doc, 
+  getDoc, 
+  getDocs, 
+  query, 
+  where, 
+  updateDoc, 
+  arrayUnion, 
+  serverTimestamp 
+} from "firebase/firestore";
+
 import { FIRESTORE_DB, FIREBASE_AUTH } from "../../FirebaseConfig";
+
+// ------------------------------------------------------
+// TIPAGEM DO PERFIL PÚBLICO (para listas, busca, etc.)
+// ------------------------------------------------------
 
 export type PublicProfile = {
   id: string;
@@ -11,205 +26,158 @@ export type PublicProfile = {
   profileType?: string;
 };
 
+// ------------------------------------------------------
+// OBTÉM O TIPO DO USUÁRIO ATUAL (patient / caregiver)
+// ------------------------------------------------------
+
 export async function getCurrentUserType(): Promise<string | null> {
   try {
     const uid = FIREBASE_AUTH?.currentUser?.uid;
     if (!uid) return null;
+
     const ref = doc(FIRESTORE_DB, "Users", uid);
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
+
     const data = snap.data();
-    // ajuste aqui conforme o campo real no documento (profileType / type / role)
-    return data?.profileType;
+    return data?.profileType ?? null;
+
   } catch (err) {
     console.error("getCurrentUserType error:", err);
     return null;
   }
 }
 
-/**
- * Busca todos os perfis do tipo informado (ex: "patient" ou "caregiver").
- * Retorna um array simplificado compatível com o CustomList esperado.
- */
+// ------------------------------------------------------
+// BUSCA PERFIS POR TIPO (para listas)
+// ------------------------------------------------------
+
 export async function getProfilesByType(type: string): Promise<PublicProfile[]> {
   try {
     const col = collection(FIRESTORE_DB, "Users");
     const q = query(col, where("profileType", "==", type));
     const snaps = await getDocs(q);
-    // tipagem explícita para evitar 'implicitly has any' (alternativa: usar QueryDocumentSnapshot<DocumentData>)
+
     const list: PublicProfile[] = snaps.docs.map((d: any) => {
       const data: any = d.data();
+
       const name =
         data?.patientProfile?.nome ||
         data?.caregiverProfile?.nome ||
         data?.displayName ||
         data?.name ||
         "";
+
       return {
         id: d.id,
         name,
         rating: data?.rating ?? 0,
         tags: data?.tags ?? data?.especializacoes ?? [],
-        imageUrl: data?.photoUrl ?? data?.avatar ?? null,
+        imageUrl: data?.caregiverProfile?.photo ||
+                  data?.patientProfile?.photo ||
+                  null,
         especialization: data?.especialization ?? data?.especializacoes?.[0] ?? type,
         profileType: data?.profileType ?? null,
       };
     });
+
     return list;
+
   } catch (err) {
     console.error("getProfilesByType error:", err);
     return [];
   }
 }
-            // FILTRO
-// nova função: busca por tipo + filtra por nome (client-side)
+
+// ------------------------------------------------------
+// BUSCA PERFIL COMPLETO DO USUÁRIO
+// ------------------------------------------------------
+
+export async function getUserProfile(userId: string) {
+  console.log("🔎 [getUserProfile] Buscando perfil do UID:", userId);
+
+  const docRef = doc(FIRESTORE_DB, "Users", userId);
+  const docSnap = await getDoc(docRef);
+
+  return docSnap.exists() ? docSnap.data() : null;
+}
+
+
+// ------------------------------------------------------
+// BUSCA PERFIL PELO NOME
+// ------------------------------------------------------
 export async function searchProfilesByName(
   type: string,
   nameQuery: string,
   filters?: { city?: string; state?: string; period?: string; languages?: string[] }
 ): Promise<PublicProfile[]> {
-  const normalize = (s: any) =>
-    String(s ?? "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim();
-
   try {
     const col = collection(FIRESTORE_DB, "Users");
     const q = query(col, where("profileType", "==", type));
     const snaps = await getDocs(q);
-    const term = normalize(nameQuery);
+    const term = (nameQuery || "").trim().toLowerCase();
 
     const list: PublicProfile[] = snaps.docs
       .map((d: any) => {
         const data: any = d.data();
         const name =
-          data?.patientProfile?.nome ||
-          data?.caregiverProfile?.nome ||
-          data?.displayName ||
           data?.name ||
           "";
 
-        // tenta extrair cidade/estado por vários caminhos possíveis no documento
-        const profileCity =
+        // campos para filtro
+        const city =
           data?.patientProfile?.city ||
           data?.caregiverProfile?.city ||
           "";
-
-        const profileState =
+        const state =
           data?.patientProfile?.state ||
           data?.caregiverProfile?.state ||
           "";
-
-        const profilePeriod =
-          data?.condition?.periodos ||
-          data?.caregiverSpecifications?.periodOptions||
+        const period =
+          data?.condition?.periodOptions ||
+          data?.caregiverProfile?.periodOptions ||
           "";
+        const languages: string[] =
+          data?.patientProfile?.idiomasPreferidos ||
+          data?.caregiverSpecifications?.idiomasPreferidos ||
+          [];
 
-        let profileLanguages: string[] = [];
-        if (Array.isArray(data?.condition?.idiomasPreferidos)) {
-          profileLanguages = data.condition.idiomasPreferidos;
-        } else if (typeof data?.condition?.idiomasPreferidos === "string") {
-            profileLanguages = data.condition.idiomasPreferidos
-            .split(",")
-            .map((x: string) => x.trim());
-        }
-        if (Array.isArray(data?.caregiverSpecifications?.idiomasPreferidos)) {
-          profileLanguages = data.caregiverSpecifications.idiomasPreferidos;
-        } else if (typeof data?.caregiverSpecifications?.idiomasPreferidos === "string") {
-            profileLanguages = data.caregiverSpecifications.idiomasPreferidos
-            .split(",")
-            .map((x: string) => x.trim());
-        }
         return {
           id: d.id,
           name,
           rating: data?.rating ?? 0,
           tags: data?.tags ?? data?.especializacoes ?? [],
-          imageUrl: data?.photoUrl ?? data?.avatar ?? null,
+          imageUrl: data?.caregiverProfile?.photo ||
+                    data?.patientProfile?.photo ||
+                    null,
           especialization: data?.especialization ?? data?.especializacoes?.[0] ?? type,
           profileType: data?.profileType ?? null,
-          // meta para filtragem
-          // @ts-ignore
-          _meta: {
-            city: profileCity,
-            state: profileState,
-            period: profilePeriod,
-            languages: profileLanguages,
-          },
+          _meta: { city, state, period, languages },
         } as PublicProfile;
       })
-      .filter((p: PublicProfile) => {
-        const meta: any = (p as any)._meta || {};
-
-        // nome (se termo vazio -> sempre true)
-        const nameOk = normalize(p.name).includes(term);
-        if (!nameOk) return false;
-
-        if (!filters) return true;
-
-        // cidade
-        if (filters.city && filters.city.trim() !== "") {
-          const cityMatch =
-          meta.city && normalize(meta.city).includes(normalize(filters.city));
-          if (!cityMatch) return false;
+      .filter((p: any) => {
+        // filtro por nome
+        if (term && (!p.name || !p.name.toLowerCase().includes(term))) return false;
+        // filtro cidade
+        if (filters?.city && filters.city.trim() !== "") {
+          if (!p._meta.city || !p._meta.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
         }
-
-        // estado
-        if (filters.state && filters.state.trim() !== "") {
-          const metaState = normalize(meta.state);
-          const want = normalize(filters.state);
-          const stateMatch =
-          want.length <= 2 ? metaState === want : metaState.includes(want);
-          if (!stateMatch) return false;
+        // filtro estado
+        if (filters?.state && filters.state.trim() !== "") {
+          if (!p._meta.state || !p._meta.state.toLowerCase().includes(filters.state.toLowerCase())) return false;
         }
-
-        // período (string ou array)
-        if (filters.period && filters.period.trim() !== "") {
-          const metaPeriod = Array.isArray(meta.period)
-          ? meta.period.join(" ")
-          : String(meta.period || "");
-          const periodMatch = normalize(metaPeriod).includes(normalize(filters.period));
-          if (!periodMatch) return false;
+        // filtro período
+        if (filters?.period && filters.period.trim() !== "") {
+          if (!p._meta.period || !p._meta.period.toLowerCase().includes(filters.period.toLowerCase())) return false;
         }
-
-        // idiomas
-        if (filters.languages && filters.languages.length > 0) {
-          const profileLangs: string[] = (meta.languages || []).map((l: any) =>
-          normalize(l)
-        );
-        const required: string[] = filters.languages.map((l) => normalize(l));
-
-        // verifica se pelo menos um idioma filtrado bate com os idiomas do perfil
-        const anyMatch = required.some((r) =>
-        profileLangs.some((pl: string) => pl.includes(r))
-      );
-
-      if (!anyMatch) return false;
-  }
-
-  return true;
-});
-
-    // debug: quando não encontra nada, logar alguns metadados para inspeção
-    if (list.length === 0) {
-      console.debug("[searchProfilesByName] nenhum resultado — amostra de documentos (3):");
-      snaps.docs.slice(0, 3).forEach((d: any) => {
-        const data = d.data();
-        console.debug("docId:", d.id, {
-          patientProfile: data?.patientProfile,
-          caregiverProfile: data?.caregiverProfile,
-          neighborhood: data?.neighborhood,
-          street: data?.street,
-          city: data?.city,
-          state: data?.state,
-          idiomas: data?.idiomas,
-          languages: data?.languages,
-          availability: data?.availability,
-        });
+        // filtro idiomas
+        if (filters?.languages && filters.languages.length > 0) {
+          const langs = (p._meta.languages || []).map((l: string) => l.toLowerCase());
+          const required = filters.languages.map((l) => l.toLowerCase());
+          if (!required.some((r) => langs.includes(r))) return false;
+        }
+        return true;
       });
-    }
 
     return list;
   } catch (err) {
@@ -218,17 +186,100 @@ export async function searchProfilesByName(
   }
 }
 
-export async function getUserProfile(userId: string) {
-  console.log("🔎 [getUserProfile] Buscando perfil do UID:", userId);
+// ------------------------------------------------------
+// SALVAR AVALIAÇÃO DE USUÁRIO
+// ------------------------------------------------------
 
-  const docRef = doc(FIRESTORE_DB, "users", userId);
-  const docSnap = await getDoc(docRef);
-  
-  console.log("📄 [getUserProfile] Documento encontrado:", docSnap.exists());
+export async function submitUserRating(targetUserId: string, rating: number) {
+  try {
+    const userRef = doc(FIRESTORE_DB, "Users", targetUserId);
+    const userSnap = await getDoc(userRef);
 
-  if (docSnap.exists()) {
-    console.log("📚 [getUserProfile] Dados do usuário:", docSnap.data());
+    if (!userSnap.exists()) return { ok: false, error: "Usuário não encontrado" };
+
+    const userData = userSnap.data();
+    const currentUser = FIREBASE_AUTH.currentUser;
+    
+    const previousTotal = userData.totalRatings ?? 0;
+
+    const previousAvg = userData.rating ?? 0;
+
+    const updatedSum = previousAvg * previousTotal + rating;
+
+    const updatedTotal = previousTotal + 1;
+
+    const review = {
+      fromUserId: currentUser?.uid,
+      fromUserName: currentUser?.displayName || currentUser?.email || "Usuário",
+      rating,
+      createdAt: new Date().toISOString()
+    };
+
+    
+
+    const updatedAverage = Number((updatedSum / updatedTotal).toFixed(1));
+
+    await updateDoc(userRef, {
+      reviews: arrayUnion(review),
+      totalRatings: updatedTotal,
+      updatedAt: serverTimestamp(),
+    });
+
+    return { ok: true };
+
+  } catch (err) {
+    console.error("submitUserRating error:", err);
+    return { ok: false, error: err };
+  }
+}
+
+// ------------------------------------------------------
+// BUSCAR AVALIAÇÕES DO USUÁRIO (listagem + média + total)
+// ------------------------------------------------------
+
+export async function getUserReviews(userId: string) {
+  try {
+    const ref = doc(FIRESTORE_DB, "Users", userId)
+    const snap = await getDoc(ref)
+
+    if (!snap.exists()) return null
+
+    const data = snap.data()
+    let reviews = data.reviews ?? []
+
+    reviews = reviews.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
+    return {
+      rating: data.reviews.rating ?? 0,
+      totalRatings: data.totalRatings ?? 0,
+      reviews,
+    }
+  } catch (err) {
+    console.error("getUserReviews error:", err)
+    return null
+  }
+}
+
+// ------------------------------------------------------
+// FORMATAÇÃO DA DATA DAS AVALIAÇÕES
+// ------------------------------------------------------
+
+export function formatReviewDate(dateValue: any) {
+  if (!dateValue) return "";
+
+  let d: Date;
+
+  if (typeof dateValue === "string") {
+    d = new Date(dateValue);
+  } else if (dateValue?.toDate) {
+    d = dateValue.toDate();
+  } else {
+    d = new Date(dateValue);
   }
 
-  return docSnap.exists() ? docSnap.data() : null;
+  return d.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }

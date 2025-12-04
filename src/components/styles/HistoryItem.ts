@@ -36,6 +36,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 4,
     paddingHorizontal: 8,
+    marginLeft: 1,
   },
   requestStatusText: {
     fontSize: 14,

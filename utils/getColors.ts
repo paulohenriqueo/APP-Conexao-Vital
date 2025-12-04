@@ -28,7 +28,7 @@ export function getPendingRequestsColors(pendingRequests: number) {
 export function getAverageRatingColors(averageRating: number) {
     if (averageRating === 0) {
         return {
-            gradient: [colors.gray7FD, colors.grayF5, colors.grayE8] as const,
+            gradient: [colors.gray7FD, colors.grayF5, colors.grayEC] as const,
             textColor: colors.gray14,
         };
     } else if (averageRating < 3) {

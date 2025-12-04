@@ -1,9 +1,9 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles as historyStyles } from "./styles/HistoryItem";
 import { colors } from "../../styles/colors";
-import { styles, typography } from "../../styles/styles";
+import { styles } from "../../styles/styles";
 import { Avatar } from "./Avatar";
 import { CircleButton } from "./Button";
 import { Check, X } from "phosphor-react-native";
@@ -14,7 +14,7 @@ type HistoryItemProps = {
   date: string;
   careCategory: string;
   imageUrl?: string;
-  requestStatus?: "aceita" | "recusada" | "pendente";
+  requestStatus?:  "aceita" | "accepted" | "recusada" | "declined" | "pendente" | "pending" | undefined;
   currentProfileType?: "caregiver" | "patient";
   onPress: () => void;
   onAccept?: () => void;
@@ -28,27 +28,27 @@ export function HistoryItem({
   date,
   imageUrl,
   currentProfileType = "caregiver",
-  requestStatus = "pendente",
+  requestStatus,
   onPress,
   onAccept,
   onDecline,
 }: HistoryItemProps) {
 
-  let bgColor = colors.grayE8;
-  let textColor = colors.gray47;
-  let label = "Pendente";
+  let bgColor;
+  let textColor;
+  let label;
 
   switch (requestStatus) {
-    case "aceita":
+    case "accepted":
       bgColor = colors.greenAcceptBg;
       textColor = colors.greenAccept;
-      label = "Aceita";
+      label = "Aceito";
       break;
 
-    case "recusada":
+    case "declined":
       bgColor = colors.redc0019;
       textColor = colors.redc00;
-      label = "Recusada";
+      label = "Recusado";
       break;
 
     default:
@@ -58,22 +58,14 @@ export function HistoryItem({
       break;
   }
 
-  function handleAccept() {
-    Alert.alert("Solicitação de contato aceita")
-  }
-
-  function handleDecline() {
-    Alert.alert("Solicitação de contato recusada")
-  }
-
   return (
     <View style={historyStyles.container}>
-      <Avatar name={name} imageUrl={imageUrl} />
+      <Avatar name={name} photoURL={imageUrl} />
+
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={historyStyles.name}>{name}</Text>
-        <Text style={historyStyles.careCategory}>
-          {careCategory}
-        </Text>
+        <Text style={historyStyles.careCategory}>{careCategory}</Text>
+
         <View style={styles.ratingContainer}>
           {Array.from({ length: 5 }).map((_, i) => (
             <Ionicons
@@ -84,20 +76,29 @@ export function HistoryItem({
             />
           ))}
         </View>
+
         <Text style={historyStyles.date}>{date}</Text>
       </View>
 
-      <View style={[historyStyles.requestStatus, { marginRight: 6, alignSelf: "stretch", gap: 8 }]}>
-        {currentProfileType === "caregiver" && requestStatus === "pendente" ? (
-          // botões para aceitar ou recusar
+      <View style={[historyStyles.requestStatus, { marginRight: 6, marginLeft: 2, gap: 8 }]}>
+        {currentProfileType === "caregiver" && requestStatus === "pending" ? (
           <View style={{ marginRight: 12, gap: 6 }}>
-            <CircleButton type="aceitar" onPress={()=> onAccept} icon={<Check size={20} color={colors.greenAccept} weight="bold"></Check>}></CircleButton>
-            <CircleButton type="recusar" onPress={()=> onDecline} icon={<X size={20} color={colors.redc00} weight="bold"></X>}></CircleButton>
+            <CircleButton
+              type="accepted"
+              onPress={() => onAccept?.()}
+              icon={<Check size={20} color={colors.greenAccept} weight="bold" />}
+            />
+            <CircleButton
+              type="declined"
+              onPress={() => onDecline?.()}
+              icon={<X size={20} color={colors.redc00} weight="bold" />}
+            />
           </View>
         ) : (
-          // tag com requestStatus
           <View style={[historyStyles.requestStatusTag, { backgroundColor: bgColor }]}>
-            <Text style={[historyStyles.requestStatusText, { color: textColor }]}>{label}</Text>
+            <Text style={[historyStyles.requestStatusText, { color: textColor }]}>
+              {label}
+            </Text>
           </View>
         )}
       </View>

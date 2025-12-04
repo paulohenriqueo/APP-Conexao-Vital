@@ -150,6 +150,12 @@ export const typography: Record<string, TextStyle> = {
         lineHeight: 12,
         color: colors.green85F,
     },
+    M01M1420: {
+        ...baseTypography.montserratMedium,
+        fontSize: 14,
+        lineHeight: 20,
+        color: colors.gray94,
+    },
     M01M1624: {
         ...baseTypography.montserratMedium,
         fontSize: 16,

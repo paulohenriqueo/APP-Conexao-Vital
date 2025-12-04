@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { colors } from "../../../../styles/colors";
-import { typography } from "../../../../styles/typography";
+import { baseTypography, typography } from "../../../../styles/typography";
 import { UserProfile } from "../../../types/UserProfile";
 
 type Props = {
@@ -24,21 +24,22 @@ const joinOrNone = (v: any) => {
 
 const CaregiverProfileInfo: React.FC<Props> = ({ caregiverData = {} }) => {
   // normaliza campos que aparecem no seu Firestore
-  const experiencia = caregiverData.experiencia ?? caregiverData.experience ?? [];
+  const experiencia = caregiverData.experiencia ?? caregiverData.experiencias ?? caregiverData.experiences ?? [];
   const qualificacoes = caregiverData.qualificacoes ?? caregiverData.qualifications ?? [];
-  const dispoDia = caregiverData.dispoDia ?? caregiverData.dispoDia ?? [];
-  const periodo = caregiverData.periodo ?? caregiverData.periodos ?? [];
-  const publicoAtendido = caregiverData.publicoAtendido ?? caregiverData.publicoAtendido ?? [];
-  const observacoes = caregiverData.observacoes ?? caregiverData.notes ?? "";
+  const dispoDia = caregiverData.dispoDia ?? caregiverData.dayOptions ?? [];
+  const periodo = caregiverData.periodo ?? caregiverData.periodos ?? caregiverData.periodOptions ?? [];
+  const publicoAtendido = caregiverData.publicoAtendido ?? caregiverData.caregiverSpecifications?.publicoAtendido ?? [];
+  const idiomas = caregiverData.idiomasPreferidos ?? caregiverData.preferredLanguages ?? [];
+  const observacoes = caregiverData.observacoes ?? caregiverData.caregiverSpecifications?.observacoes ?? caregiverData.notes ?? "";
 
   return (
     <View style={styles.container}>
       <Section title="Experiência" content={joinOrNone(experiencia)} />
       <Section title="Qualificações" content={joinOrNone(qualificacoes)} />
-      <Section title="Disponibilidade (dias)" content={joinOrNone(dispoDia)} />
-      {/* <Section title="Disponibilidade (horário)" content={joinOrNone(dispoHora)} /> */}
+      <Section title="Disponibilidade de dias" content={joinOrNone(dispoDia)} />
       <Section title="Período de atendimento" content={joinOrNone(periodo)} />
       <Section title="Público atendido" content={joinOrNone(publicoAtendido)} />
+      <Section title="Idiomas" content={joinOrNone(idiomas)} />
       <Section title="Observações" content={observacoes ? observacoes : "Nenhuma observação informada"} />
     </View>
   );
@@ -51,16 +52,20 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   section: {
-    marginBottom: 18,
+    marginBottom: 8,
   },
   title: {
-    ...typography.H02B1820,
-    color: colors.gray14,
-    marginBottom: 6,
+    ...baseTypography.montserratMedium,
+    fontSize: 16,
+    lineHeight: 20,
+    color: colors.gray23,
+    marginVertical: 6,
   },
   content: {
-    ...typography.M01R1214,
-    color: colors.gray75,
+    ...baseTypography.montserratRegular,
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.gray47,
   },
 });
 

@@ -12,14 +12,12 @@ import { styles, typography } from "../../../styles/styles";
 import Logo from '../../assets/logo.png'
 import { colors } from "../../../styles/colors";
 import { Input, InputPassword } from "../../components/Input";
-import { PrimaryButton, GoogleButton } from "../../components/Button";
+import { PrimaryButton } from "../../components/Button";
 import { useNavigation } from "@react-navigation/native";
 import { FIREBASE_AUTH } from "../../../FirebaseConfig";
-import { GoogleAuthProvider, signInWithCredential, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import * as WebBrowser from 'expo-web-browser';
 import { ActivityIndicator } from "react-native";
-import { makeRedirectUri } from 'expo-auth-session';
-import * as Google from 'expo-auth-session/providers/google';
 import { useAuthRequest } from 'expo-auth-session/providers/google';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -65,13 +63,20 @@ export default function Login() {
                     break;
 
                 case "auth/user-not-found":
-                case "auth/invalid-credential":
-                    Alert.alert("Conta não encontrada", "O e-mail informado pode estar incorreto ou a conta pode ter sido excluída. Verifique as informações ou crie uma nova conta.");
-                    console.warn("DEBUG: conta não encontrada para o e-mail:", email);
+                    Alert.alert(
+                        "Conta não encontrada",
+                        "Não encontramos uma conta com este e-mail. Ele pode estar incorreto ou ter sido removido."
+                    );
+                    console.warn("DEBUG: user-not-found:", email);
                     break;
 
+                case "auth/invalid-credential":
                 case "auth/wrong-password":
-                    Alert.alert("Senha incorreta", "A senha informada está incorreta. Tente novamente.");
+                    Alert.alert(
+                        "Credenciais inválidas",
+                        "E-mail ou senha incorretos. Verifique os dados e tente novamente."
+                    );
+                    console.warn("DEBUG: invalid-credential para o e-mail:", email);
                     console.warn("DEBUG: senha incorreta para o e-mail:", email);
                     break;
 
@@ -95,29 +100,6 @@ export default function Login() {
             console.log("DEBUG: finalizando tentativa de login");
         }
     };
-
-    // useEffect(() => {
-    //     const signInWithGoogle = async () => {
-    //         if (response?.type === 'success') {
-    //             const { authentication } = response;
-    //             if (authentication?.accessToken) {
-    //                 const credential = GoogleAuthProvider.credential(null, authentication.accessToken);
-    //                 try {
-    //                     await signInWithCredential(auth, credential);
-    //                     Alert.alert("Login Google bem-sucedido!");
-    //                     navigation.navigate("Home");
-    //                 } catch (error) {
-    //                     Alert.alert("Erro ao autenticar com Firebase.");
-    //                 }
-    //             }
-    //         }
-    //     };
-    //     signInWithGoogle();
-    // }, [response]);
-
-    // const handleGoogleLogin = () => {
-    //     promptAsync();
-    // };
 
     return (
         <View style={styles.container}>
@@ -149,16 +131,7 @@ export default function Login() {
                         {loading ? (
                             <ActivityIndicator size="large" color={colors.green382} />
                         ) : (
-                            <>
-                                <PrimaryButton title="Entrar" onPress={singIn} />
-                                {/* <View style={styles.dividerContainer}>
-                                    <View style={styles.line} />
-                                    <Text style={styles.dividerText}>ou</Text>
-                                    <View style={styles.line} />
-                                </View>
-                                <GoogleButton onPress={handleGoogleLogin} />
-                                */}
-                            </>
+                            <PrimaryButton title="Entrar" onPress={singIn} />
                         )}
 
                     </View>

@@ -9,7 +9,7 @@ type ButtonProps = {
     onPress: () => void;
     icon?: React.ReactNode;
     disabled?: boolean;
-    type?: "aceitar" | "recusar";
+    type?: "accepted" | "declined";
 };
 
 export function PrimaryButton({ title, onPress, icon, disabled }: ButtonProps) {
@@ -51,10 +51,10 @@ export function OutlinedButton({ title, onPress, icon }: ButtonProps) {
 
 export function ActionButton({ title, onPress, icon, disabled, type }: ButtonProps) {
     return (
-        <TouchableOpacity style={[styles.actionButton, { backgroundColor: type === "aceitar" ? colors.greenAcceptBg : colors.redc0019 }, disabled && { opacity: 0.5 }]} onPress={onPress} activeOpacity={0.7}>
+        <TouchableOpacity style={[styles.actionButton, { backgroundColor: type === "accepted" ? colors.greenAcceptBg : colors.redc0019 }, disabled && { opacity: 0.5 }]} onPress={onPress} activeOpacity={0.7}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
                 {icon && <View style={{ marginRight: 8 }}>{icon}</View>}
-                <Text style={[styles.actionButtonText, { color: type === "aceitar" ? colors.greenAccept : colors.redc00 }]}>{title}</Text>
+                <Text style={[styles.actionButtonText, { color: type === "accepted" ? colors.greenAccept : colors.redc00 }]}>{title}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -62,7 +62,7 @@ export function ActionButton({ title, onPress, icon, disabled, type }: ButtonPro
 
 export function CircleButton({ icon, type, onPress }: ButtonProps) {
     return (
-        <TouchableOpacity style={[styles.circleButton, { backgroundColor: type === "aceitar" ? colors.greenAcceptBg : colors.redc0019 }]} onPress={onPress} activeOpacity={0.8}>
+        <TouchableOpacity style={[styles.circleButton, { backgroundColor: type === "accepted" ? colors.greenAcceptBg : colors.redc0019 }]} onPress={onPress} activeOpacity={0.8}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
                 {icon}
             </View>

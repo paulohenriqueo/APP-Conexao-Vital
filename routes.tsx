@@ -15,7 +15,7 @@ import CaregiverForms from "./src/screens/onboarding/caregiver/CaregiverForms";
 import CaregiverSpecifications from "./src/screens/onboarding/caregiver/CaregiverSpecifications";
 import ExternalUser from "./src/screens/home/profile/ExternalUser";
 import EditProfile from "./src/screens/home/profile/EditProfile";
-import Profile from "./src/screens/home/profile/Profile";
+import ReceivedReviews from "./src/screens/home/profile/ReceivedReviews";
 
 const Stack = createStackNavigator();
 
@@ -36,6 +36,7 @@ export default function Routes() {
         <Stack.Screen name="CaregiverSpecifications" component={CaregiverSpecifications} />
         <Stack.Screen name="ExternalUser" component={ExternalUser} />
         <Stack.Screen name="EditProfile" component={EditProfile} />
+        <Stack.Screen name="ReceivedReviews" component={ReceivedReviews} />
       </Stack.Navigator>
     </NavigationContainer>
   );

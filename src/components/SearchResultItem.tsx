@@ -18,7 +18,7 @@ type SearchResultItemProps = {
 export function SearchResultItem({ name, careCategory, rating, tags, imageUrl, onPress }: SearchResultItemProps) {
   return (
     <View style={resultStyles.container}>
-      <Avatar name={name} imageUrl={imageUrl}/>
+      <Avatar name={name} photoURL={imageUrl}/>
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={resultStyles.name}>{name}
           <Text style={resultStyles.careCategory}>  {careCategory}</Text>

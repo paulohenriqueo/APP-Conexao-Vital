@@ -4,7 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { deleteUser, getAuth, signOut } from "firebase/auth";
 import { deleteDoc, getFirestore, doc, getDoc } from "firebase/firestore";
 import { colors } from "../../../../styles/colors";
-import { typography } from "../../../../styles/typography";
+import { baseTypography, typography } from "../../../../styles/typography";
 import { useNavigation, NavigationProp, useFocusEffect } from "@react-navigation/native";
 import ProfileItem from "../../../components/ProfileItem";
 import { SignOut } from "phosphor-react-native";
@@ -40,23 +40,18 @@ interface SectionItem {
 export default function Profile() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [userLocation, setUserLocation] = useState("");
   const [userCareCategory, setUserCareCategory] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
+  const [rating, setRating] = useState<number>(0);
   const [currentProfileType, setCurrentProfileType] = useState<string | null>(null);
   const [showSelect, setShowSelect] = useState(false);
   const [userData, setUserData] = useState<any>(null);
 
   const navigation = useNavigation<NavigationProp<any>>();
 
-  // Dados provisórios do usuário
-  const user: User = {
-    role: currentProfileType,
-    rating: 5, //Avaliação a ser exibida - já incluío na exibição de estrelas
-    // careCategory: "Cuidados Domiciliares",
-  };
-
   // Definir o componente de informações do perfil com base na função do usuário
-  const ProfileInfoComponent = user.role === "caregiver" ? CaregiverProfileInfo : PatientProfileInfo;
+  const ProfileInfoComponent = currentProfileType === "caregiver" ? CaregiverProfileInfo : PatientProfileInfo;
 
   const profileProps =
     currentProfileType?.toLowerCase() === "caregiver"
@@ -65,8 +60,9 @@ export default function Profile() {
           experiencia: [],
           qualificacoes: [],
           dispoDia: [],
-          period: [],
+          periodo: [],
           publicoAtendido: [],
+          idioma: [],
           observacoes: "",
         },
       }
@@ -75,10 +71,25 @@ export default function Profile() {
           alergias: [],
           medicamentos: [],
           condicoes: [],
+          periodo: [],
           idiomasPreferidos: [],
           observacoes: "",
         },
       };
+
+  useEffect(() => {
+    if (!userData) return;
+
+    if (userData.city && userData.state) {
+      setUserLocation(`${userData.city} | ${userData.state}`);
+    } else if (userData.city) {
+      setUserLocation(userData.city);
+    } else if (userData.state) {
+      setUserLocation(userData.state);
+    } else {
+      setUserLocation("");
+    }
+  }, [userData]);
 
   // Buscar email, nome e foto
   useEffect(() => {
@@ -120,13 +131,47 @@ export default function Profile() {
       const auth = getAuth();
       const db = getFirestore();
       const currentUser = auth.currentUser;
+
       if (currentUser) {
         const userDocRef = doc(db, "Users", currentUser.uid);
         const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) setPhoto(userDoc.data().photo || "");
+
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+
+          const photoURL =
+            data?.caregiverProfile?.photo ??
+            data?.patientProfile?.photo ??
+            null;
+
+          setPhoto(photoURL);
+        }
       }
     };
+
     fetchUserPhoto();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserRating = async () => {
+      const auth = getAuth();
+      const db = getFirestore();
+      const currentUser = auth.currentUser;
+
+      if (currentUser) {
+        const userDocRef = doc(db, "Users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          const avgRating =
+            data?.rating ?? 0;
+          setRating(avgRating);
+        }
+      }
+    };
+
+    fetchUserRating();
   }, []);
 
   useEffect(() => {
@@ -246,8 +291,14 @@ export default function Profile() {
 
   // Cria um array único com todas as seções e itens
   const items: SectionItem[] = [
-    { section: "Históricos", title: "Avaliações realizadas", onPress: () => console.log("Completed Reviews") },
-    { section: "Históricos", title: "Compra de créditos", onPress: () => console.log("Purchase Credits") },
+    { section: "Históricos", title: "Avaliações recebidas", onPress: () => navigation.navigate("ReceivedReviews") },
+    {
+      section: "Históricos", title: "Compra de créditos", onPress: () => Alert.alert(
+        "Em breve",
+        "Essa funcionalidade ainda será implementada.", [
+        { text: "OK", style: "default" },
+      ])
+    },
     { section: "Ajuda e Suporte", title: "Termos de Uso", onPress: () => navigation.navigate("Terms") },
     { section: "Ajuda e Suporte", title: "Política de Privacidade", onPress: () => navigation.navigate("PrivacyPolicy") },
     { section: "Ajuda e Suporte", title: "Alterar senha", onPress: () => navigation.navigate("NewPassword") },
@@ -301,7 +352,7 @@ export default function Profile() {
         <Avatar
           size={84}
           name={userName}
-          imageUrl={photo}
+          photoURL={photo}
         />
         <Text
           style={{
@@ -319,24 +370,40 @@ export default function Profile() {
             color: colors.gray75,
             textAlign: "center",
             fontWeight: "600",
+          }}>
+          {userData?.careCategory ?? userData?.caregiverSpecifications?.careCategory ?? userData?.condition?.careCategory ?? "Categoria não informada"}
+        </Text>
+        <Text
+          style={{
+            ...baseTypography.hindSemiBold,
+            fontSize: 14,
+            lineHeight: 16,
+            color: colors.gray75,
+            textAlign: "center",
+            fontWeight: "600",
           }}
         >
           {userEmail}
         </Text>
-        <Text
-          style={{
-            ...typography.H01SB1618,
-            color: colors.gray75,
-            textAlign: "center",
-            fontWeight: "600",
-          }}>
-          {userData?.condition?.careCategory || "Categoria não informada"}
-        </Text>
+        {userLocation ?
+          <Text
+            style={{
+              ...baseTypography.hindSemiBold,
+              fontSize: 14,
+              lineHeight: 16,
+              color: colors.gray75,
+              textAlign: "center",
+              fontWeight: "600",
+            }}
+          >
+            {userLocation}
+          </Text>
+          : null}
         <View style={{ ...styles.ratingContainer }}>
-          {Array.from({ length: Number(user.rating) }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <Ionicons
               key={i}
-              name={i < (user.rating || 0) ? "star" : "star-outline"}
+              name={i < rating ? "star" : "star-outline"}
               size={20}
               color={colors.ambar400}
             />

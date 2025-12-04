@@ -11,7 +11,6 @@ import { CustomList } from "./profile/CustomList";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import PopUpFormsModel from "../model/PopUpFormsModel";
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import ExternalUser from "./profile/ExternalUser";
 import { getCurrentUserType, getProfilesByType, searchProfilesByName, PublicProfile, getUserProfile } from "../../services/userService";
 import { SecondaryButton } from "../../components/Button";
 import { Picker } from "@react-native-picker/picker";
@@ -21,6 +20,8 @@ import { getRequestsForUser, RequestItem, updateStatus } from "../../services/re
 import type { HistoryData } from "./profile/CustomList";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { FIREBASE_AUTH, FIRESTORE_DB } from "../../../FirebaseConfig";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 export default function Home() {
   const navigation = useNavigation<any>();
@@ -95,13 +96,73 @@ export default function Home() {
     loadDebugUser();
   }, []);
 
+  interface RequestItem {
+    status: string;
+    patientId: string;
+    createdAt: string;
+    patientName: string;
+  }
+
+  interface RatingItem {
+    fromUserId?: string;
+    fromUserName: string;
+    rating: number;
+    createdAt: string | Date | any;
+  }
+
   useEffect(() => {
-    // Exemplo de mock de dados — depois você pode trocar por fetch do Firestore
-    setPendingRequests(3);
-    setReceivedRequests(10);
-    setAcceptedRequests(7);
-    setTotalRatings(12);
-    setAverageRating(4.8);
+    const fetchDashboardData = async () => {
+      try {
+        const auth = getAuth();
+        const db = getFirestore();
+        const currentUser = auth.currentUser;
+
+        if (!currentUser) return;
+
+        const userRef = doc(db, "Users", currentUser.uid);
+        const snap = await getDoc(userRef);
+
+        if (!snap.exists()) return;
+
+        const data = snap.data();
+        console.log("DATA")
+        console.log(data)
+        // ========== SOLICITAÇÕES ==========
+
+        const receivedRequests: RequestItem[] = data.receivedRequests ?? [];
+        const sentRequests: RequestItem[] = data.requests ?? [];
+
+        const allRequests: RequestItem[] = data.profileType === "patient" ? sentRequests: receivedRequests;
+
+        const total = allRequests.length;
+        const pending = allRequests.filter((r) => r.status === "pending" || r.status === "pendente").length;
+        const accepted = allRequests.filter((r) => r.status === "accepted" || r.status === "aceita").length;
+
+        setReceivedRequests(total);
+        setPendingRequests(pending);
+        console.log(pending)
+        console.log(pendingRequests)
+        setAcceptedRequests(accepted);
+
+        // ========== AVALIAÇÕES ==========
+        const ratings: RatingItem[] = data.reviews || [];
+
+        const totalRatings = ratings.length;
+
+        const avgRating =
+          ratings.length > 0
+            ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+            : 0;
+
+        setTotalRatings(totalRatings);
+        setAverageRating(avgRating);
+
+      } catch (error) {
+        console.error("Erro ao carregar dashboard:", error);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   useEffect(() => {
@@ -233,73 +294,83 @@ export default function Home() {
     navigation.navigate("CaregiverForms");
   };
 
-  // const handleRequest = () => {
-  //   if (!profileCompleted) {
-  //     Alert.alert(
-  //       "Cadastro incompleto",
-  //       "Para fazer qualquer solicitação, é necessário completar seu cadastro.",
-  //       [{ text: "OK" }]
-  //     );
-  //   } else {
-  //     navigation.navigate("RequestScreen"); // muda para tela real de solicitação
-  //   }
-  // };
-
   const [historyData, setHistoryData] = useState<HistoryData[]>([]);
 
   // ------------------------------
   // FUNÇÃO GLOBAL — pode ser usada no accept/decline
   // ------------------------------
   async function loadRequests() {
-    console.log("\n==============================");
-    console.log("🔄 [loadRequests] Iniciando carregamento...");
-    console.log("==============================\n");
-
     try {
-      const requests: RequestItem[] = await getRequestsForUser(currentUserId);
+      console.log("🔄 Carregando solicitações...");
 
-      console.log("📥 [loadRequests] Requests recebidos:", requests);
-      console.log("📛 currentProfileType dentro do loadRequests:", currentProfileType);
-      console.log("📛 currentUserId usado:", currentUserId);
+      const requests = await getRequestsForUser(currentUserId);
 
-      const formatted: HistoryData[] = requests.map((req: any) => {
-        // Força que currentProfileType seja do tipo correto
-        const profileType: "caregiver" | "patient" | undefined =
-          currentProfileType === "caregiver"
-            ? "caregiver"
-            : currentProfileType === "patient"
-              ? "patient"
-              : undefined;
+      const formatted: HistoryData[] = [];
 
-        // Formata a data sem os "de"
+      for (const req of requests) {
+        const isCaregiver = currentProfileType === "caregiver";
+        const otherUserId = isCaregiver ? req.patientId : req.caregiverId;
+
+        // pegar dados do outro usuário
+        const otherRef = doc(FIRESTORE_DB, "Users", otherUserId);
+        const otherSnap = await getDoc(otherRef);
+        const otherData = otherSnap.data();
+
+        const name =
+          otherData?.name ||
+          otherData?.displayName ||
+          otherData?.patientProfile?.nome ||
+          otherData?.caregiverProfile?.nome ||
+          "Usuário";
+
+        const photo =
+          otherData?.patientProfile?.photo ||
+          otherData?.caregiverProfile?.photo ||
+          null;
+
+        const careCategory =
+          otherData?.caregiverSpecifications?.careCategory ||
+          otherData?.condition?.careCategory ||
+          otherData?.careCategory ||
+          "";
+
+        const rating =
+          otherData?.rating ??
+          otherData?.averageRating ??
+          0;
+
+        // converter status
+        const statusMap: any = {
+          pending: "pendente",
+          accepted: "aceita",
+          rejected: "recusada",
+        };
+
+        const mappedStatus = statusMap[req.status] ?? "pendente";
+
+        // formatar data
         const dateObj = new Date(req.createdAt);
-        const parts = new Intl.DateTimeFormat("pt-BR", {
+        const formattedDate = dateObj.toLocaleDateString("pt-BR", {
           day: "2-digit",
           month: "short",
           year: "numeric",
-        }).formatToParts(dateObj);
+        });
 
-        const day = parts.find(p => p.type === "day")?.value;
-        const month = parts.find(p => p.type === "month")?.value;
-        const year = parts.find(p => p.type === "year")?.value;
-
-        const formattedDate = `${day} ${month} ${year}`;
-
-        return {
-          id: req.patientId ?? req.caregiverId ?? "",
-          name: req.patientName ?? req.caregiverName ?? "Usuário",
+        formatted.push({
+          id: otherUserId,
+          name,
+          imageUrl: photo,
+          careCategory,
+          rating,
           date: formattedDate,
-          requestStatus: req.status,
-          imageUrl: req.imageUrl ?? null,
-          rating: req.rating ?? null,
-          careCategory: req.careCategory ?? "",
-          currentProfileType: profileType,
-        };
-      });
+          requestStatus: mappedStatus,
+          currentProfileType: currentProfileType as any,
+        });
+      }
 
-      setHistoryData(formatted.slice().reverse());
+      setHistoryData(formatted.reverse());
+      console.log("🟩 Histórico formatado:", formatted);
 
-      console.log("🟩 [Home] Dados formatados para lista:", formatted);
     } catch (err) {
       console.warn("Erro ao carregar solicitações:", err);
     }
@@ -320,14 +391,14 @@ export default function Home() {
   // ------------------------------
   async function acceptRequestFromHistory(id: string) {
     console.log("✔️ [acceptRequest] Aceitando ID:", id);
-    await updateStatus(id, currentUserId, "aceita");
+    await updateStatus(id, currentUserId, "accepted");
     console.log("🔄 [acceptRequest] Atualizando lista...");
     await loadRequests();
   }
 
   async function declineRequestFromHistory(id: string) {
     console.log("❌ [declineRequest] Recusando ID:", id);
-    await updateStatus(id, currentUserId, "recusada");
+    await updateStatus(id, currentUserId, "declined");
     console.log("🔄 [declineRequest] Atualizando lista...");
     await loadRequests();
   }
@@ -581,7 +652,7 @@ export default function Home() {
           </>
         );
 
-      // adicionar forma de exibir a pesquisa
+      // exibir a pesquisa
       case "search":
         return (
           <View style={{ flex: 1, width: "100%", padding: 0 }}>
@@ -610,9 +681,14 @@ export default function Home() {
               onPressFilter={() => console.log("Filter pressed in History")}
               placeholder="Pesquisar..."
             />
-            <Text style={{ ...styles.subtitleText, textAlign: "left", paddingVertical: 16 }}>
-              Histórico de solicitações
-            </Text>
+            <View style={{ flexDirection: "column", gap: 2, alignContent: "flex-start" }}>
+              <Text style={{ ...styles.subtitleText, textAlign: "left", paddingTop: 16 }}>
+                Histórico de solicitações
+              </Text>
+              <Text style={{ ...typography.M01M1420, color: colors.gray94, textAlign: "left", paddingBottom: 16 }}>
+                Total de solicitações: {receivedRequests}
+              </Text>
+            </View>
             <CustomList
               type="history"
               data={historyData}
@@ -675,14 +751,6 @@ export default function Home() {
       <TopBar title="" />
 
       <View style={styles.contentArea}>{renderContent()}</View>
-      {/* Botões para testar troca de cores */}
-      {/* <TouchableOpacity onPress={() => { setPendingRequests(7) }}>Pending Requests = 7</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setPendingRequests(3) }}>Pending Requests = 3</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setPendingRequests(0) }}>Pending Requests = 0</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setAverageRating(0) }}>Average Rating = 0</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setAverageRating(2) }}>Average Rating = 2</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setAverageRating(3) }}>Average Rating = 3</TouchableOpacity>
-      <TouchableOpacity onPress={() => { setAverageRating(4) }}>Average Rating = 4</TouchableOpacity> */}
       <BottomNavBar selected={selectedTab} onSelect={setSelectedTab} />
 
       <PopUpFormsModel

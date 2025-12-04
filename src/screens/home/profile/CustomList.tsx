@@ -11,7 +11,7 @@ export type HistoryData = {
   date: string;
   careCategory: string;
   imageUrl?: string;
-  requestStatus?: "aceita" | "recusada" | "pendente";
+  requestStatus?: "aceita" | "accepted" | "recusada" | "declined" | "pendente" | "pending" | undefined;
   currentProfileType?: "caregiver" | "patient";
 };
 
@@ -33,11 +33,10 @@ type CustomListProps = {
 
 export function CustomList({ type, data, onAccept, onDecline }: CustomListProps) {
   const navigation = useNavigation<any>();
-
   return (
     <FlatList<any>
       data={data}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => `${item.id}-${index}`}
       renderItem={({ item }) => {
         const handlePress = () =>
           navigation.navigate("ExternalUser", { userId: String(item.id) });
@@ -50,7 +49,7 @@ export function CustomList({ type, data, onAccept, onDecline }: CustomListProps)
                 rating={item.rating}
                 date={item.date}
                 careCategory={item.careCategory}
-                imageUrl={item.imageUrl || ""}
+                imageUrl={(item as HistoryData).imageUrl || ""}
                 requestStatus={item.requestStatus}
                 currentProfileType={item.currentProfileType}
                 onPress={handlePress}

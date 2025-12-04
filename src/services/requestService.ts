@@ -1,16 +1,27 @@
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { FIRESTORE_DB } from "../../FirebaseConfig";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import auth from "@react-native-firebase/auth";
 
+/**
+ * Tipagem oficial usada no app inteiro
+ */
 export type RequestItem = {
   id: string;
-  clientId: string;
-  professionalId: string;
-  status: "pending" | "accepted" | "rejected";
+  patientId: string;
+  caregiverId: string;
+  status: "pending" | "accepted" | "declined";
   createdAt: any;
+  patientName?: string;
+  caregiverName?: string;
+  imageUrl?: string;
+  careCategory?: string;
 };
 
+/**
+ * Retorna todas as solicitações REALMENTE salvas no documento do usuário.
+ * Junta:
+ * - requests (enviadas)
+ * - receivedRequests (recebidas)
+ */
 export async function getRequestsForUser(userId: string) {
   console.log("📌 [getRequestsForUser] Buscando solicitações para:", userId);
 
@@ -18,106 +29,129 @@ export async function getRequestsForUser(userId: string) {
   const snap = await getDoc(userRef);
   const userData = snap.data();
 
-  console.log("📄 [getRequestsForUser] DOCUMENTO DO USER:", userData);
+  if (!userData) {
+    console.log("⚠️ [getRequestsForUser] Usuário sem dados.");
+    return [];
+  }
 
-  if (!userData) return [];
-
-  const sent = (userData.requests ?? []).map((req: any) => ({
+const normalize = (req: any, direction: "sent" | "received") => {
+  return {
     ...req,
-    direction: "sent",
-  }));
+    direction,
+    id: req.id,
+    status: req.status ?? "pending",
 
-  const received = (userData.receivedRequests ?? []).map((req: any) => ({
-    ...req,
-    direction: "received",
-  }));
+    // se não tiver caregiverId, colocamos baseado no usuário logado
+    caregiverId: req.caregiverId ?? (direction === "received" ? userId : req.caregiverId),
 
-  console.log("➡️ [getRequestsForUser] ENVIADAS:", sent);
-  console.log("⬅️ [getRequestsForUser] RECEBIDAS:", received);
+    // se não tiver patientId e for enviado, mantemos
+    patientId: req.patientId ?? "",
+  };
+};
+
+
+  const sent = (userData.requests ?? []).map((req: any) =>
+    normalize(req, "sent")
+  );
+
+  const received = (userData.receivedRequests ?? []).map((req: any) =>
+    normalize(req, "received")
+  );
+
+  console.log("➡️ ENVIADAS:", sent);
+  console.log("⬅️ RECEBIDAS:", received);
 
   return [...sent, ...received];
 }
 
 /**
- * Atualiza a solicitação para ACEITA
- */
-export async function acceptRequest(patientId: string, caregiverId: string) {
-  return updateStatus(patientId, caregiverId, "aceita");
-}
-
-/**
- * Atualiza a solicitação para RECUSADA
- */
-export async function declineRequest(patientId: string, caregiverId: string) {
-  return updateStatus(patientId, caregiverId, "recusada");
-}
-
-/**
- * Função reutilizável que realmente faz o trabalho
+ * Atualiza status da solicitação entre paciente e cuidador.
+ *
+ * IMPORTANTE:
+ * - patientId SEMPRE é o paciente
+ * - caregiverId SEMPRE é o cuidador
  */
 export async function updateStatus(
   patientId: string,
   caregiverId: string,
-  newStatus: "aceita" | "recusada"
+  newStatus: "accepted" | "declined"
 ) {
   console.log("🔄 [updateStatus] Iniciando atualização...");
-  console.log("👤 Paciente:", patientId);
-  console.log("🧑‍⚕️ Cuidador:", caregiverId);
+  console.log("👤 patientId:", patientId);
+  console.log("🧑‍⚕️ caregiverId:", caregiverId);
   console.log("📌 Novo status:", newStatus);
 
   try {
     const patientRef = doc(FIRESTORE_DB, "Users", patientId);
     const caregiverRef = doc(FIRESTORE_DB, "Users", caregiverId);
 
-    // buscar paciente
+    // Buscar documentos
     const patientSnap = await getDoc(patientRef);
-    const patientData = patientSnap.data();
-
-    // buscar cuidador
     const caregiverSnap = await getDoc(caregiverRef);
+
+    const patientData = patientSnap.data();
     const caregiverData = caregiverSnap.data();
 
-    console.log("📄 [updateStatus] Dados do paciente:", patientSnap.data());
-    console.log("📄 [updateStatus] Dados do cuidador:", caregiverSnap.data());
+    if (!patientData || !caregiverData) {
+      console.log("❌ [updateStatus] Usuário não encontrado.");
+      return { ok: false };
+    }
 
-    // === UPDATE lado do paciente ===
-    const updatedPatientRequests = (patientData?.requests ?? []).map((req: any) => {
+    // ======================================================
+    //  UPDATE DO LADO DO PACIENTE
+    // ======================================================
+    const updatedPatientRequests = (patientData.requests ?? []).map((req: any) => {
       if (req.caregiverId === caregiverId) {
-        console.log("📝 [updateStatus] Atualizando no paciente:", req);
-        return { ...req, status: newStatus, updatedAt: new Date().toISOString() };
+        return {
+          ...req,
+          status: newStatus,
+          updatedAt: new Date().toISOString(),
+        };
       }
       return req;
     });
-
-    console.log("📦 [updateStatus] Novo array do paciente:", updatedPatientRequests);
 
     await updateDoc(patientRef, {
       requests: updatedPatientRequests,
       updatedAt: serverTimestamp(),
     });
+    console.log("✅ [updateStatus] Lado do paciente atualizado: ", updateDoc);
 
-    // === UPDATE lado do cuidador ===
-    const updatedReceived = (caregiverData?.receivedRequests ?? []).map((req: any) => {
-      if (req.patientId === patientId) {
-        console.log("📝 [updateStatus] Atualizando no cuidador:", req);
-        return { ...req, status: newStatus, updatedAt: new Date().toISOString() };
+    // ======================================================
+    //  UPDATE DO LADO DO CUIDADOR
+    // ======================================================
+    const updatedCaregiverReceived = (caregiverData.receivedRequests ?? []).map(
+      (req: any) => {
+        if (req.patientId === patientId) {
+          return {
+            ...req,
+            status: newStatus,
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        return req;
       }
-      return req;
-    });
-
-    console.log("📦 [updateStatus] Novo array do cuidador:", updatedReceived);
+    );
 
     await updateDoc(caregiverRef, {
-      receivedRequests: updatedReceived,
+      receivedRequests: updatedCaregiverReceived,
       updatedAt: serverTimestamp(),
     });
 
     console.log("✅ [updateStatus] Atualização concluída.");
-
     return { ok: true };
-
   } catch (error) {
-    console.error("updateStatus error:", error);
+    console.error("❌ updateStatus error:", error);
     return { ok: false, error };
   }
+}
+
+/** Wrapper para aceitar solicitação */
+export async function acceptRequest(patientId: string, caregiverId: string) {
+  return updateStatus(patientId, caregiverId, "accepted");
+}
+
+/** Wrapper para recusar solicitação */
+export async function declineRequest(patientId: string, caregiverId: string) {
+  return updateStatus(patientId, caregiverId, "declined");
 }
