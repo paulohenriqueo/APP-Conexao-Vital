@@ -299,82 +299,92 @@ export default function Home() {
   // ------------------------------
   // FUNÇÃO GLOBAL — pode ser usada no accept/decline
   // ------------------------------
-  async function loadRequests() {
-    try {
-      console.log("🔄 Carregando solicitações...");
+async function loadRequests() {
+  try {
+    console.log("🔄 Carregando solicitações...");
 
-      const requests = await getRequestsForUser(currentUserId);
+    const requests = await getRequestsForUser(currentUserId);
+    const formatted: HistoryData[] = [];
 
-      const formatted: HistoryData[] = [];
+    for (const req of requests) {
+      const isCaregiver = currentProfileType === "caregiver";
+      const otherUserId = isCaregiver ? req.patientId : req.caregiverId;
 
-      for (const req of requests) {
-        const isCaregiver = currentProfileType === "caregiver";
-        const otherUserId = isCaregiver ? req.patientId : req.caregiverId;
+      // pegar dados do outro usuário
+      const otherRef = doc(FIRESTORE_DB, "Users", otherUserId);
+      const otherSnap = await getDoc(otherRef);
+      const otherData = otherSnap.data();
 
-        // pegar dados do outro usuário
-        const otherRef = doc(FIRESTORE_DB, "Users", otherUserId);
-        const otherSnap = await getDoc(otherRef);
-        const otherData = otherSnap.data();
+      const name =
+        otherData?.name ||
+        otherData?.patientProfile?.nome ||
+        otherData?.caregiverProfile?.nome ||
+        "Usuário";
 
-        const name =
-          otherData?.name ||
-          otherData?.displayName ||
-          otherData?.patientProfile?.nome ||
-          otherData?.caregiverProfile?.nome ||
-          "Usuário";
+      const photo =
+        otherData?.patientProfile?.photo ||
+        otherData?.caregiverProfile?.photo ||
+        null;
 
-        const photo =
-          otherData?.patientProfile?.photo ||
-          otherData?.caregiverProfile?.photo ||
-          null;
+      const careCategory =
+        otherData?.caregiverSpecifications?.careCategory ||
+        otherData?.condition?.careCategory ||
+        otherData?.careCategory ||
+        "";
 
-        const careCategory =
-          otherData?.caregiverSpecifications?.careCategory ||
-          otherData?.condition?.careCategory ||
-          otherData?.careCategory ||
-          "";
+      const rating =
+        otherData?.rating ??
+        otherData?.averageRating ??
+        0;
 
-        const rating =
-          otherData?.rating ??
-          otherData?.averageRating ??
-          0;
+      // ==============================
+      // NORMALIZAR STATUS PARA INGLÊS
+      // ==============================
+      let normalizedStatus: "pending" | "accepted" | "declined" = "pending";
 
-        // converter status
-        const statusMap: any = {
-          pending: "pendente",
-          accepted: "aceita",
-          rejected: "recusada",
-        };
-
-        const mappedStatus = statusMap[req.status] ?? "pendente";
-
-        // formatar data
-        const dateObj = new Date(req.createdAt);
-        const formattedDate = dateObj.toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        });
-
-        formatted.push({
-          id: otherUserId,
-          name,
-          imageUrl: photo,
-          careCategory,
-          rating,
-          date: formattedDate,
-          requestStatus: mappedStatus,
-          currentProfileType: currentProfileType as any,
-        });
+      if (
+        req.status === "aceita" ||
+        req.status === "accepted"
+      ) {
+        normalizedStatus = "accepted";
+      } else if (
+        req.status === "recusada" ||
+        req.status === "declined" ||
+        req.status === "rejected"
+      ) {
+        normalizedStatus = "declined";
+      } else {
+        normalizedStatus = "pending";
       }
 
-      setHistoryData(formatted.reverse());
-      console.log("🟩 Histórico formatado:", formatted);
+      // formatar data
+      const dateObj = new Date(req.createdAt);
+      const formattedDate = dateObj.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
 
-    } catch (err) {
-      console.warn("Erro ao carregar solicitações:", err);
+      formatted.push({
+        id: otherUserId,
+        name,
+        imageUrl: photo,
+        careCategory,
+        rating,
+        date: formattedDate,
+        requestStatus: normalizedStatus, // <-- AGORA SIM
+        currentProfileType: currentProfileType as any,
+      });
     }
+
+    setHistoryData(formatted.reverse());
+    console.log("🟩 Histórico formatado:", formatted);
+
+  } catch (err) {
+    console.warn("Erro ao carregar solicitações:", err);
   }
+}
+
 
   // ------------------------------
   // useEffect apenas chama loadRequests
