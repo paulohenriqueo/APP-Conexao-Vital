@@ -11,7 +11,7 @@ export type HistoryData = {
   date: string;
   careCategory: string;
   imageUrl?: string;
-  requestStatus?: "aceita" | "accepted" | "recusada" | "declined" | "pendente" | "pending" | undefined;
+  requestStatus?: "accepted" | "declined" | "pending" | undefined;
   currentProfileType?: "caregiver" | "patient";
 };
 

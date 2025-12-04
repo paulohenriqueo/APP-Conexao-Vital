@@ -7,6 +7,8 @@ import { styles } from "../../styles/styles";
 import { Avatar } from "./Avatar";
 import { CircleButton } from "./Button";
 import { Check, X } from "phosphor-react-native";
+import { collection, getDocs } from "firebase/firestore";
+import { FIRESTORE_DB } from "../../FirebaseConfig"; // ajuste o caminho conforme seu projeto
 
 type HistoryItemProps = {
   name: string;
@@ -14,7 +16,7 @@ type HistoryItemProps = {
   date: string;
   careCategory: string;
   imageUrl?: string;
-  requestStatus?:  "aceita" | "accepted" | "recusada" | "declined" | "pendente" | "pending" | undefined;
+  requestStatus?:  "accepted" | "declined" | "pending" | undefined;
   currentProfileType?: "caregiver" | "patient";
   onPress: () => void;
   onAccept?: () => void;
@@ -51,7 +53,7 @@ export function HistoryItem({
       label = "Recusado";
       break;
 
-    default:
+    case "pending":
       bgColor = colors.grayE8;
       textColor = colors.gray47;
       label = "Pendente";
@@ -108,4 +110,26 @@ export function HistoryItem({
       </TouchableOpacity>
     </View>
   );
+}
+
+// Exemplo de função para buscar histórico de solicitações
+export async function getSolicitationsHistory(userId: string) {
+  const col = collection(FIRESTORE_DB, "Solicitations"); // ou o nome da sua coleção
+  const snapshot = await getDocs(col);
+
+  return snapshot.docs
+    .filter((doc: { data: () => { (): any; new(): any; userId: string; }; }) => doc.data().userId === userId) // ajuste o filtro conforme sua estrutura
+    .map((doc: { data: () => any; id: any; }) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name,
+        rating: data.rating,
+        date: data.date,
+        careCategory: data.careCategory,
+        imageUrl: data.imageUrl,
+        requestStatus: data.requestStatus, // <-- aqui vem 'accepted', 'declined' ou 'pending'
+        currentProfileType: data.currentProfileType,
+      };
+    });
 }
