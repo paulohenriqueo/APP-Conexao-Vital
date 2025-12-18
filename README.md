@@ -25,8 +25,8 @@ Este repositório contém a versão mobile do aplicativo preparada para produç�
 
 Este projeto foi idealizado e desenvolvido por:
 
-👤 **Paulo Henrique**  
-👤 **Sophia**  
+👤 **@paulohenriqueo**  
+👤 **@sophiacaires**  
 
 ---
 
